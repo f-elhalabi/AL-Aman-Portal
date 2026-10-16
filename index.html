@@ -374,6 +374,8 @@ details.req[open]>summary{background:var(--surface2)}
 .subbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 16px}
 .subbar .btn{min-height:36px;padding:4px 12px;font-size:13px}
 .fields .fld{min-width:0}
+.hubnav{margin-bottom:10px}
+#captureHost{position:fixed;left:-10000px;top:0;width:794px;pointer-events:none}
 .tag-late{color:var(--v-ok);font-weight:700}
 @media (max-width:640px){
   .stbl{min-width:0}
@@ -404,6 +406,7 @@ details.req[open]>summary{background:var(--surface2)}
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div id="captureHost" aria-hidden="true"></div>
 <div id="printHost" aria-hidden="true"></div>
 
 <script>
@@ -589,9 +592,9 @@ var ROLE_AR={teacher:'معلم(ة)',coordinator:'منسق(ة)',admin:'إدارة
 var CUR='';
 function tabsFor(){
   var t=[];
-  if(has('coordinator')){t.push(['obs','مشاهدة صفية']);t.push(['hist','سجل مشاهداتي']);t.push(['team','تسليمات معلميّ']);t.push(['min','محاضر التنسيق']);}
+  if(has('coordinator')){t.push(['obs','مشاهدة صفية']);t.push(['hist','سجل مشاهداتي']);t.push(['team','تسليمات معلميّ']);t.push(['min','مطلوباتي كمنسق']);}
   if(has('teacher')){t.push(['tasks','المطلوب مني']);t.push(['my','تقارير مشاهداتي']);}
-  if(has('admin')){t.push(['dash','لوحة المتابعة']);t.push(['subs','التسليمات']);}
+  if(has('admin')){t.push(['dash','لوحة المتابعة']);t.push(['subs','المتابعة الإدارية والأكاديمية']);}
   return t;
 }
 function start(){
@@ -609,7 +612,7 @@ function go(v){
   CUR=v;
   $$('#ptabs .tab').forEach(function(b){var on=b.dataset.pt===v;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
   window.scrollTo(0,0);
-  if(v==='obs')showObs();else if(v==='hist')showHist();else if(v==='dash')showDash();else if(v==='subs')showSubs('admin');else if(v==='team')showSubs('coord');else if(v==='tasks'||v==='min')showTasks(v);else showMy();
+  if(v==='obs')showObs();else if(v==='hist')showHist();else if(v==='dash')showDash();else if(v==='subs')showHub();else if(v==='team')showSubs('coord');else if(v==='tasks'||v==='min')showTasks(v);else showMy();
 }
 
 /* ───────── القوائم للمنسق ───────── */
@@ -633,7 +636,7 @@ function sectionsFor(tid,subj){
 }
 
 /* ───────── حالة المشاهدة ───────── */
-function freshState(){return {id:null,status:'draft',step:0,exportedAt:'',saved:null,info:{teacherId:'',teacher:'',subject:'',grade:'',date:todayISO(),period:'',topic:'',showAll:false},scores:{},pS:[],pD:[],pR:[],notes:'',follow:false};}
+function freshState(){return {id:null,status:'draft',pdf:false,step:0,exportedAt:'',saved:null,info:{teacherId:'',teacher:'',subject:'',grade:'',date:todayISO(),period:'',topic:'',showAll:false},scores:{},pS:[],pD:[],pR:[],notes:'',follow:false};}
 var state=freshState();
 function hasData(){var i=state.info;return !!(i.teacherId||i.subject||i.topic||Object.keys(state.scores).length||state.notes.trim()||state.pS.length||state.pD.length||state.pR.length);}
 function calcScores(sc){
@@ -653,7 +656,7 @@ function payload(){
 }
 function stateFromServer(o){
   var s=o.summary,d=o.data||{},st=freshState();
-  st.id=s.id;st.status=s.status;st.exportedAt=s.exported;
+  st.id=s.id;st.status=s.status;st.pdf=!!s.pdf;st.exportedAt=s.exported;
   st.info={teacherId:s.teacherId,teacher:s.teacher,subject:s.subject,grade:s.section,date:s.date,period:s.period,topic:s.topic,showAll:!!d.showAll};
   st.scores=d.scores||{};st.pS=d.pS||[];st.pD=d.pD||[];st.pR=d.pR||[];st.notes=d.notes||'';st.follow=!!d.follow;
   st.saved={strengths:d.strengths||[],dev:d.dev||[],recs:d.recs||[]};
@@ -813,8 +816,9 @@ function renderWrap(){
 }
 function renderReport(){
   var locked=state.status==='exported';
-  return '<div class="pv-bar">'+(locked?'':'<button class="btn primary" type="button" id="exportBtn">تصدير وإرسال إلى النظام</button>')+'<button class="btn" type="button" id="printBtn">طباعة</button></div>'+
-   (locked?'<p class="pv-help">تم التصدير بتاريخ '+fmtDT(state.exportedAt)+'. هذه المشاهدة للعرض فقط.</p>':'<p class="pv-help">راجع التقرير ثم صدّره. بعد التصدير لا يمكن تعديل المشاهدة.</p>')+
+  var pdfBtn=locked?(state.pdf?'<button class="btn" type="button" data-pdf="'+esc(state.id)+'">تنزيل PDF</button>':'<button class="btn primary" type="button" id="pdfMake">حفظ نسخة PDF</button>'):'';
+  return '<div class="pv-bar">'+(locked?'':'<button class="btn primary" type="button" id="exportBtn">تصدير وإرسال إلى النظام</button>')+pdfBtn+'<button class="btn" type="button" id="printBtn">طباعة</button></div>'+
+   (locked?'<p class="pv-help" id="pdfStat">'+(state.pdf?'تم التصدير بتاريخ '+fmtDT(state.exportedAt)+'. نسخة PDF محفوظة ومتاحة للمعلم والإدارة.':'تم التصدير بتاريخ '+fmtDT(state.exportedAt)+'. لم تُحفظ نسخة PDF بعد.')+'</p>':'<p class="pv-help">راجع التقرير ثم صدّره. عند التصدير تُحفظ نسخة PDF ثابتة وتصل للمعلم تلقائياً، ولا يمكن تعديل المشاهدة بعدها.</p>')+
    '<p class="pv-warn" id="expMsg" hidden></p><div class="pv-wrap" id="pvWrap"><div class="pv-inner" id="pvInner"></div></div>';
 }
 function renderStep(){
@@ -903,15 +907,15 @@ function onPrint(model){
   setTimeout(function(){try{window.print();}catch(e){toast('تعذّرت الطباعة من هذه الصفحة.');}setTimeout(function(){document.body.classList.remove('printing');host.innerHTML='';},400);},120);
 }
 var CURMODEL=null;
-function showReportView(model,backLabel,backFn){
+function showReportView(model,backLabel,backFn,opt){
   CURMODEL=model;
-  $('#view').innerHTML='<div class="rep-bar"><button class="btn" id="repBack" type="button">'+esc(backLabel)+'</button><button class="btn primary" id="repPrint" type="button">طباعة</button></div><div class="pv-wrap" id="pvWrap"><div class="pv-inner" id="pvInner"></div></div>';
+  $('#view').innerHTML='<div class="rep-bar"><button class="btn" id="repBack" type="button">'+esc(backLabel)+'</button><button class="btn primary" id="repPrint" type="button">طباعة</button>'+(opt&&opt.pdf?'<button class="btn" type="button" data-pdf="'+esc(opt.id)+'">تنزيل PDF</button>':'')+'</div><div class="pv-wrap" id="pvWrap"><div class="pv-inner" id="pvInner"></div></div>';
   $('#pvInner').appendChild(buildSheet(model));fitPreview();window.scrollTo(0,0);
   $('#repBack').onclick=backFn;$('#repPrint').onclick=function(){onPrint(CURMODEL);};
 }
 function openReport(id,backLabel,backFn){
   $('#view').innerHTML='<div class="loading">جارٍ التحميل…</div>';
-  api('getObs',{id:id}).then(function(r){showReportView(modelFromServer(r.obs),backLabel,backFn);}).catch(function(e){toast(errText(e));backFn();});
+  api('getObs',{id:id}).then(function(r){showReportView(modelFromServer(r.obs),backLabel,backFn,{id:id,pdf:!!r.obs.summary.pdf});}).catch(function(e){toast(errText(e));backFn();});
 }
 
 /* ───────── التصدير ───────── */
@@ -921,10 +925,10 @@ function onExport(btn){
   if(!i.teacherId)miss.push('المعلم(ة)');if(!i.subject)miss.push('المادة');if(!i.grade)miss.push('الشعبة');if(!i.date)miss.push('تاريخ المشاهدة');if(calc().n===0)miss.push('درجات البنود');
   if(miss.length){msg.hidden=false;msg.textContent='أكمل البيانات التالية قبل التصدير: '+miss.join('، ');return;}
   msg.hidden=true;
-  if(!expArmed){expArmed=true;btn.textContent='اضغط مرة أخرى لتأكيد التصدير';clearTimeout(expT);expT=setTimeout(function(){expArmed=false;btn.textContent='تصدير وإرسال إلى النظام';},4000);return;}
+  if(!expArmed){expArmed=true;btn.textContent='تأكيد: سيصل التقرير للمعلم فوراً';clearTimeout(expT);expT=setTimeout(function(){expArmed=false;btn.textContent='تصدير وإرسال إلى النظام';},4000);return;}
   expArmed=false;clearTimeout(expT);clearTimeout(saveTimer);btn.disabled=true;btn.textContent='جارٍ التصدير…';
   var go2=function(){var req={obs:payload(),finalize:true};if(state.id)req.id=state.id;
-    return api('saveObs',req).then(function(r){state.id=r.id;state.status='exported';state.exportedAt=r.updated;state.step=STEPS.length-1;state.saved=null;dirty=false;lsDel(bkKey());renderStep();toast('تم التصدير وحفظ المشاهدة على الخادم.');})
+    return api('saveObs',req).then(function(r){state.id=r.id;state.status='exported';state.exportedAt=r.updated;state.step=STEPS.length-1;state.saved=null;state.pdf=false;dirty=false;lsDel(bkKey());renderStep();toast('تم التصدير. جارٍ حفظ نسخة PDF للمعلم…');return archivePdf();})
     .catch(function(e){btn.disabled=false;btn.textContent='تصدير وإرسال إلى النظام';msg.hidden=false;msg.textContent=errText(e);});};
   (saving?new Promise(function(res){setTimeout(res,1200);}):Promise.resolve()).then(go2);
 }
@@ -958,7 +962,7 @@ function renderHist(){
      '<div class="rec-s"><span>الشعبة: '+esc(r.section||'—')+'</span><span>المادة: '+esc(r.subject||'—')+'</span><span>التاريخ: '+fmtDate(r.date)+'</span></div>'+
      '<div class="rec-s"><span>البنود: '+r.n+' من '+TOTAL+'</span><span>آخر تعديل: '+fmtDT(r.updated)+'</span></div></div>'+
      '<div class="rec-score" style="color:'+col+'">'+(r.pct==null?'—':r.pct)+'<small>'+esc(lbl||'')+'</small></div>'+
-     '<div class="rec-btns"><button class="btn primary sm" type="button" data-act="open">'+(exp?'عرض':'متابعة')+'</button>'+(exp?'':'<button class="btn sm" type="button" data-act="del">حذف</button>')+'</div></div>';
+     '<div class="rec-btns"><button class="btn primary sm" type="button" data-act="open">'+(exp?'عرض':'متابعة')+'</button>'+(exp?(r.pdf?'<button class="btn sm" type="button" data-pdf="'+esc(r.id)+'">تنزيل PDF</button>':'<span class="rec-s" style="align-self:center">بلا PDF</span>'):'<button class="btn sm" type="button" data-act="del">حذف</button>')+'</div></div>';
   });
   $('#view').innerHTML=h+'</div></div>';
 }
@@ -1008,15 +1012,15 @@ function obsRowsHTML(){
 function showMy(){
   var h='<div class="panel sect"><div class="panel-h"><div><h2>تقارير مشاهداتي</h2><div class="sub">تقارير المشاهدات الصفية المُصدَّرة عن حصصك</div></div></div>';
   if(!SETTINGS.teacherSeesReports){
-    $('#view').innerHTML=h+'<div class="empty"><b>غير مفعّلة بعد</b>ستظهر هنا تقارير مشاهداتك عندما تفعّل الإدارة هذه الخدمة.</div></div>';return;
+    $('#view').innerHTML=h+'<div class="empty"><b>غير مفعّلة حالياً</b>أوقفت الإدارة هذه الخدمة مؤقتاً.</div></div>';return;
   }
   $('#view').innerHTML='<div class="loading">جارٍ التحميل…</div>';
   api('listObs').then(function(r){
     var items=has('coordinator')?r.items.filter(function(x){return x.asTeacher;}):r.items;
     var b=h;
-    if(!items.length)b+='<div class="empty"><b>لا توجد تقارير بعد</b>ستظهر هنا بعد أن يصدّر المنسق مشاهدته.</div>';
+    if(!items.length)b+='<div class="empty"><b>لا توجد تقارير بعد</b>يصلك هنا تقرير كل مشاهدة (مع نسخة PDF) تلقائياً بعد أن يصدّرها المنسق.</div>';
     b+='<div class="reclist">';
-    items.forEach(function(s){b+='<div class="rec" data-open="'+esc(s.id)+'"><div><div class="rec-t">'+esc(s.subject)+' – '+esc(s.section)+'</div><div class="rec-s"><span>التاريخ: '+fmtDate(s.date)+'</span><span>المنسق(ة): '+esc(s.coord)+'</span></div></div><div class="rec-score" style="color:'+lvVar(s.level)+'">'+(s.pct==null?'—':s.pct)+'<small>'+esc(s.level)+'</small></div><div class="rec-btns"><button class="btn primary sm" type="button" data-act="open">عرض التقرير</button></div></div>';});
+    items.forEach(function(s){b+='<div class="rec" data-open="'+esc(s.id)+'"><div><div class="rec-t">'+esc(s.subject)+' – '+esc(s.section)+'</div><div class="rec-s"><span>التاريخ: '+fmtDate(s.date)+'</span><span>المنسق(ة): '+esc(s.coord)+'</span></div></div><div class="rec-score" style="color:'+lvVar(s.level)+'">'+(s.pct==null?'—':s.pct)+'<small>'+esc(s.level)+'</small></div><div class="rec-btns"><button class="btn primary sm" type="button" data-act="open">عرض التقرير</button>'+(s.pdf?'<button class="btn sm" type="button" data-pdf="'+esc(s.id)+'">تنزيل PDF</button>':'')+'</div></div>';});
     $('#view').innerHTML=b+'</div></div>';
   }).catch(function(e){$('#view').innerHTML='<div class="panel"><div class="empty"><b>تعذّر التحميل</b>'+esc(errText(e))+'</div></div>';});
 }
@@ -1024,8 +1028,8 @@ function showMy(){
 
 /* ───────── المطلوب (المعلم والمنسق) ───────── */
 var TASKS=[],TASKMODE='tasks',UP=null;
-var TYPE_ORDER=['plan','report','ca','exam','minutes'];
-var TYPE_TITLE={plan:'الخطط السنوية',report:'تقارير المعلم الشهرية',ca:'التقييم المستمر',exam:'الامتحانات',minutes:'محاضر اجتماعات التنسيق'};
+var TYPE_ORDER=['plan','ca','exam','report','minutes'];
+var TYPE_TITLE={plan:'الخطط السنوية',report:'التقارير التقييمية للمعلمين (شهرياً)',ca:'التقييم المستمر',exam:'الامتحانات',minutes:'محاضر اجتماعات التنسيق'};
 var ST_LABEL={open:'مفتوح',overdue:'متأخر',done:'تم التسليم',done_late:'سُلِّم متأخراً',upcoming:'لم يحن موعده'};
 var ST_COLOR={open:'var(--v-g)',overdue:'var(--v-low)',done:'var(--v-vg)',done_late:'var(--v-ok)',upcoming:'var(--muted)'};
 function num2(v){return v==null||isNaN(v)?'—':String(Math.round(v*100)/100);}
@@ -1033,12 +1037,12 @@ function showTasks(mode){
   TASKMODE=mode;UP=null;
   $('#view').innerHTML='<div class="loading">جارٍ التحميل…</div>';
   api('myTasks').then(function(r){
-    TASKS=r.tasks.filter(function(t){return mode==='min'?t.type==='minutes':t.type!=='minutes';});renderTasks();
+    TASKS=r.tasks.filter(function(t){var co=(t.type==='minutes'||t.type==='report');return mode==='min'?co:!co;});renderTasks();
   }).catch(function(e){$('#view').innerHTML='<div class="panel"><div class="empty"><b>تعذّر التحميل</b>'+esc(errText(e))+'</div></div>';});
 }
 function taskRow(t){
   var sub=t.submission,key=esc(t.reqId+'|'+t.unit);
-  var s='<div class="task'+(t.status==='upcoming'?' up':'')+'"><div><div class="task-t">'+esc(t.period)+(t.subject?' – '+esc(t.subject):'')+'</div>'+
+  var s='<div class="task'+(t.status==='upcoming'?' up':'')+'"><div><div class="task-t">'+esc(t.period)+(t.target?' – عن: '+esc(t.target):(t.subject?' – '+esc(t.subject):''))+'</div>'+
    '<div class="task-s">آخر موعد: '+fmtDate(t.due)+(t.status==='upcoming'?' • يُفتح في '+fmtDate(t.opens):'')+(t.sections.length?' • الشعب: '+esc(t.sections.join('، ')):'')+'</div>'+
    (sub?'<div class="task-s">آخر رفع: '+fmtDT(sub.when)+' • '+esc(sub.fileName)+(sub.late?' <span class="tag-late">(متأخر)</span>':'')+'</div>':'')+'</div>'+
    '<span class="chipv" style="--c:'+ST_COLOR[t.status]+'">'+ST_LABEL[t.status]+'</span><div class="task-btns">';
@@ -1049,15 +1053,16 @@ function taskRow(t){
 function renderTasks(){
   var cnt={open:0,overdue:0,done:0};
   TASKS.forEach(function(t){if(t.status==='open')cnt.open++;else if(t.status==='overdue')cnt.overdue++;else if(t.status==='done'||t.status==='done_late')cnt.done++;});
-  var title=TASKMODE==='min'?'محاضر اجتماعات التنسيق':'المطلوب مني';
+  var title=TASKMODE==='min'?'المطلوب مني كمنسق':'المطلوب مني';
   var h='<div class="rep-bar" style="justify-content:space-between;align-items:center"><div style="font:800 20px Cairo,sans-serif;color:var(--brand)">'+title+'</div></div>'+
    '<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><div class="v" style="color:var(--v-g)">'+cnt.open+'</div><div class="l">مفتوح</div></div><div class="kpi"><div class="v" style="color:'+(cnt.overdue?'var(--v-low)':'var(--brand)')+'">'+cnt.overdue+'</div><div class="l">متأخر</div></div><div class="kpi"><div class="v" style="color:var(--v-vg)">'+cnt.done+'</div><div class="l">تم تسليمه</div></div></div>';
   if(!TASKS.length)h+='<div class="panel"><div class="empty"><b>لا توجد مطلوبات</b>لم تُحدَّد مطلوبات لك بعد.</div></div>';
   TYPE_ORDER.forEach(function(ty){
     var g=TASKS.filter(function(t){return t.type===ty;});if(!g.length)return;
-    var cur=g.filter(function(t){return t.status!=='upcoming';}),up=g.filter(function(t){return t.status==='upcoming';});
+    var cur=g.filter(function(t){return t.status==='open'||t.status==='overdue';}),dn=g.filter(function(t){return t.status==='done'||t.status==='done_late';}),up=g.filter(function(t){return t.status==='upcoming';});
     h+='<div class="panel sect"><div class="grp-h">'+esc(TYPE_TITLE[ty])+'</div>'+cur.map(taskRow).join('');
     if(!cur.length)h+='<div class="empty" style="padding:16px">لا يوجد مطلوب مفتوح حالياً.</div>';
+    if(dn.length)h+='<details class="grp"><summary><span>تم التسليم</span><span class="badge">'+dn.length+'</span></summary>'+dn.map(taskRow).join('')+'</details>';
     if(up.length)h+='<details class="grp"><summary><span>القادمة</span><span class="badge">'+up.length+'</span></summary>'+up.map(taskRow).join('')+'</details>';
     h+='</div>';
   });
@@ -1141,8 +1146,7 @@ function remTxt(u){
 function renderSubs(){
   var d=SUBS,admin=SUBMODE==='admin',reqs=d.requirements.filter(function(r){return !subF.type||r.type===subF.type;});
   var coords={};d.requirements.forEach(function(r){r.units.forEach(function(u){if(u.cid)coords[u.cid]=u.coord;});});
-  var title=admin?'التسليمات':'تسليمات معلميّ';
-  var h='<div class="rep-bar" style="justify-content:space-between;align-items:center"><div style="font:800 20px Cairo,sans-serif;color:var(--brand)">'+title+'</div><button class="btn xs" id="subsRefresh" type="button">تحديث</button></div>';
+  var h=admin?hubHead():'<div class="rep-bar" style="justify-content:space-between;align-items:center"><div style="font:800 20px Cairo,sans-serif;color:var(--brand)">تسليمات معلميّ</div><button class="btn xs" id="subsRefresh" type="button">تحديث</button></div>';
   // مؤشرات سريعة
   var allU=[];d.requirements.forEach(function(r){r.units.forEach(function(u){allU.push(u);});});
   var od=allU.filter(function(u){return u.status==='overdue'&&!u.own;}),odR=od.filter(function(u){return u.remind;}),ownOd=allU.filter(function(u){return u.status==='overdue'&&u.own;});
@@ -1154,7 +1158,7 @@ function renderSubs(){
     h+='<div class="panel sect" style="margin-bottom:12px"><div class="panel-h"><div><h2>متابعة المنسقين للمتأخرين</h2><div class="sub">المنسق يتابع أولاً ويذكّر معلميه، والإدارة تشرف</div></div></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المنسق(ة)</th><th>متأخرون</th><th>ذُكِّر بهم</th><th>لم يُذكَّر بهم</th><th>آخر تذكير</th></tr></thead><tbody>'+
      Object.keys(by).sort(function(a,b){return (by[b].n-by[b].r)-(by[a].n-by[a].r);}).map(function(k){var o=by[k];return '<tr><td><b>'+esc(o.name)+'</b></td><td class="tn">'+o.n+'</td><td class="tn">'+o.r+'</td><td class="tn" style="color:'+(o.n-o.r?'var(--v-low)':'var(--v-vg)')+'">'+(o.n-o.r)+'</td><td>'+(o.last?fmtDate(o.last):'—')+'</td></tr>';}).join('')+'</tbody></table></div>'+(ownOd.length?'<div class="note" style="margin-top:12px">'+ownOd.length+' تسليم متأخر للمنسقين أنفسهم (إشراف مباشر من الإدارة).</div>':'')+'</div>';
   }
-  h+='<div class="panel sect" style="margin-bottom:12px"><div class="filters"><select id="sfType"><option value="">كل الأنواع</option>'+TYPE_ORDER.filter(function(k){return admin||k!=='minutes';}).map(function(k){return '<option value="'+k+'"'+(subF.type===k?' selected':'')+'>'+esc(TYPE_TITLE[k])+'</option>';}).join('')+'</select>'+
+  h+='<div class="panel sect" style="margin-bottom:12px"><div class="filters"><select id="sfType"><option value="">كل الأنواع</option>'+TYPE_ORDER.filter(function(k){return admin||(k!=='minutes'&&k!=='report');}).map(function(k){return '<option value="'+k+'"'+(subF.type===k?' selected':'')+'>'+esc(TYPE_TITLE[k])+'</option>';}).join('')+'</select>'+
    (admin?'<select id="sfCoord"><option value="">كل المنسقين</option>'+Object.keys(coords).sort().map(function(k){return '<option value="'+k+'"'+(subF.coord===k?' selected':'')+'>'+esc(coords[k])+'</option>';}).join('')+'</select>':'')+
    '<label class="chk" style="display:flex;align-items:center;gap:6px;font-weight:600"><input type="checkbox" id="sfMissing"'+(subF.missing?' checked':'')+'> غير المسلّمين فقط</label></div></div>';
   var shown=reqs.filter(function(r){return r.state!=='upcoming';}).sort(function(a,b){return a.due<b.due?1:-1;});
@@ -1173,7 +1177,7 @@ function renderSubs(){
     var cols=admin?7:6;
     h+=us.length?us.map(function(u){
       var act=u.subId?'<button class="btn xs" type="button" data-dl="'+esc(u.subId)+'" data-fn="'+esc(u.fileName)+'">تنزيل</button>':((!admin&&isMiss(u))?'<button class="btn xs primary" type="button" data-rem="'+esc(r.id+'|'+u.unit+'|'+u.pid)+'">تذكير</button>':'—');
-      return '<tr><td><b>'+esc(u.name)+'</b></td><td>'+esc(u.subject||'—')+'</td>'+(admin?'<td>'+esc(u.coord||'—')+'</td>':'')+'<td><span class="chipv" style="--c:'+ST_COLOR[u.status]+'">'+ST_LABEL[u.status]+'</span></td><td>'+(u.when?fmtDT(u.when):'—')+'</td><td>'+remTxt(u)+'</td><td>'+act+'</td></tr>';}).join(''):'<tr><td colspan="'+cols+'" style="text-align:center;color:var(--muted);padding:16px">لا توجد عناصر مطابقة.</td></tr>';
+      return '<tr><td><b>'+esc(u.name)+'</b></td><td>'+(u.target?'عن: '+esc(u.target):esc(u.subject||'—'))+'</td>'+(admin?'<td>'+esc(u.coord||'—')+'</td>':'')+'<td><span class="chipv" style="--c:'+ST_COLOR[u.status]+'">'+ST_LABEL[u.status]+'</span></td><td>'+(u.when?fmtDT(u.when):'—')+'</td><td>'+remTxt(u)+'</td><td>'+act+'</td></tr>';}).join(''):'<tr><td colspan="'+cols+'" style="text-align:center;color:var(--muted);padding:16px">لا توجد عناصر مطابقة.</td></tr>';
     h+='</tbody></table></div>';
     var sr=d.stats.filter(function(x){return x.reqId===r.id&&(!admin||!subF.coord||x.cid===subF.coord);});
     if(sr.length){
@@ -1194,7 +1198,7 @@ function exportCsv(rid,stats){
   if(stats){
     rows=[['الاسم','المادة','الشعبة','عدد الطلاب','أعلى علامة','أدنى علامة','المعدل','نسبة النجاح']].concat(SUBS.stats.filter(function(x){return x.reqId===rid&&f(x.cid);}).map(function(x){return [x.teacher,x.subject,x.section,x.n,x.max,x.min,x.avg,x.pass];}));
   }else{
-    rows=[['الاسم','المادة','المنسق','الحالة','وقت الرفع','عدد التذكيرات']].concat(r.units.filter(function(u){return f(u.cid);}).map(function(u){return [u.name,u.subject,u.coord,ST_LABEL[u.status],u.when,u.remind?u.remind.n:0];}));
+    rows=[['الاسم','المادة / عن معلم','المنسق','الحالة','وقت الرفع','عدد التذكيرات']].concat(r.units.filter(function(u){return f(u.cid);}).map(function(u){return [u.name,u.target||u.subject,u.coord,ST_LABEL[u.status],u.when,u.remind?u.remind.n:0];}));
   }
   var csv='\uFEFF'+rows.map(function(x){return x.map(csvCell).join(',');}).join('\r\n');
   saveBlob((stats?'نتائج':'تسليمات')+'_'+r.label+'_'+r.period+'.csv','text/csv;charset=utf-8',csv,false);
@@ -1233,6 +1237,136 @@ function remindAll(rid,btn){
 }
 
 
+
+/* ───────── المتابعة الإدارية والأكاديمية (الإدارة) ───────── */
+var HUB='subs',resF={req:'',grade:'',stream:''},teF={coord:'',noobs:false};
+var HUB_TABS=[['subs','حالة التسليم'],['results','نتائج الطلاب'],['teachers','تقييم المعلمين']];
+function showHub(sec){
+  if(sec)HUB=sec;SUBMODE='admin';
+  $('#view').innerHTML='<div class="loading">جارٍ تحميل البيانات…</div>';
+  Promise.all([api('adminSubmissions'),api('adminData')]).then(function(r){SUBS=r[0];DASH=r[1];renderHub();})
+  .catch(function(e){$('#view').innerHTML='<div class="panel"><div class="empty"><b>تعذّر التحميل</b>'+esc(errText(e))+'<div style="margin-top:12px"><button class="btn primary" id="subsRefresh" type="button">إعادة المحاولة</button></div></div></div>';});
+}
+function hubHead(){
+  return '<div class="rep-bar" style="justify-content:space-between;align-items:center"><div style="font:800 20px Cairo,sans-serif;color:var(--brand)">المتابعة الإدارية والأكاديمية</div><button class="btn xs" id="subsRefresh" type="button">تحديث</button></div>'+
+   '<nav class="tabs hubnav">'+HUB_TABS.map(function(x){return '<button type="button" class="tab'+(HUB===x[0]?' on':'')+'" data-hub="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</nav>';
+}
+function renderHub(){if(HUB==='results')renderResults();else if(HUB==='teachers')renderTeachersEval();else renderSubs();}
+function gradeOf(c){return parseInt(c,10);}
+function streamOf(c){return String(c||'').charAt(1);}
+function aggBy(rows,keyFn,labelFn){
+  var by={};
+  rows.forEach(function(x){var k=keyFn(x),o=by[k]||(by[k]={key:k,label:labelFn?labelFn(k):k,secs:0,n:0,w:0,pw:0,max:-1e9,min:1e9});o.secs++;o.n+=x.n;o.w+=x.avg*x.n;o.pw+=x.pass*x.n;o.max=Math.max(o.max,x.max);o.min=Math.min(o.min,x.min);});
+  return Object.keys(by).map(function(k){var o=by[k];return {key:o.key,label:o.label,secs:o.secs,n:o.n,avg:o.w/o.n,pass:o.pw/o.n,max:o.max,min:o.min};});
+}
+function aggTable(rows,firstHead){
+  return '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>'+firstHead+'</th><th>الشعب</th><th>الطلاب</th><th>المعدل</th><th>أعلى علامة</th><th>أدنى علامة</th><th>نسبة النجاح</th></tr></thead><tbody>'+
+   rows.map(function(a){return '<tr><td><b>'+esc(a.label)+'</b></td><td class="tn">'+a.secs+'</td><td class="tn">'+a.n+'</td><td class="tn">'+num2(a.avg)+'</td><td class="tn">'+num2(a.max)+'</td><td class="tn">'+num2(a.min)+'</td><td class="tn">'+num2(a.pass)+'%</td></tr>';}).join('')+'</tbody></table></div>';
+}
+function renderResults(){
+  var d=SUBS,reqs=d.requirements.filter(function(r){return (r.type==='exam'||r.type==='ca')&&r.state!=='upcoming';});
+  var rows=d.stats.filter(function(x){return (!resF.req||x.reqId===resF.req)&&(!resF.grade||gradeOf(x.section)===+resF.grade)&&(!resF.stream||streamOf(x.section)===resF.stream);});
+  var h=hubHead()+'<div class="panel sect" style="margin-bottom:12px"><div class="filters"><select id="rfReq"><option value="">كل التقييمات والامتحانات</option>'+reqs.map(function(r){return '<option value="'+r.id+'"'+(resF.req===r.id?' selected':'')+'>'+esc(r.label+' – '+r.period)+'</option>';}).join('')+'</select>'+
+   '<select id="rfGrade"><option value="">كل الصفوف</option>'+[1,2,3,4,5,6,7,8,9].map(function(g){return '<option value="'+g+'"'+(+resF.grade===g?' selected':'')+'>الصف '+g+'</option>';}).join('')+'</select>'+
+   '<select id="rfStream"><option value="">كل البرامج</option><option value="E"'+(resF.stream==='E'?' selected':'')+'>الإنجليزي (E)</option><option value="F"'+(resF.stream==='F'?' selected':'')+'>الفرنسي (F)</option></select></div></div>';
+  if(!rows.length){$('#view').innerHTML=h+'<div class="panel"><div class="empty"><b>لا توجد أرقام نتائج مطابقة</b>تظهر هنا معدلات الطلاب عندما يرفع المعلمون نتائج التقييم المستمر والامتحانات.</div></div>';return;}
+  var tot=aggBy(rows,function(){return 'all';})[0],L=lvOf(tot.avg);
+  h+='<div class="kpis"><div class="kpi"><div class="v">'+tot.n+'</div><div class="l">طالباً</div></div><div class="kpi"><div class="v">'+num2(tot.avg)+'</div><div class="l">المعدل العام (موزون)</div></div><div class="kpi"><div class="v">'+num2(tot.pass)+'%</div><div class="l">نسبة النجاح</div></div><div class="kpi"><div class="v">'+rows.length+'</div><div class="l">شعبة / نتيجة</div></div></div>';
+  var bySubj=aggBy(rows,function(x){return x.subject;}).sort(function(a,b){return a.label.localeCompare(b.label,'ar');});
+  var byGrade=aggBy(rows,function(x){return gradeOf(x.section);},function(k){return 'الصف '+k;}).sort(function(a,b){return a.key-b.key;});
+  var byStream=aggBy(rows,function(x){return streamOf(x.section);},function(k){return k==='E'?'الإنجليزي (E)':k==='F'?'الفرنسي (F)':k;});
+  h+='<div class="dgrid"><div class="panel sect"><div class="panel-h"><h2>حسب المادة</h2></div>'+aggTable(bySubj,'المادة')+'</div><div class="panel sect"><div class="panel-h"><h2>حسب الصف</h2></div>'+aggTable(byGrade,'الصف')+'<div class="panel-h" style="border-top:1px solid var(--border)"><h2>حسب البرنامج</h2></div>'+aggTable(byStream,'البرنامج')+'</div></div>';
+  var det=rows.slice().sort(function(a,b){return a.subject.localeCompare(b.subject,'ar')||a.section.localeCompare(b.section);});
+  h+='<div class="panel sect"><details class="grp"><summary><span>تفصيل الشعب</span><span class="badge">'+det.length+'</span></summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المادة</th><th>الشعبة</th><th>المعلم(ة)</th><th>الطلاب</th><th>المعدل</th><th>أعلى</th><th>أدنى</th><th>النجاح</th></tr></thead><tbody>'+
+   det.map(function(x){return '<tr><td>'+esc(x.subject)+'</td><td class="tn">'+esc(x.section)+'</td><td>'+esc(x.teacher)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td></tr>';}).join('')+'</tbody></table></div></details></div>';
+  $('#view').innerHTML=h;
+}
+function renderTeachersEval(){
+  var map={};
+  SUBS.requirements.forEach(function(r){
+    if(r.type!=='report')return;
+    r.units.forEach(function(u){var o=map[u.unit]||(map[u.unit]={tid:u.unit,name:u.target,coords:[],cids:[],obs:[],repExp:0,repDone:0});
+      if(u.coord&&o.coords.indexOf(u.coord)<0){o.coords.push(u.coord);o.cids.push(u.cid);}
+      o.repExp++;if(isDone(u))o.repDone++;});
+  });
+  DASH.observations.forEach(function(s){var o=map[s.teacherId]||(map[s.teacherId]={tid:s.teacherId,name:s.teacher,coords:[s.coord],cids:[s.coordId],obs:[],repExp:0,repDone:0});o.obs.push(s);});
+  var rows=Object.keys(map).map(function(k){
+    var o=map[k],ps=o.obs.filter(function(s){return s.pct!=null;}).map(function(s){return s.pct;}),last=o.obs.slice().sort(function(a,b){return a.date<b.date?1:-1;})[0];
+    o.n=o.obs.length;o.avg=ps.length?ps.reduce(function(a,b){return a+b;},0)/ps.length:null;o.lastLevel=last?last.level:'';o.lastDate=last?last.date:'';return o;
+  });
+  var coordMap={};rows.forEach(function(o){o.cids.forEach(function(c,i){if(c)coordMap[c]=o.coords[i];});});
+  var list=rows.filter(function(o){return (!teF.coord||o.cids.indexOf(teF.coord)>-1)&&(!teF.noobs||o.n===0);});
+  list.sort(function(a,b){if(a.avg==null&&b.avg==null)return a.name.localeCompare(b.name,'ar');if(a.avg==null)return 1;if(b.avg==null)return -1;return a.avg-b.avg;});
+  var h=hubHead()+'<div class="panel sect"><div class="panel-h"><div><h2>تقييم المعلمين</h2><div class="sub">نتائج المشاهدات الصفية والتقارير التقييمية الشهرية للمنسقين، مرتّبة من الأدنى معدلاً</div></div></div><div class="filters"><select id="tfCoord"><option value="">كل المنسقين</option>'+Object.keys(coordMap).sort().map(function(c){return '<option value="'+c+'"'+(teF.coord===c?' selected':'')+'>'+esc(coordMap[c])+'</option>';}).join('')+'</select>'+
+   '<label class="chk" style="display:flex;align-items:center;gap:6px;font-weight:600"><input type="checkbox" id="tfNoObs"'+(teF.noobs?' checked':'')+'> بلا مشاهدات فقط</label></div>'+
+   '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>المعلم(ة)</th><th>المنسق(ة)</th><th>المشاهدات</th><th>المعدل</th><th>آخر حكم</th><th>آخر مشاهدة</th><th>التقارير التقييمية</th></tr></thead><tbody>'+
+   (list.length?list.map(function(o){var L=o.lastLevel;return '<tr><td><b>'+esc(o.name)+'</b></td><td>'+esc(o.coords.join('، ')||'—')+'</td><td class="tn">'+o.n+'</td><td class="tn" style="color:'+lvVar(lvOf(o.avg))+'">'+(o.avg==null?'—':Math.round(o.avg))+'</td><td>'+(L?'<span class="chipv" style="--c:'+lvVar(L)+'">'+esc(L)+'</span>':'—')+'</td><td>'+(o.lastDate?fmtDate(o.lastDate):'—')+'</td><td class="tn">'+o.repDone+' / '+o.repExp+'</td></tr>';}).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:18px">لا توجد بيانات مطابقة.</td></tr>')+'</tbody></table></div></div>';
+  $('#view').innerHTML=h;
+}
+
+
+/* ───────── أرشفة PDF لتقرير المشاهدة ───────── */
+var pdfLibs=null;
+function loadScript(src){return new Promise(function(res,rej){var s=document.createElement('script');s.src=src;s.onload=res;s.onerror=function(){var e=new Error('load');e.code='load';rej(e);};document.head.appendChild(s);});}
+function ensurePdfLibs(){
+  if(window.html2canvas&&window.jspdf)return Promise.resolve();
+  if(!pdfLibs)pdfLibs=Promise.all([loadScript('vendor/html2canvas.min.js'),loadScript('vendor/jspdf.umd.min.js')]).catch(function(e){pdfLibs=null;throw e;});
+  return pdfLibs;
+}
+function buildPdfB64(model){
+  var ready=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+  return ready.then(function(){
+    var host=$('#captureHost');host.innerHTML='';var sheet=buildSheet(model);host.appendChild(sheet);
+    var cands=[];
+    return new Promise(function(r){setTimeout(r,150);}).then(function(){
+      var base=sheet.getBoundingClientRect().top;
+      cands=$$('li,.sh-dom,.sh-note,.sh-sec,.sh-score,.sh-meta,.sh-flag,.sh-sign',sheet).map(function(el){return Math.round((el.getBoundingClientRect().bottom-base)*2);}).sort(function(a,b){return a-b;});
+      return window.html2canvas(sheet,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false});
+    }).then(function(canvas){
+      host.innerHTML='';
+      var jsPDF=window.jspdf.jsPDF,pdf=new jsPDF({unit:'mm',format:'a4',orientation:'portrait',compress:true});
+      var PW=210,PH=297,ratio=PW/canvas.width,totalMM=canvas.height*ratio;
+      if(totalMM<=PH*1.05){
+        var k=Math.min(1,PH/totalMM),w=PW*k,hh=totalMM*k;
+        pdf.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',(PW-w)/2,0,w,hh);
+      }else{
+        var pagePx=Math.floor(PH/ratio),y=0,first=true;
+        while(y<canvas.height){
+          var limit=y+pagePx,end=Math.min(limit,canvas.height);
+          if(limit<canvas.height){var best=0;cands.forEach(function(v){if(v>y+pagePx*0.55&&v<=limit&&v>best)best=v;});if(best)end=best;}
+          var hpx=end-y,c=document.createElement('canvas');
+          c.width=canvas.width;c.height=hpx;var ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+          ctx.drawImage(canvas,0,y,canvas.width,hpx,0,0,canvas.width,hpx);
+          if(!first)pdf.addPage();
+          pdf.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',0,0,PW,hpx*ratio);first=false;y=end;
+        }
+      }
+      var uri=pdf.output('datauristring');return uri.slice(uri.indexOf('base64,')+7);
+    });
+  });
+}
+function setPdfStat(txt,bad){var el=$('#pdfStat');if(el){el.textContent=txt;el.style.color=bad?'var(--v-low)':'';el.style.fontWeight=bad?'700':'';}}
+function archivePdf(){
+  var id=state.id;if(!id)return Promise.resolve();
+  setPdfStat('جارٍ إنشاء نسخة PDF وحفظها…');
+  var mk=$('#pdfMake');if(mk)mk.disabled=true;
+  return ensurePdfLibs().then(function(){return buildPdfB64(modelFromState());})
+  .then(function(b64){return api('attachPdf',{id:id,file:{name:'report.pdf',data:b64}});})
+  .then(function(){
+    if(state.id===id)state.pdf=true;
+    if(CUR==='obs'&&state.id===id){renderStep();setPdfStat('تم حفظ نسخة PDF، وهي متاحة الآن للمعلم والإدارة ✓');}
+    toast('تم حفظ نسخة PDF ووصلت للمعلم.');
+  }).catch(function(e){
+    setPdfStat('تعذّر حفظ نسخة PDF ('+(e.code==='load'?'تعذّر تحميل مكوّن إنشاء الملف':errText(e))+'). اضغط «حفظ نسخة PDF» للمحاولة مجدداً.',true);
+    var m2=$('#pdfMake');if(m2)m2.disabled=false;
+  });
+}
+function downloadObsPdf(id,btn){
+  var old=btn?btn.textContent:'';if(btn){btn.disabled=true;btn.textContent='جارٍ التحضير…';}
+  api('getObsPdf',{id:id}).then(function(r){saveBlob(r.name,r.mime,r.data,true);}).catch(function(e){toast(errText(e));})
+  .then(function(){if(btn){btn.disabled=false;btn.textContent=old;}});
+}
+
 /* ───────── الأحداث ───────── */
 document.addEventListener('click',function(e){
   var t=e.target;
@@ -1245,11 +1379,14 @@ document.addEventListener('click',function(e){
   var dl=t.closest('[data-dl]');if(dl){downloadFile(dl.dataset.dl,dl);return;}
   if(t.closest('#upSubmit')){doUpload();return;}
   if(t.closest('#upCancel')){showTasks(TASKMODE);return;}
-  if(t.closest('#subsRefresh')){showSubs();return;}
+  if(t.closest('#subsRefresh')){if(SUBMODE==='admin')showHub();else showSubs();return;}
+  var hb=t.closest('[data-hub]');if(hb){HUB=hb.dataset.hub;renderHub();return;}
   var rm=t.closest('[data-rem]');if(rm){remindOne(rm.dataset.rem,rm);return;}
   var ra=t.closest('[data-remall]');if(ra){remindAll(ra.dataset.remall,ra);return;}
   var cs=t.closest('[data-csv]');if(cs){exportCsv(cs.dataset.csv,false);return;}
   var cst=t.closest('[data-csv-stats]');if(cst){exportCsv(cst.dataset.csvStats,true);return;}
+  var pd=t.closest('[data-pdf]');if(pd){downloadObsPdf(pd.dataset.pdf,pd);return;}
+  if(t.closest('#pdfMake')){archivePdf();return;}
   var op=t.closest('[data-open]');
   if(op){var oid=op.dataset.open;
     if(CUR==='dash')openReport(oid,'رجوع إلى اللوحة',function(){renderDash();});
@@ -1307,6 +1444,11 @@ document.addEventListener('change',function(e){
   if(t.id==='sfType'){subF.type=t.value;renderSubs();return;}
   if(t.id==='sfCoord'){subF.coord=t.value;renderSubs();return;}
   if(t.id==='sfMissing'){subF.missing=t.checked;renderSubs();return;}
+  if(t.id==='rfReq'){resF.req=t.value;renderResults();return;}
+  if(t.id==='rfGrade'){resF.grade=t.value;renderResults();return;}
+  if(t.id==='rfStream'){resF.stream=t.value;renderResults();return;}
+  if(t.id==='tfCoord'){teF.coord=t.value;renderTeachersEval();return;}
+  if(t.id==='tfNoObs'){teF.noobs=t.checked;renderTeachersEval();return;}
 });
 document.addEventListener('toggle',function(e){var d=e.target;if(d&&d.classList&&d.classList.contains('req'))subOpen[d.dataset.rid]=d.open;},true);
 window.addEventListener('resize',fitPreview);
