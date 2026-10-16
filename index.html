@@ -305,6 +305,43 @@ body.hist-mode .app{padding-bottom:40px}
 .fu{display:flex;justify-content:space-between;gap:8px;padding:10px 16px;border-top:1px solid var(--border);cursor:pointer}
 .fu:hover{background:var(--surface2)}
 .rep-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+
+/* ───── تخطيط متجاوب: يملأ الشاشة ───── */
+.app{max-width:1880px;padding:0 clamp(12px,3vw,40px) 130px}
+.head{padding:16px 0 12px}
+.obs{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+.obs-side{display:contents}
+.obs-main{order:3;min-width:0}
+.obs .toolbar{order:1}
+.obs .strip{order:2}
+.dgrid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px}
+.dgrid .sect{margin:0}
+.reclist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:10px;padding:12px 16px 16px}
+.reclist .rec{border:1px solid var(--border);border-radius:14px;margin:0;background:var(--surface)}
+.pv-inner{left:50%;right:auto;transform-origin:50% 0}
+.nav{position:fixed}
+@media (min-width:900px){
+  .item{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,440px);gap:18px;align-items:center}
+  .item-top{margin-bottom:0}
+  .fields{grid-template-columns:repeat(3,1fr)}
+  .fields .full{grid-column:1 / -1}
+  .tabs{flex-wrap:wrap;overflow:visible}
+  .dgrid{grid-template-columns:1fr 1fr}
+  .login .fields{grid-template-columns:1fr}
+}
+@media (min-width:1024px){
+  .obs{grid-template-columns:minmax(0,1fr) 370px;gap:20px;align-items:start}
+  .obs-side{display:block;position:sticky;top:16px;order:2}
+  .obs-main{order:1}
+  .obs .strip{position:static;top:auto}
+  .obs .toolbar{margin-bottom:12px}
+  .nav{position:sticky;inset-inline:auto;bottom:12px;margin-top:14px;border:1px solid var(--border);border-radius:16px;padding:10px 14px;box-shadow:var(--shadow)}
+  .nav-in{max-width:none}
+  .kpi .v{font-size:32px}
+}
+@media (min-width:1500px){
+  .dgrid{grid-template-columns:1fr 1fr}
+}
 </style>
 </head>
 <body>
@@ -323,13 +360,6 @@ body.hist-mode .app{padding-bottom:40px}
   <div id="view"><div class="loading">جارٍ التحميل…</div></div>
 </div>
 
-<div class="nav" id="bnav" style="display:none">
-  <div class="nav-in">
-    <button class="btn" id="prev" type="button">السابق</button>
-    <div class="mid" id="mid"></div>
-    <button class="btn primary" id="next" type="button">التالي</button>
-  </div>
-</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div id="printHost" aria-hidden="true"></div>
 
@@ -482,7 +512,7 @@ function has(role){return !!(ME&&ME.roles.indexOf(role)>-1);}
 
 /* ───────── الدخول ───────── */
 function showLogin(msg){
-  ME=null;$('#who').hidden=true;$('#ptabs').hidden=true;$('#bnav').style.display='none';
+  ME=null;$('#who').hidden=true;$('#ptabs').hidden=true;
   $('#view').innerHTML='<div class="panel login"><div class="panel-h"><div><h2>الدخول</h2><div class="sub">أدخل رمزك الشخصي</div></div></div>'+
    (msg?'<div class="err" style="margin-top:12px">'+esc(msg)+'</div>':'')+
    '<div class="fields" style="grid-template-columns:1fr"><div class="fld"><label for="codeIn">الرمز الشخصي</label><input class="inp" id="codeIn" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX"></div></div>'+
@@ -532,7 +562,6 @@ function go(v){
   if(CUR==='obs'&&v!=='obs')flushNow();
   CUR=v;
   $$('#ptabs .tab').forEach(function(b){var on=b.dataset.pt===v;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
-  $('#bnav').style.display=v==='obs'?'block':'none';
   window.scrollTo(0,0);
   if(v==='obs')showObs();else if(v==='hist')showHist();else if(v==='dash')showDash();else showMy();
 }
@@ -635,9 +664,11 @@ function showObs(){
   $('#view').innerHTML='<div class="loading">جارٍ تحميل القوائم…</div>';
   ensureRoster().then(function(){
     $('#view').innerHTML=
+     '<div class="obs"><aside class="obs-side">'+
      '<div class="toolbar"><button class="btn primary" id="saveBtn" type="button">حفظ</button><button class="btn ghost" id="newBtn" type="button">مشاهدة جديدة</button><span class="savestat" id="saveStat"></span></div>'+
-     '<section class="strip" id="strip" aria-label="النتيجة الحية"><div class="strip-top"><div class="ring"><svg viewBox="0 0 72 72" aria-hidden="true"><circle class="track" cx="36" cy="36" r="30"/><circle class="arc" id="arc" cx="36" cy="36" r="30"/></svg><span class="rv" id="rv">—</span></div><div class="sv"><div class="vl" id="vl">لم يبدأ التقييم</div><div class="vd" id="vd">قيّم البنود لتظهر النتيجة والحكم</div></div><div class="cnt"><span id="cn">0</span>/'+TOTAL+'<small>بند مُقيَّم</small></div></div><div class="segs" id="segs" aria-hidden="true"></div></section>'+
-     '<nav class="tabs" id="tabs" aria-label="خطوات المشاهدة"></nav><main id="content"></main>';
+     '<section class="strip" id="strip" aria-label="النتيجة الحية"><div class="strip-top"><div class="ring"><svg viewBox="0 0 72 72" aria-hidden="true"><circle class="track" cx="36" cy="36" r="30"/><circle class="arc" id="arc" cx="36" cy="36" r="30"/></svg><span class="rv" id="rv">—</span></div><div class="sv"><div class="vl" id="vl">لم يبدأ التقييم</div><div class="vd" id="vd">قيّم البنود لتظهر النتيجة والحكم</div></div><div class="cnt"><span id="cn">0</span>/'+TOTAL+'<small>بند مُقيَّم</small></div></div><div class="segs" id="segs" aria-hidden="true"></div></section></aside>'+
+     '<div class="obs-main"><nav class="tabs" id="tabs" aria-label="خطوات المشاهدة"></nav><main id="content"></main>'+
+     '<div class="nav" id="bnav"><div class="nav-in"><button class="btn" id="prev" type="button">السابق</button><div class="mid" id="mid"></div><button class="btn primary" id="next" type="button">التالي</button></div></div></div></div>';
     buildTabs();
     if(!state.id&&!hasData()){
       var bk=lsGet(bkKey());
@@ -761,7 +792,7 @@ function renderStep(){
 }
 function fitPreview(){
   var w=$('#pvWrap'),inner=$('#pvInner');if(!w||!inner)return;
-  var k=Math.min(1,w.clientWidth/794);inner.style.transform='scale('+k+')';w.style.height=Math.ceil(inner.offsetHeight*k)+'px';
+  var k=Math.min(1,w.clientWidth/794);inner.style.transform='translateX(-50%) scale('+k+')';w.style.height=Math.ceil(inner.offsetHeight*k)+'px';
 }
 function goStep(i){state.step=Math.max(0,Math.min(STEPS.length-1,i));renderStep();if(dirty)markDirty();}
 
@@ -874,6 +905,7 @@ function renderHist(){
   function fb(k,t){return '<button type="button" class="fbtn'+(histFilter===k?' on':'')+'" data-filter="'+k+'">'+t+'</button>';}
   var h='<div class="panel"><div class="panel-h"><div><h2>سجل مشاهداتي</h2><div class="sub">المسودات والمشاهدات المُصدَّرة، وهي ظاهرة لك وحدك</div></div></div><div class="seg-f">'+fb('all','الكل ('+all.length+')')+fb('draft','قيد الاستكمال ('+nDraft+')')+fb('exp','مُصدَّرة ('+nExp+')')+'</div>';
   if(!list.length)h+='<div class="note">'+(all.length?'لا توجد مشاهدات في هذا التصنيف.':'لا توجد مشاهدات بعد. ابدأ من «مشاهدة صفية».')+'</div>';
+  h+='<div class="reclist">';
   list.forEach(function(r){
     var exp=r.status==='exported',lbl=r.level,col=lvVar(lbl);
     h+='<div class="rec" data-id="'+esc(r.id)+'"><div><div class="rec-t">'+esc(r.teacher||'بدون معلم')+'<span class="pill'+(exp?' done':'')+'">'+(exp?'مُصدَّرة':'قيد الاستكمال')+'</span></div>'+
@@ -882,7 +914,7 @@ function renderHist(){
      '<div class="rec-score" style="color:'+col+'">'+(r.pct==null?'—':r.pct)+'<small>'+esc(lbl||'')+'</small></div>'+
      '<div class="rec-btns"><button class="btn primary sm" type="button" data-act="open">'+(exp?'عرض':'متابعة')+'</button>'+(exp?'':'<button class="btn sm" type="button" data-act="del">حذف</button>')+'</div></div>';
   });
-  $('#view').innerHTML=h+'</div>';
+  $('#view').innerHTML=h+'</div></div>';
 }
 var delArmed=null,delT=null;
 function deleteRecord(id){
@@ -897,25 +929,25 @@ function showDash(){
 }
 function renderDash(){
   var d=DASH,t=d.totals,cov=t.teachers?Math.round(t.observedTeachers/t.teachers*100):0,L=lvOf(t.avgPct);
-  var h='<div class="rep-bar" style="justify-content:space-between;align-items:center"><div style="font:800 18px Cairo,sans-serif;color:var(--brand)">لوحة المتابعة</div><button class="btn xs" id="dashRefresh" type="button">تحديث</button></div>';
+  var h='<div class="rep-bar" style="justify-content:space-between;align-items:center"><div style="font:800 20px Cairo,sans-serif;color:var(--brand)">لوحة المتابعة</div><button class="btn xs" id="dashRefresh" type="button">تحديث</button></div>';
   h+='<div class="kpis"><div class="kpi"><div class="v">'+t.observations+'</div><div class="l">مشاهدة مُصدَّرة</div></div>'+
    '<div class="kpi"><div class="v">'+cov+'%</div><div class="l">تغطية المعلمين</div><div class="s" style="color:var(--muted)">'+t.observedTeachers+' من '+t.teachers+'</div></div>'+
    '<div class="kpi"><div class="v" style="color:'+lvVar(L)+'">'+(t.avgPct==null?'—':t.avgPct)+'</div><div class="l">متوسط المجموع</div><div class="s" style="color:'+lvVar(L)+'">'+esc(L)+'</div></div>'+
    '<div class="kpi"><div class="v" style="color:'+(d.followUp.length?'var(--v-ok)':'var(--brand)')+'">'+d.followUp.length+'</div><div class="l">تحتاج متابعة</div></div></div>';
-  if(!t.observations){h+='<div class="panel"><div class="empty"><b>لا توجد مشاهدات مُصدَّرة بعد</b>ستظهر هنا المعدلات والمقارنات تلقائياً عندما يصدّر المنسقون مشاهداتهم.</div></div>';}
+  if(!t.observations){h+='<div class="panel" style="margin-bottom:12px"><div class="empty"><b>لا توجد مشاهدات مُصدَّرة بعد</b>ستظهر هنا المعدلات والمقارنات تلقائياً عندما يصدّر المنسقون مشاهداتهم.</div></div>';}
   else{
     var order=['ممتاز','جيد جداً','جيد','مقبول','يحتاج دعماً'],tot=0;order.forEach(function(k){tot+=d.levels[k]||0;});
-    h+='<div class="panel sect"><div class="panel-h"><h2>توزيع الأحكام</h2></div><div class="pad"><div class="dist">'+order.map(function(k){var n=d.levels[k]||0;return n?'<i style="width:'+(n/tot*100)+'%;background:'+lvVar(k)+'"></i>':'';}).join('')+'</div><div class="legend2">'+order.map(function(k){return '<span style="--c:'+lvVar(k)+'">'+esc(k)+': <b>'+(d.levels[k]||0)+'</b></span>';}).join('')+'</div></div></div>';
-    h+='<div class="panel sect"><div class="panel-h"><h2>أداء المحاور</h2></div><div class="pad">'+d.domains.map(function(x){var l=lvOf(x.avg);return '<div class="hb"><div class="t"><span>'+esc(x.name)+'</span><b style="color:'+lvVar(l)+'">'+(x.avg==null?'—':x.avg)+'</b></div><div class="b"><i style="width:'+(x.avg||0)+'%;background:'+lvVar(l)+'"></i></div></div>';}).join('')+'</div></div>';
+    var g='';
+    g+='<div class="panel sect"><div class="panel-h"><h2>توزيع الأحكام</h2></div><div class="pad"><div class="dist">'+order.map(function(k){var n=d.levels[k]||0;return n?'<i style="width:'+(n/tot*100)+'%;background:'+lvVar(k)+'"></i>':'';}).join('')+'</div><div class="legend2">'+order.map(function(k){return '<span style="--c:'+lvVar(k)+'">'+esc(k)+': <b>'+(d.levels[k]||0)+'</b></span>';}).join('')+'</div></div></div>';
+    g+='<div class="panel sect"><div class="panel-h"><h2>أداء المحاور</h2></div><div class="pad">'+d.domains.map(function(x){var l=lvOf(x.avg);return '<div class="hb"><div class="t"><span>'+esc(x.name)+'</span><b style="color:'+lvVar(l)+'">'+(x.avg==null?'—':x.avg)+'</b></div><div class="b"><i style="width:'+(x.avg||0)+'%;background:'+lvVar(l)+'"></i></div></div>';}).join('')+'</div></div>';
     var items=Object.keys(d.itemAvg).map(function(k){return {id:k,avg:d.itemAvg[k]};}).filter(function(x){return x.avg/4*100<90;}).sort(function(a,b){return a.avg-b.avg;}).slice(0,6);
-    h+='<div class="panel sect"><div class="panel-h"><h2>أضعف البنود على مستوى المدرسة</h2></div><div class="pad">'+(items.length?'':'<div class="empty" style="padding:10px">لا توجد بنود دون 90 حالياً.</div>')+items.map(function(x){var p=Math.round(x.avg/4*100),l=lvOf(p);return '<div class="hb"><div class="t"><span>'+esc(ITEM[x.id]?ITEM[x.id].t:x.id)+'</span><b style="color:'+lvVar(l)+'">'+p+'</b></div><div class="b"><i style="width:'+p+'%;background:'+lvVar(l)+'"></i></div></div>';}).join('')+'</div></div>';
+    g+='<div class="panel sect"><div class="panel-h"><h2>أضعف البنود على مستوى المدرسة</h2></div><div class="pad">'+(items.length?'':'<div class="empty" style="padding:10px">لا توجد بنود دون 90 حالياً.</div>')+items.map(function(x){var p=Math.round(x.avg/4*100),l=lvOf(p);return '<div class="hb"><div class="t"><span>'+esc(ITEM[x.id]?ITEM[x.id].t:x.id)+'</span><b style="color:'+lvVar(l)+'">'+p+'</b></div><div class="b"><i style="width:'+p+'%;background:'+lvVar(l)+'"></i></div></div>';}).join('')+'</div></div>';
+    g+='<div class="panel sect"><div class="panel-h"><h2>تحتاج مشاهدة متابعة</h2></div>'+(d.followUp.length?d.followUp.map(function(s){return '<div class="fu" data-open="'+esc(s.id)+'"><div><b>'+esc(s.teacher)+'</b><div class="rec-s">'+esc(s.subject)+' – '+esc(s.section)+' – '+fmtDate(s.date)+'</div></div><div class="tn" style="font:800 18px Cairo,sans-serif;color:'+lvVar(s.level)+'">'+(s.pct==null?'—':s.pct)+'</div></div>';}).join(''):'<div class="empty" style="padding:22px">لا توجد حصص بحاجة لمتابعة.</div>')+'</div>';
+    h+='<div class="dgrid">'+g+'</div>';
   }
-  h+='<div class="panel sect"><div class="panel-h"><h2>المنسقون</h2></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المنسق(ة)</th><th>المجال</th><th>معلموه</th><th>المشاهَدون</th><th>التغطية</th><th>المشاهدات</th><th>المعدل</th><th>آخر مشاهدة</th></tr></thead><tbody>'+
+  h+='<div class="panel sect" style="margin-bottom:12px"><div class="panel-h"><h2>المنسقون</h2></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المنسق(ة)</th><th>المجال</th><th>معلموه</th><th>المشاهَدون</th><th>التغطية</th><th>المشاهدات</th><th>المعدل</th><th>آخر مشاهدة</th></tr></thead><tbody>'+
    d.coordinators.map(function(c){var cv=c.teachers?Math.round(c.observedTeachers/c.teachers*100):0,l=lvOf(c.avgPct);
      return '<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.field)+'</td><td class="tn">'+c.teachers+'</td><td class="tn">'+c.observedTeachers+'</td><td class="tn">'+cv+'%</td><td class="tn">'+c.observations+'</td><td class="tn" style="color:'+lvVar(l)+'">'+(c.avgPct==null?'—':c.avgPct)+'</td><td>'+(c.lastDate?fmtDate(c.lastDate):'—')+'</td></tr>';}).join('')+'</tbody></table></div></div>';
-  if(d.followUp.length){
-    h+='<div class="panel sect"><div class="panel-h"><h2>تحتاج مشاهدة متابعة</h2></div>'+d.followUp.map(function(s){return '<div class="fu" data-open="'+esc(s.id)+'"><div><b>'+esc(s.teacher)+'</b><div class="rec-s">'+esc(s.subject)+' – '+esc(s.section)+' – '+fmtDate(s.date)+'</div></div><div class="num" style="font:800 18px Cairo,sans-serif;color:'+lvVar(s.level)+'">'+(s.pct==null?'—':s.pct)+'</div></div>';}).join('')+'</div>';
-  }
   h+='<div class="panel sect"><div class="panel-h"><h2>المشاهدات المُصدَّرة</h2></div><div class="filters"><select id="dfCoord"><option value="">كل المنسقين</option>'+d.coordinators.map(function(c){return '<option value="'+c.id+'"'+(dashF.coord===c.id?' selected':'')+'>'+esc(c.name)+'</option>';}).join('')+'</select>'+
    '<select id="dfLevel"><option value="">كل الأحكام</option>'+['ممتاز','جيد جداً','جيد','مقبول','يحتاج دعماً'].map(function(k){return '<option'+(dashF.level===k?' selected':'')+'>'+k+'</option>';}).join('')+'</select></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>التاريخ</th><th>المعلم(ة)</th><th>المادة</th><th>الشعبة</th><th>المنسق(ة)</th><th>المجموع</th><th>الحكم</th></tr></thead><tbody id="obsBody">'+obsRowsHTML()+'</tbody></table></div></div>';
   $('#view').innerHTML=h;
@@ -937,8 +969,9 @@ function showMy(){
     var items=has('coordinator')?r.items.filter(function(x){return x.asTeacher;}):r.items;
     var b=h;
     if(!items.length)b+='<div class="empty"><b>لا توجد تقارير بعد</b>ستظهر هنا بعد أن يصدّر المنسق مشاهدته.</div>';
+    b+='<div class="reclist">';
     items.forEach(function(s){b+='<div class="rec" data-open="'+esc(s.id)+'"><div><div class="rec-t">'+esc(s.subject)+' – '+esc(s.section)+'</div><div class="rec-s"><span>التاريخ: '+fmtDate(s.date)+'</span><span>المنسق(ة): '+esc(s.coord)+'</span></div></div><div class="rec-score" style="color:'+lvVar(s.level)+'">'+(s.pct==null?'—':s.pct)+'<small>'+esc(s.level)+'</small></div><div class="rec-btns"><button class="btn primary sm" type="button" data-act="open">عرض التقرير</button></div></div>';});
-    $('#view').innerHTML=b+'</div>'+soon();
+    $('#view').innerHTML=b+'</div></div>'+soon();
   }).catch(function(e){$('#view').innerHTML='<div class="panel"><div class="empty"><b>تعذّر التحميل</b>'+esc(errText(e))+'</div></div>';});
 }
 function soon(){return '<div class="panel sect"><div class="panel-h"><div><h2>رفع الأعمال</h2><div class="sub">الخطة السنوية، التقرير الشهري، نتائج الامتحانات</div></div></div><div class="empty"><b>قريباً</b>سيتوفر رفع أعمالك وتسجيل تسليمها من هذه الصفحة.</div></div>';}
@@ -957,6 +990,8 @@ document.addEventListener('click',function(e){
     else if(CUR==='my')openReport(oid,'رجوع إلى تقاريري',function(){showMy();});
     return;}
   var tab=t.closest('.tab[data-step]');if(tab){goStep(+tab.dataset.step);return;}
+  if(t.closest('#prev')){goStep(state.step-1);return;}
+  if(t.closest('#next')){goStep(state.step+1);return;}
   if(t.closest('#saveBtn')){syncSave(true);return;}
   if(t.closest('#newBtn')){newObservation();return;}
   var fb=t.closest('.fbtn');if(fb){histFilter=fb.dataset.filter;renderHist();return;}
@@ -1004,8 +1039,6 @@ document.addEventListener('change',function(e){
   if(t.id==='dfCoord'){dashF.coord=t.value;$('#obsBody').innerHTML=obsRowsHTML();return;}
   if(t.id==='dfLevel'){dashF.level=t.value;$('#obsBody').innerHTML=obsRowsHTML();return;}
 });
-$('#prev').addEventListener('click',function(){goStep(state.step-1);});
-$('#next').addEventListener('click',function(){goStep(state.step+1);});
 window.addEventListener('resize',fitPreview);
 boot();
 })();
