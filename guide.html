@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>دليل استخدام منظومة المتابعة الأكاديمية – مدرسة الأمان الدولية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F9FC;--surface:#fff;--surface2:#EDF3F9;--text:#202638;--muted:#66708A;--border:#DCE7F0;
+  --brand:#0F0E9F;--brand2:#2732B3;--on-brand:#fff;--cyan:#1F8FC9;--green:#2E9E3D;--amber:#A77D18;--red:#A33B3B;
+  --hero1:#0F0E9F;--hero2:#2732B3;--hero3:#1F8FC9;
+  --v-ex:#0F0E9F;--v-vg:#2E9E3D;--v-g:#1F8FC9;--v-ok:#A77D18;--v-low:#A33B3B;
+  --shadow:0 1px 2px rgba(15,14,159,.06),0 8px 24px rgba(15,14,159,.08);--ring:#E3ECF4;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0C1120;--surface:#141B2E;--surface2:#1C2540;--text:#E7EBF5;--muted:#9AA4BD;--border:#27324F;
+  --brand:#A3AAFF;--brand2:#8791FF;--on-brand:#0C1120;--cyan:#43B3EC;--green:#4CC35B;--amber:#D9A93C;--red:#EE7B7B;
+  --hero1:#141a55;--hero2:#1c2480;--hero3:#14577d;
+  --v-ex:#98A0FF;--v-vg:#4CC35B;--v-g:#43B3EC;--v-ok:#D9A93C;--v-low:#EE7B7B;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);--ring:#25304D;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1120;--surface:#141B2E;--surface2:#1C2540;--text:#E7EBF5;--muted:#9AA4BD;--border:#27324F;
+  --brand:#A3AAFF;--brand2:#8791FF;--on-brand:#0C1120;--cyan:#43B3EC;--green:#4CC35B;--amber:#D9A93C;--red:#EE7B7B;
+  --hero1:#141a55;--hero2:#1c2480;--hero3:#14577d;
+  --v-ex:#98A0FF;--v-vg:#4CC35B;--v-g:#43B3EC;--v-ok:#D9A93C;--v-low:#EE7B7B;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);--ring:#25304D;color-scheme:dark}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:128px;background:var(--bg)}
+body{font-family:'Tajawal','Cairo',sans-serif;font-weight:500;background:var(--bg);color:var(--text);line-height:1.85;font-size:16px;-webkit-text-size-adjust:100%;padding-top:env(safe-area-inset-top,0px)}
+h1,h2,h3,h4{font-family:'Cairo',sans-serif;line-height:1.4}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--brand2)}
+:focus-visible{outline:3px solid var(--brand2);outline-offset:2px;border-radius:8px}
+.wrap{max-width:1360px;margin:0 auto;padding:0 clamp(12px,3vw,36px)}
+.btn{border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:8px 14px;font-weight:700;min-height:42px;text-decoration:none;color:var(--text);display:inline-flex;align-items:center;gap:6px}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.btn.sm{min-height:36px;padding:4px 12px;font-size:14px}
+.btn:hover{border-color:var(--brand2)}
+
+/* الرأس */
+.top{position:sticky;top:0;z-index:50;background:var(--surface);border-bottom:1px solid var(--border);padding-top:env(safe-area-inset-top,0px)}
+.top-in{display:flex;align-items:center;gap:12px;padding:10px 0}
+.logo-plate{background:#fff;border-radius:12px;padding:5px 10px;border:1px solid var(--border);flex:0 0 auto}
+.logo-plate img{display:block;height:34px;width:auto}
+.top h1{font:800 16px/1.3 'Cairo',sans-serif;color:var(--brand);flex:1;min-width:0}
+.top h1 small{display:block;font:500 12px 'Tajawal',sans-serif;color:var(--muted)}
+.search{position:relative;flex:0 1 320px;min-width:0}
+.search input{width:100%;min-height:42px;border:1.5px solid var(--border);background:var(--surface2);border-radius:12px;padding:6px 14px;outline:none}
+.search input:focus{border-color:var(--brand2);background:var(--surface)}
+.results{position:absolute;inset-inline:0;top:48px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);max-height:60vh;overflow:auto;z-index:70;display:none}
+.results.show{display:block}
+.res{display:block;width:100%;text-align:right;border:0;border-bottom:1px solid var(--border);background:transparent;padding:10px 14px;line-height:1.6}
+.res:last-child{border-bottom:0}.res:hover{background:var(--surface2)}
+.res b{display:block;font-family:'Cairo',sans-serif;font-size:14.5px}
+.res span{font-size:12.5px;color:var(--muted)}
+.res mark{background:rgba(31,143,201,.25);color:inherit;border-radius:3px;padding:0 2px}
+@media (max-width:760px){.top-in{flex-wrap:wrap}.search{order:5;flex:1 0 100%}.top h1 small{display:none}.hide-sm{display:none}}
+
+/* البطل */
+.hero{background:linear-gradient(135deg,var(--hero1),var(--hero2) 62%,var(--hero3));color:#fff;padding:36px 0 78px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 20%,rgba(255,255,255,.12),transparent 40%),radial-gradient(circle at 90% 90%,rgba(59,177,74,.25),transparent 45%)}
+.hero .wrap{position:relative}
+.hero h2{font:900 clamp(26px,4.2vw,44px)/1.25 'Cairo',sans-serif;max-width:900px}
+.hero p{max-width:760px;margin-top:10px;font-size:clamp(15px,1.6vw,18px);opacity:.92}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.fact{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:5px 14px;font-size:14px;font-weight:700}
+.rolecards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:-52px;position:relative;z-index:5}
+@media (max-width:820px){.rolecards{grid-template-columns:1fr}}
+.rc{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:18px;text-align:right;box-shadow:var(--shadow);transition:transform .15s,border-color .15s;display:block;width:100%}
+.rc:hover{transform:translateY(-3px);border-color:var(--brand2)}
+.rc .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:var(--surface2);margin-bottom:10px;color:var(--brand)}
+.rc .ic svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rc h3{font:800 19px 'Cairo',sans-serif;color:var(--brand)}
+.rc p{font-size:14px;color:var(--muted);line-height:1.7;margin-top:4px}
+.rc .go{display:inline-block;margin-top:10px;font-weight:800;color:var(--brand2);font-size:14px}
+@media (prefers-reduced-motion:reduce){.rc{transition:none}.rc:hover{transform:none}}
+
+/* التبويبات */
+.tabbar{position:sticky;top:61px;z-index:40;background:var(--bg);padding:14px 0 8px}
+.tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:1.5px solid var(--border);background:var(--surface);border-radius:999px;padding:7px 18px;font-weight:800;font-family:'Cairo',sans-serif;font-size:14.5px;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+@media (max-width:760px){.tabbar{top:108px}}
+
+/* التخطيط */
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:28px;padding-top:10px;padding-bottom:60px}
+@media (max-width:1000px){.layout{grid-template-columns:1fr}.toc{display:none}}
+.toc{position:sticky;top:130px;align-self:start;max-height:calc(100vh - 150px);overflow:auto;padding:4px}
+.toc h4{font:800 13px 'Cairo',sans-serif;color:var(--muted);margin-bottom:8px}
+.toc a{display:block;padding:6px 12px;border-inline-start:3px solid var(--border);color:var(--muted);text-decoration:none;font-weight:700;font-size:14px;line-height:1.5}
+.toc a.on{border-color:var(--brand2);color:var(--brand);background:var(--surface2);border-radius:0 8px 8px 0}
+article{display:none}
+article.show{display:block}
+.sec{margin-bottom:34px;scroll-margin-top:130px}
+.sec>h2{font:900 clamp(21px,2.6vw,28px)/1.35 'Cairo',sans-serif;color:var(--brand);margin-bottom:6px;padding-inline-start:14px;border-inline-start:5px solid var(--cyan)}
+.lead{color:var(--muted);margin:6px 0 14px;max-width:820px}
+.sec h3{font:800 18px 'Cairo',sans-serif;margin:20px 0 8px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:18px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+.callout{border-radius:14px;padding:12px 16px;margin:14px 0;border:1px solid var(--border);background:var(--surface2);display:flex;gap:10px;line-height:1.75}
+.callout::before{content:"ℹ";font-weight:900;color:var(--cyan);flex:0 0 auto}
+.callout.warn{border-color:var(--amber)}.callout.warn::before{content:"!";color:var(--amber);font-family:'Cairo',sans-serif}
+.callout.ok{border-color:var(--green)}.callout.ok::before{content:"✓";color:var(--green)}
+.callout.no{border-color:var(--red)}.callout.no::before{content:"✕";color:var(--red)}
+ul.ck{list-style:none;padding:0;display:grid;gap:6px}
+ul.ck li{padding-inline-start:26px;position:relative}
+ul.ck li::before{content:"";position:absolute;inset-inline-start:0;top:.65em;width:10px;height:10px;border-radius:50%;background:var(--cyan)}
+
+/* الخطوات */
+.steps{counter-reset:s;display:grid;gap:12px;margin:12px 0}
+.step{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px 14px 14px;padding-inline-start:68px}
+.step::before{counter-increment:s;content:counter(s);position:absolute;inset-inline-start:14px;top:14px;width:40px;height:40px;border-radius:50%;background:var(--brand);color:var(--on-brand);display:grid;place-items:center;font:900 18px 'Cairo',sans-serif}
+.step h4{font:800 16.5px 'Cairo',sans-serif;margin-bottom:2px}
+.step p{color:var(--muted);font-size:15px}
+.step details{margin-top:6px}
+details>summary{cursor:pointer;font-weight:800;color:var(--brand2);list-style:none;padding:4px 0}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"◂ ";display:inline-block;transition:transform .15s}
+details[open]>summary::before{transform:rotate(-90deg)}
+.step details div,.faq details div{padding:6px 0 4px;font-size:15px}
+table.t{width:100%;border-collapse:collapse;font-size:14.5px}
+table.t th{background:var(--surface2);padding:9px 10px;text-align:right;color:var(--muted);white-space:nowrap}
+table.t td{padding:9px 10px;border-top:1px solid var(--border);vertical-align:top}
+.tw{overflow-x:auto;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+.chip{display:inline-block;border:1.5px solid var(--c,var(--muted));color:var(--c,var(--muted));border-radius:999px;padding:0 12px;font:800 13px 'Cairo',sans-serif;line-height:1.9;white-space:nowrap}
+kbd,.k{display:inline-block;background:var(--surface2);border:1px solid var(--border);border-bottom-width:3px;border-radius:8px;padding:0 9px;font:800 13.5px 'Cairo',sans-serif;line-height:1.8}
+
+/* التجارب التفاعلية */
+.demo{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1.5px dashed var(--cyan);border-radius:20px;padding:16px;margin:14px 0}
+.demo>.dh{display:flex;align-items:center;gap:8px;margin-bottom:10px;font:800 15px 'Cairo',sans-serif;color:var(--cyan)}
+.demo>.dh::before{content:"▶";font-size:12px}
+.inp{width:100%;min-height:44px;border:1.5px solid var(--border);background:var(--surface);border-radius:12px;padding:6px 12px;outline:none}
+.inp:focus{border-color:var(--brand2)}
+.fld label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:3px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.scale{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:6px}
+.scale button{border:1.5px solid var(--border);background:var(--surface2);border-radius:12px;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.scale button b{font:800 17px 'Cairo',sans-serif}.scale button span{font-size:11.5px;color:var(--muted)}
+.scale button.on.s1{background:var(--red);border-color:var(--red)}.scale button.on.s2{background:var(--amber);border-color:var(--amber)}
+.scale button.on.s3{background:var(--cyan);border-color:var(--cyan)}.scale button.on.s4{background:var(--green);border-color:var(--green)}
+.scale button.on b,.scale button.on span{color:#fff}
+.scale .na{min-width:60px;border-style:dashed;background:transparent}.scale .na.on{background:var(--muted);border-style:solid;border-color:var(--muted)}
+.sitem{padding:10px 0;border-top:1px solid var(--border)}.sitem:first-of-type{border-top:0}
+.sitem .q{font-weight:700;margin-bottom:6px;font-size:15px}
+.ringbox{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.ring{position:relative;width:78px;height:78px;flex:0 0 78px}
+.ring svg{width:78px;height:78px;transform:rotate(-90deg);direction:ltr}
+.ring .tr{fill:none;stroke:var(--ring);stroke-width:8}.ring .ar{fill:none;stroke:var(--border);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .4s,stroke .3s}
+.ring .rv{position:absolute;inset:0;display:grid;place-items:center;font:900 24px 'Cairo',sans-serif}
+@media (prefers-reduced-motion:reduce){.ring .ar{transition:none}}
+.bands{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px}
+.band{border-radius:10px;padding:6px 4px;text-align:center;font:800 12.5px/1.4 'Cairo',sans-serif;color:#fff;opacity:.35;transition:opacity .2s}
+.band.on{opacity:1}
+@media (max-width:520px){.band{font-size:11px}}
+.out{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;white-space:pre-wrap;line-height:1.9}
+.msg{margin-top:8px;padding:9px 12px;border-radius:12px;font-weight:700;font-size:14.5px}
+.msg.ok{background:rgba(46,158,61,.14);color:var(--green)}.msg.bad{background:rgba(163,59,59,.12);color:var(--red)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1.5px solid var(--border);background:var(--surface);border-radius:999px;padding:5px 14px;font-weight:700;font-size:14px}
+.seg button.on{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+
+/* المحاكاة والنقاط الساخنة */
+.mock{position:relative;background:var(--bg);border:1px solid var(--border);border-radius:18px;padding:14px;margin:12px 0;box-shadow:var(--shadow)}
+.mock .bar{display:flex;gap:6px;margin-bottom:10px}.mock .bar i{width:10px;height:10px;border-radius:50%;background:var(--border)}
+.mrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:10px}
+.mk{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 10px;position:relative}
+.mk .v{font:900 22px 'Cairo',sans-serif;color:var(--brand)}.mk .l{font-size:12px;color:var(--muted)}
+.mbox{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px;position:relative;margin-bottom:10px}
+.mbox .mh{font:800 13.5px 'Cairo',sans-serif;color:var(--brand);margin-bottom:6px}
+.mtask{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:8px 0;border-top:1px solid var(--border);font-size:13.5px}
+.mtask small{color:var(--muted);font-size:12px}
+.mbar{height:9px;border-radius:6px;background:var(--ring);overflow:hidden}.mbar i{display:block;height:100%;border-radius:6px}
+.hs{position:absolute;top:-10px;inset-inline-end:-6px;width:28px;height:28px;border-radius:50%;background:var(--brand2);color:#fff;border:3px solid var(--bg);font:900 13px 'Cairo',sans-serif;display:grid;place-items:center;z-index:3;padding:0;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.hs.on{background:var(--green);transform:scale(1.15)}
+.hs-info{margin-top:8px;background:var(--surface);border:1px solid var(--border);border-inline-start:5px solid var(--green);border-radius:12px;padding:12px 14px;min-height:64px}
+.hs-info b{font-family:'Cairo',sans-serif;color:var(--brand)}
+.hs-hint{font-size:13px;color:var(--muted);margin-top:6px}
+
+/* المصفوفة والدورة */
+.mx td,.mx th{text-align:center}.mx td:first-child,.mx th:first-child{text-align:right}
+.mx td.c{cursor:pointer}
+.mx .y{color:var(--green);font-weight:900}.mx .n{color:var(--muted)}.mx .p{color:var(--amber);font-weight:900}
+.mx col.hl,.mx td.hl,.mx th.hl{background:rgba(31,143,201,.14)}
+.cyc{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:10px 0}
+@media (max-width:820px){.cyc{grid-template-columns:repeat(2,1fr)}}
+.cs{border:1.5px solid var(--border);background:var(--surface);border-radius:14px;padding:10px 6px;text-align:center;font:800 13.5px/1.45 'Cairo',sans-serif;position:relative}
+.cs .n{display:block;width:30px;height:30px;line-height:30px;border-radius:50%;background:var(--surface2);margin:0 auto 4px;color:var(--brand)}
+.cs.on{border-color:var(--brand2);background:var(--surface2)}.cs.on .n{background:var(--brand);color:var(--on-brand)}
+
+/* الأسئلة والاختبار */
+.faq details{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:6px 16px;margin-bottom:8px}
+.faq .cat{font:800 16px 'Cairo',sans-serif;color:var(--brand);margin:22px 0 8px}
+.quiz .opt{display:block;width:100%;text-align:right;border:1.5px solid var(--border);background:var(--surface);border-radius:14px;padding:10px 14px;margin-bottom:8px;font-weight:600;line-height:1.7}
+.quiz .opt:hover:not(:disabled){border-color:var(--brand2)}
+.quiz .opt.good{border-color:var(--green);background:rgba(46,158,61,.12)}.quiz .opt.bad{border-color:var(--red);background:rgba(163,59,59,.1)}
+.qprog{height:8px;border-radius:6px;background:var(--ring);overflow:hidden;margin-bottom:12px}.qprog i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+.cl label{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--border);cursor:pointer}
+.cl label:first-child{border-top:0}.cl input{width:20px;height:20px;accent-color:var(--brand);margin-top:5px;flex:0 0 auto}
+.cl label.done span{text-decoration:line-through;color:var(--muted)}
+.pbar{height:10px;border-radius:6px;background:var(--ring);overflow:hidden;margin:6px 0 10px}.pbar i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+.qcard{border:2px solid var(--brand);border-radius:18px;padding:16px;background:var(--surface)}
+.qcard h3{margin-top:0;color:var(--brand)}
+.qcard ol{padding-inline-start:20px;display:grid;gap:4px}
+footer{border-top:1px solid var(--border);padding:22px 0 40px;color:var(--muted);font-size:14px;text-align:center}
+.badge{display:inline-block;background:var(--green);color:#fff;border-radius:999px;padding:2px 14px;font:800 13px 'Cairo',sans-serif}
+.hl{outline:3px solid var(--cyan);outline-offset:6px;border-radius:12px;transition:outline-color 1.2s}
+@media print{
+  @page{margin:14mm}
+  body{background:#fff;color:#000}
+  .top,.hero,.rolecards,.tabbar,.toc,footer,.demo,.mock,.no-print{display:none!important}
+  .layout{display:block}article{display:none!important}article.show{display:block!important}
+  body.pc .sec{display:none!important}body.pc .sec.prn{display:block!important}
+  .step,.panel{box-shadow:none}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-in">
+    <div class="logo-plate"><img src="data:image/png;base64,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" alt="مدرسة الأمان الدولية"></div>
+    <h1>دليل استخدام المنظومة<small>منظومة المتابعة الأكاديمية – مدرسة الأمان الدولية</small></h1>
+    <div class="search" role="search"><input id="q" type="search" placeholder="ابحث في الدليل… (مثل: تذكير، PDF، رمز)" autocomplete="off" aria-label="بحث في الدليل"><div class="results" id="results" role="listbox"></div></div>
+    <a class="btn primary sm" id="backLink" href="./">العودة للمنظومة</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h2>كل ما تحتاجه لتستخدم المنظومة بثقة</h2>
+    <p>دليل تفاعلي قصير لكل دور: المعلم والمنسق والإدارة. جرّب الأدوات الصغيرة داخل الصفحة، وتابع قائمة البدء، ثم اختبر فهمك.</p>
+    <div class="facts"><span class="fact">دخول برابط شخصي</span><span class="fact">كل شخص يرى ما يخصه فقط</span><span class="fact">يعمل على الموبايل والكمبيوتر</span></div>
+  </div>
+</section>
+<div class="wrap">
+  <div class="rolecards" id="rolecards">
+    <button class="rc" data-go="teacher" type="button"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4zM20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z"/></svg></div><h3>أنا معلم(ة)</h3><p>أرفع خطتي وتقييماتي ونتائج امتحاناتي، وأتابع تقارير مشاهداتي.</p><span class="go">اذهب إلى دليل المعلم ←</span></button>
+    <button class="rc" data-go="coordinator" type="button"><div class="ic"><svg viewBox="0 0 24 24"><path d="M9 4h6v3H9zM7 5.5H5V20h14V5.5h-2M8.5 13.5l2.5 2.5 4.5-5.5"/></svg></div><h3>أنا منسق(ة)</h3><p>أجري المشاهدات الصفية، وأتابع تسليمات معلميّ وأذكّرهم، وأرفع تقاريري.</p><span class="go">اذهب إلى دليل المنسق ←</span></button>
+    <button class="rc" data-go="admin" type="button"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></div><h3>أنا من الإدارة</h3><p>أتابع اللوحات والتسليمات ونتائج الطلاب وتقييم المعلمين، وأشرف على المتابعة.</p><span class="go">اذهب إلى دليل الإدارة ←</span></button>
+  </div>
+</div>
+
+<div class="tabbar"><div class="wrap"><div class="tabs" role="tablist" id="tabs">
+  <button class="tab" role="tab" data-tab="general">نظرة عامة</button>
+  <button class="tab" role="tab" data-tab="teacher">المعلم</button>
+  <button class="tab" role="tab" data-tab="coordinator">المنسق</button>
+  <button class="tab" role="tab" data-tab="admin">الإدارة</button>
+  <button class="tab" role="tab" data-tab="faq">الأسئلة الشائعة</button>
+  <button class="tab" role="tab" data-tab="quiz">اختبر فهمك</button>
+</div></div></div>
+
+<div class="wrap layout">
+<aside class="toc" id="toc" aria-label="محتويات القسم"></aside>
+<main id="main">
+
+<!-- ===================== نظرة عامة ===================== -->
+<article data-tab="general">
+
+<section class="sec" id="g-what" data-title="ما هي المنظومة؟">
+  <h2>ما هي المنظومة؟</h2>
+  <p class="lead">منظومة المتابعة الأكاديمية أداة رقمية بسيطة لمدرسة الأمان الدولية، تجمع في مكان واحد المشاهدات الصفية وتقاريرها، وتسليمات المعلمين والمنسقين، ولوحات المتابعة للإدارة. هدفها تسهيل المتابعة واتخاذ القرار، لا إضافة تعقيد.</p>
+  <div class="grid3">
+    <div class="panel"><h3 style="margin-top:0">كل شخص يرى ما يخصه</h3><p style="color:var(--muted)">المعلم يرى مطلوباته وتقارير مشاهداته. المنسق يرى معلميه. الإدارة ترى الصورة الكاملة.</p></div>
+    <div class="panel"><h3 style="margin-top:0">الأعمال منظمة ومحفوظة</h3><p style="color:var(--muted)">الملفات تُحفظ تلقائياً في مجلدات مرتبة، والمشاهدات تُحفظ مسودةً أثناء التعبئة.</p></div>
+    <div class="panel"><h3 style="margin-top:0">المنسق أولاً، والإدارة تشرف</h3><p style="color:var(--muted)">المنسق يتابع معلميه ويذكّرهم، والإدارة ترى مَن تابع ومَن لم يتابع.</p></div>
+  </div>
+</section>
+
+<section class="sec" id="g-access" data-title="الدخول إلى المنظومة">
+  <h2>الدخول إلى المنظومة</h2>
+  <p class="lead">لا حاجة لاسم مستخدم أو كلمة مرور. لكل شخص رابط ورمز شخصي.</p>
+  <div class="steps">
+    <div class="step"><h4>افتح رابطك الشخصي</h4><p>تصلك الرسالة من الإدارة (غالباً عبر واتساب) وفيها رابط بصيغة <span class="k" dir="ltr">portal.alamanschool.org/?k=…</span>. اضغط عليه فتدخل مباشرة إلى صفحتك.</p></div>
+    <div class="step"><h4>أو أدخل رمزك يدوياً</h4><p>إذا فتحت عنوان المنظومة دون الرابط، تظهر شاشة «الدخول»؛ اكتب رمزك واضغط «دخول».</p></div>
+    <div class="step"><h4>ابقَ داخل المنظومة</h4><p>يُحفظ الرمز في متصفحك فلا تحتاج لإدخاله كل مرة. وعند الانتهاء على جهاز مشترك اضغط <span class="k">خروج</span> أعلى الصفحة.</p></div>
+  </div>
+  <div class="callout warn"><div><b>رابطك بمثابة كلمة مرور.</b> لا ترسله لأحد. إذا ضاع أو شككت أن غيرك رآه، اطلب من الإدارة رابطاً جديداً: يُلغى القديم فوراً.</div></div>
+</section>
+
+<section class="sec" id="g-roles" data-title="الأدوار وما يظهر لكل دور">
+  <h2>الأدوار وما يظهر لكل دور</h2>
+  <p class="lead">بعد الدخول تظهر لك الأقسام المناسبة لدورك فقط. اضغط على أي دور لقراءة دليله.</p>
+  <div class="tw"><table class="t"><thead><tr><th>الدور</th><th>الأقسام التي تظهر له</th></tr></thead><tbody>
+    <tr><td><b>معلم(ة)</b></td><td><span class="chip" style="--c:var(--cyan)">المطلوب مني</span> <span class="chip" style="--c:var(--cyan)">تقارير مشاهداتي</span></td></tr>
+    <tr><td><b>منسق(ة)</b></td><td><span class="chip" style="--c:var(--green)">مشاهدة صفية</span> <span class="chip" style="--c:var(--green)">سجل مشاهداتي</span> <span class="chip" style="--c:var(--green)">تسليمات معلميّ</span> <span class="chip" style="--c:var(--green)">مطلوباتي كمنسق</span></td></tr>
+    <tr><td><b>إدارة</b></td><td><span class="chip" style="--c:var(--brand2)">لوحة المتابعة</span> <span class="chip" style="--c:var(--brand2)">المتابعة الإدارية والأكاديمية</span></td></tr>
+  </tbody></table></div>
+  <div class="callout"><div>بعض الأشخاص لهم أكثر من دور، فالمنسق الذي يدرّس مادة تظهر له أقسام المنسق وأقسام المعلم معاً، وبنفس الرمز.</div></div>
+</section>
+
+<section class="sec" id="g-matrix" data-title="من يرى ماذا؟ (جدول الصلاحيات)">
+  <h2>من يرى ماذا؟</h2>
+  <p class="lead">اختر دوراً لتظليل عموده، واضغط على أي خلية لقراءة التفصيل.</p>
+  <div class="seg no-print" id="mxSeg" style="margin-bottom:10px"><button class="on" data-r="">كل الأدوار</button><button data-r="1">معلم</button><button data-r="2">منسق</button><button data-r="3">إدارة</button></div>
+  <div class="tw"><table class="t mx" id="mx"><thead><tr><th>الإجراء</th><th>معلم</th><th>منسق</th><th>إدارة</th></tr></thead><tbody></tbody></table></div>
+  <div class="hs-info" id="mxInfo"><span style="color:var(--muted)">اضغط على أي علامة في الجدول…</span></div>
+</section>
+
+<section class="sec" id="g-concepts" data-title="مفاهيم أساسية">
+  <h2>مفاهيم أساسية</h2>
+  <p class="lead">رموز وأحكام تتكرر في كل مكان. تعرّف عليها مرة واحدة.</p>
+  <h3>رمز الشعبة</h3>
+  <p style="color:var(--muted)">يتكوّن من رقم الصف + حرف البرنامج + حرف الشعبة. اكتب رمزاً لتفكّه:</p>
+  <div class="demo"><div class="dh">فك رمز الشعبة</div>
+    <div class="row" style="grid-template-columns:minmax(120px,200px) 1fr;align-items:end"><div class="fld"><label for="secIn">الرمز</label><input class="inp" id="secIn" value="1EA" maxlength="4" style="direction:ltr;text-align:center;font-family:Cairo;font-weight:800;text-transform:uppercase" autocomplete="off"></div><div class="seg" id="secEx"><button data-v="1EA">1EA</button><button data-v="4FB">4FB</button><button data-v="9EA">9EA</button></div></div>
+    <div class="msg ok" id="secOut"></div>
+  </div>
+  <p style="color:var(--muted);font-size:14.5px"><b>E</b> = البرنامج الإنجليزي (اللغة الأجنبية الأولى إنجليزية)، و<b>F</b> = البرنامج الفرنسي (اللغة الأجنبية الأولى فرنسية).</p>
+  <h3>سلّم الدرجات والأحكام</h3>
+  <p style="color:var(--muted)">كل بند في المشاهدة يُقيَّم من 1 إلى 4 (أو «لم يُلاحظ»). والمجموع من 100 يُترجم إلى حكم:</p>
+  <div class="bands" style="grid-template-columns:repeat(5,1fr);opacity:1">
+    <div class="band on" style="background:var(--v-low)">أقل من 60<br>يحتاج دعماً</div><div class="band on" style="background:var(--v-ok)">60 – 69<br>مقبول</div><div class="band on" style="background:var(--v-g)">70 – 79<br>جيد</div><div class="band on" style="background:var(--v-vg)">80 – 89<br>جيد جداً</div><div class="band on" style="background:var(--v-ex);color:var(--on-brand)">90 فأكثر<br>ممتاز</div>
+  </div>
+  <h3>حالات المطلوبات</h3>
+  <p style="color:var(--muted)">كل مطلوب (خطة، تقييم، امتحان…) له حالة ملوّنة:</p>
+  <div style="display:flex;flex-wrap:wrap;gap:8px"><span class="chip" style="--c:var(--v-g)">مفتوح</span><span class="chip" style="--c:var(--v-low)">متأخر</span><span class="chip" style="--c:var(--v-vg)">تم التسليم</span><span class="chip" style="--c:var(--v-ok)">سُلِّم متأخراً</span><span class="chip" style="--c:var(--muted)">لم يحن موعده</span></div>
+</section>
+
+<section class="sec" id="g-cycle" data-title="دورة حياة المشاهدة الصفية">
+  <h2>دورة حياة المشاهدة الصفية</h2>
+  <p class="lead">من تعبئة المنسق حتى وصول التقرير للمعلم والإدارة. اضغط على أي مرحلة.</p>
+  <div class="cyc" id="cyc"></div>
+  <div class="hs-info" id="cycInfo"></div>
+</section>
+</article>
+
+<!-- ===================== المعلم ===================== -->
+<article data-tab="teacher">
+
+<section class="sec" id="t-start" data-title="قائمة البدء للمعلم">
+  <h2>قائمة البدء</h2>
+  <p class="lead">أربع خطوات قصيرة وتصير جاهزاً. علّم ما أنجزته (يُحفظ تقدّمك على جهازك).</p>
+  <div class="panel cl" data-cl="teacher"><div class="pbar"><i></i></div>
+    <label><input type="checkbox"><span>فتحت رابطي الشخصي ورأيت صفحة «المطلوب مني».</span></label>
+    <label><input type="checkbox"><span>فهمت حالات المطلوبات (مفتوح، متأخر، تم التسليم).</span></label>
+    <label><input type="checkbox"><span>أعرف كيف أرفع ملفاً وأعبّئ أرقام النتائج.</span></label>
+    <label><input type="checkbox"><span>أعرف أين أجد تقرير مشاهدتي ونسخة PDF.</span></label>
+  </div>
+</section>
+
+<section class="sec" id="t-tasks" data-title="صفحتي: المطلوب مني">
+  <h2>صفحتي: «المطلوب مني»</h2>
+  <p class="lead">تعرض كل ما هو مطلوب منك حسب موادّك وشعبك، مجمّعاً بالنوع. اضغط على الأرقام الصغيرة في الصورة لتعرف معنى كل عنصر.</p>
+  <div class="mock" id="mockT">
+    <div class="bar"><i></i><i></i><i></i></div>
+    <div class="mrow"><div class="mk"><button class="hs" data-i="1">1</button><div class="v" style="color:var(--v-g)">2</div><div class="l">مفتوح</div></div><div class="mk"><div class="v">0</div><div class="l">متأخر</div></div><div class="mk"><div class="v" style="color:var(--v-vg)">1</div><div class="l">تم تسليمه</div></div></div>
+    <div class="mbox"><button class="hs" data-i="2">2</button><div class="mh">الخطط السنوية</div>
+      <div class="mtask"><div><b>العام الدراسي 2026/2027 – اللغة الإنجليزية – الصف 1</b><br><small>آخر موعد: 31/10/2026 • الشعب: 1EA، 1EB</small></div><span class="chip" style="--c:var(--v-g);position:relative">مفتوح<button class="hs" data-i="3" style="top:-14px">3</button></span><div style="grid-column:1/-1;position:relative"><span class="btn primary sm">رفع</span><button class="hs" data-i="4" style="top:-8px;inset-inline-end:auto;inset-inline-start:46px">4</button></div></div>
+    </div>
+    <div class="mbox"><button class="hs" data-i="5">5</button><div class="mh">التقييم المستمر</div><div class="mtask" style="border-top:0"><div><b>التقييم المستمر 1 – اللغة الإنجليزية</b><br><small>آخر موعد: 30/11/2026</small></div><span class="chip" style="--c:var(--v-g)">مفتوح</span></div><div style="border-top:1px solid var(--border);padding:8px 0;color:var(--brand2);font-weight:800;font-size:13.5px">◂ تم التسليم (1) &nbsp;&nbsp; ◂ القادمة (3)</div></div>
+  </div>
+  <div class="hs-info" id="infoT"></div><div class="hs-hint">اضغط على أي رقم أصفر/أزرق في الصورة.</div>
+
+  <h3>كيف تتغيّر الحالة؟ جرّب</h3>
+  <div class="demo"><div class="dh">محاكي حالة المطلوب</div>
+    <div class="row" style="grid-template-columns:1fr 1fr"><div class="fld"><label>اليوم بالنسبة للموعد</label><div class="seg" id="stDay"><button data-v="before">قبل فتح المطلوب</button><button data-v="in" class="on">ضمن الفترة</button><button data-v="after">بعد آخر موعد</button></div></div>
+    <div class="fld"><label>وضعي</label><div class="seg" id="stUp"><button data-v="no" class="on">لم أرفع</button><button data-v="ontime">رفعت ضمن الموعد</button><button data-v="late">رفعت بعد الموعد</button></div></div></div>
+    <div style="margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="chip" id="stChip" style="font-size:15px"></span><span id="stTxt" style="color:var(--muted)"></span></div>
+  </div>
+</section>
+
+<section class="sec" id="t-upload" data-title="كيف أرفع ملفاً؟">
+  <h2>كيف أرفع ملفاً؟</h2>
+  <p class="lead">الخطوات واحدة لكل المطلوبات، مع حقول إضافية للتقييم المستمر والامتحان.</p>
+  <div class="steps">
+    <div class="step"><h4>اضغط «رفع» بجانب المطلوب</h4><p>تفتح صفحة الرفع وفيها عنوان المطلوب وآخر موعد.</p></div>
+    <div class="step"><h4>اختر الملف</h4><p>الصيغ المقبولة: PDF، Word، Excel، PowerPoint، CSV، صور (JPG/PNG). الحد الأقصى <b>10 ميغابايت</b>.</p>
+      <details><summary>ماذا لو كان الملف كبيراً؟</summary><div>اضغطه أو صدّره PDF بجودة أقل. إذا كان أكبر من 10 ميغابايت ستظهر رسالة واضحة ولن يُرفع.</div></details></div>
+    <div class="step"><h4>عبّئ أرقام كل شعبة (للتقييم المستمر والامتحان)</h4><p>لكل شعبة تدرّسها في المادة: عدد الطلاب، أعلى علامة، أدنى علامة، المعدل، ونسبة النجاح. هذه الأرقام تُجمَّع في لوحات الإدارة.</p></div>
+    <div class="step"><h4>للامتحان: اكتب الكفايات والأهداف غير المحققة</h4><p>حقل اختياري لخلاصة ما لم يتحقق، إضافة إلى التقرير المفصّل الذي ترفعه كملف.</p></div>
+    <div class="step"><h4>اضغط «رفع» وانتظر</h4><p>قد يستغرق الأمر لحظات حسب حجم الملف. تظهر رسالة نجاح وتتحول الحالة إلى «تم التسليم».</p></div>
+  </div>
+  <div class="callout ok"><div><b>أخطأت أو عندك نسخة أحدث؟</b> اضغط «تحديث الملف» وارفع من جديد. المعتمد دائماً هو آخر ملف، والسابق يبقى محفوظاً في الأرشيف.</div></div>
+  <h3>جرّب التحقق من الأرقام</h3>
+  <div class="demo"><div class="dh">أرقام شعبة واحدة</div>
+    <div class="row" id="stRow"><div class="fld"><label>عدد الطلاب</label><input class="inp" data-f="n" value="22" inputmode="decimal"></div><div class="fld"><label>أعلى علامة</label><input class="inp" data-f="max" value="95" inputmode="decimal"></div><div class="fld"><label>أدنى علامة</label><input class="inp" data-f="min" value="40" inputmode="decimal"></div><div class="fld"><label>المعدل</label><input class="inp" data-f="avg" value="71.5" inputmode="decimal"></div><div class="fld"><label>نسبة النجاح %</label><input class="inp" data-f="pass" value="82" inputmode="decimal"></div></div>
+    <div class="msg" id="stMsg"></div>
+    <p class="hs-hint">جرّب مثلاً: أدنى علامة 80 والمعدل 70، أو نسبة نجاح 120، أو عدد طلاب 20.5.</p>
+  </div>
+  <h3>ماذا أرفع بالضبط؟</h3>
+  <div class="tw"><table class="t"><thead><tr><th>المطلوب</th><th>الملف</th><th>الأرقام</th><th>لكل</th></tr></thead><tbody>
+    <tr><td><b>الخطة السنوية</b></td><td>خطتك السنوية للمادة</td><td>—</td><td>مادة ولكل صف</td></tr>
+    <tr><td><b>التقييم المستمر</b></td><td>التقييم نفسه</td><td>5 أرقام لكل شعبة</td><td>مادة</td></tr>
+    <tr><td><b>الامتحان</b></td><td>تقرير مفصّل: النتائج والكفايات والأهداف غير المحققة</td><td>5 أرقام لكل شعبة</td><td>مادة</td></tr>
+  </tbody></table></div>
+  <div class="callout"><div><b>تدرّس المادة نفسها في أكثر من صف؟</b> تجد خطة سنوية مستقلة لكل صف (مثلاً «اللغة الفرنسية – الصف 2» و«اللغة الفرنسية – الصف 3»)، وترفع كل واحدة بنفسها. أما التقييم المستمر والامتحان فيبقيان لكل مادة، بأرقام لكل شعبة.</div></div>
+  <div class="callout warn"><div>المواعيد تحددها الإدارة وتظهر بجانب كل مطلوب. الرفع بعد الموعد مقبول لكنه يُسجَّل <b>«سُلِّم متأخراً»</b>.</div></div>
+</section>
+
+<section class="sec" id="t-reports" data-title="تقارير مشاهداتي">
+  <h2>تقارير مشاهداتي</h2>
+  <p class="lead">عندما يُنهي المنسق مشاهدة صفية لك ويصدّرها، يصلك تقريرها تلقائياً.</p>
+  <div class="steps">
+    <div class="step"><h4>افتح تبويب «تقارير مشاهداتي»</h4><p>تجد قائمة بكل مشاهدة: المادة والشعبة والتاريخ والمنسق والمجموع والحكم.</p></div>
+    <div class="step"><h4>اقرأ التقرير</h4><p>اضغط «عرض التقرير»: يظهر مجموعك وحكمك وأداءك في كل محور، وبنود التميّز والبنود التي تحتاج اهتماماً، ونقاط القوة ومجالات التطوير والتوصيات.</p></div>
+    <div class="step"><h4>نزّل نسخة PDF</h4><p>اضغط «تنزيل PDF» للاحتفاظ بنسخة ثابتة لا تتغيّر.</p></div>
+  </div>
+  <div class="callout"><div>التقرير يصلك مباشرة بعد التصدير دون مراجعة إضافية. للاستفسار عن ملاحظاتك تواصل مع منسقك. لا يرى هذه التقارير معلم آخر.</div></div>
+</section>
+
+<section class="sec pcard" id="t-ref" data-title="بطاقة المعلم السريعة">
+  <h2>بطاقة المعلم السريعة</h2>
+  <div class="qcard"><h3>أهم ما تحتاجه</h3><ol>
+    <li>ادخل برابطك الشخصي ولا تشاركه.</li>
+    <li>افتح «المطلوب مني»: الأحمر «متأخر»، الأزرق «مفتوح».</li>
+    <li>اضغط «رفع» ← اختر الملف (حتى 10MB) ← أرقام الشعب إن طُلبت ← «رفع».</li>
+    <li>أخطأت؟ «تحديث الملف» والأخير هو المعتمد.</li>
+    <li>تقرير مشاهدتك في «تقارير مشاهداتي» مع PDF.</li>
+    <li>مشكلة؟ اطلب المساعدة من الإدارة.</li></ol></div>
+  <p style="margin-top:10px"><button class="btn sm no-print" data-print="t-ref" type="button">طباعة البطاقة</button></p>
+</section>
+</article>
+
+<!-- ===================== المنسق ===================== -->
+<article data-tab="coordinator">
+
+<section class="sec" id="c-start" data-title="قائمة البدء للمنسق">
+  <h2>قائمة البدء</h2>
+  <p class="lead">أنت خط المتابعة الأول: تُجري المشاهدات، وتتابع تسليمات معلميك، وترفع تقاريرك.</p>
+  <div class="panel cl" data-cl="coordinator"><div class="pbar"><i></i></div>
+    <label><input type="checkbox"><span>فتحت رابطي ورأيت تبويباتي الأربعة.</span></label>
+    <label><input type="checkbox"><span>جرّبت تقييم البنود وفهمت كيف يُحسب المجموع.</span></label>
+    <label><input type="checkbox"><span>أعرف الفرق بين الحفظ التلقائي والتصدير النهائي.</span></label>
+    <label><input type="checkbox"><span>أعرف كيف أذكّر معلماً لم يسلّم.</span></label>
+    <label><input type="checkbox"><span>أعرف كيف أملأ المحضر والتقرير التقييمي وأتابع التكليفات.</span></label>
+  </div>
+</section>
+
+<section class="sec" id="c-obs" data-title="المشاهدة الصفية">
+  <h2>المشاهدة الصفية</h2>
+  <p class="lead">تسع خطوات تظهر في شريط أعلى النموذج: بيانات الحصة، ستة محاور، الخاتمة، ثم التقرير. اضغط على الأرقام في الصورة لتعرف مكوّنات الشاشة.</p>
+  <div class="mock" id="mockC">
+    <div class="bar"><i></i><i></i><i></i></div>
+    <div class="ringbox" style="position:relative"><button class="hs" data-i="1">1</button>
+      <div class="ring"><svg viewBox="0 0 72 72"><circle class="tr" cx="36" cy="36" r="30"/><circle class="ar" cx="36" cy="36" r="30" style="stroke:var(--v-vg);stroke-dasharray:188.5;stroke-dashoffset:34"/></svg><span class="rv">82</span></div>
+      <div><b style="font-family:Cairo;color:var(--v-vg);font-size:18px">جيد جداً</b><div style="color:var(--muted);font-size:13px">24 من 26 بنداً مُقيَّماً</div></div></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;position:relative"><button class="hs" data-i="2" style="top:-14px">2</button><span class="chip" style="--c:var(--green)">بيانات الحصة ✓</span><span class="chip" style="--c:var(--brand2);background:var(--brand);color:var(--on-brand)">الإدارة الصفية 3/5</span><span class="chip">تهيئة الدرس 0/7</span><span class="chip">…</span></div>
+    <div class="mbox"><button class="hs" data-i="3" style="inset-inline-end:auto;inset-inline-start:-6px">3</button><button class="hs" data-i="4">4</button><div class="mh">تواصل إيجابي مع المتعلمين</div>
+      <div class="scale"><button class="s1"><b>1</b><span>ضعيف</span></button><button class="s2"><b>2</b><span>مقبول</span></button><button class="on s3"><b>3</b><span>جيد</span></button><button class="s4"><b>4</b><span>ممتاز</span></button><button class="na"><span>لم يُلاحظ</span></button></div></div>
+    <div style="display:flex;gap:10px;align-items:center;position:relative"><button class="hs" data-i="5" style="top:-14px">5</button><span class="btn primary sm">حفظ</span><span class="btn sm">مشاهدة جديدة</span><span style="color:var(--green);font-weight:700;font-size:13.5px">محفوظ ✓</span></div>
+  </div>
+  <div class="hs-info" id="infoC"></div><div class="hs-hint">اضغط على الأرقام في الصورة.</div>
+
+  <div class="steps">
+    <div class="step"><h4>بيانات الحصة</h4><p>اسمك ثابت. اختر المعلم (تظهر لك قائمة معلمي مادتك)، ثم تُعبَّأ المادة تلقائياً إن كانت واحدة، واختر الشعبة (مثل 1EA)، والتاريخ والحصة وعنوان الدرس.</p>
+      <details><summary>زيارة مشتركة أو معلم من مادة أخرى</summary><div>فعّل خيار «عرض كل المعلمين والمواد» لتظهر القائمة كاملة.</div></details></div>
+    <div class="step"><h4>المحاور الستة</h4><p>لكل بند اختر درجة من 1 إلى 4، أو «لم يُلاحظ» إذا لم يظهر في الحصة (يُستبعد من الحساب). اضغط على الدرجة المختارة مرة ثانية لإلغائها. «معنى الدرجات» أعلى كل محور يشرح المستويات.</p></div>
+    <div class="step"><h4>الخاتمة</h4><p>اختر العبارات الجاهزة لنقاط القوة ومجالات التطوير حسب المحور، والتوصيات، وأضف ملاحظتك. زر <b>«إضافة المقترحات تلقائياً»</b> يختار نقاط القوة من البنود بدرجة 4، ومجالات التطوير من البنود بدرجة 1 أو 2. فعّل «تحتاج مشاهدة متابعة» لتظهر الحصة للإدارة في قائمة المتابعة.</p></div>
+    <div class="step"><h4>التقرير والتصدير</h4><p>راجع المعاينة ثم اضغط <b>«تصدير وإرسال إلى النظام»</b> ثم أكّد بضغطة ثانية. يلزم قبل التصدير: المعلم والمادة والشعبة والتاريخ ودرجة بند واحد على الأقل.</p></div>
+    <div class="step"><h4>بعد التصدير</h4><p>تُقفل المشاهدة فلا تُعدَّل، وتُنشأ نسخة PDF تُحفظ في الأرشيف وتصل للمعلم فوراً، وتظهر للإدارة. إذا فشل إنشاء الملف يظهر زر «حفظ نسخة PDF» لإعادة المحاولة.</p></div>
+  </div>
+  <div class="callout warn"><div><b>التصدير نهائي ويصل للمعلم مباشرة.</b> راجع الحكم والعبارات والملاحظات قبل أن تضغط.</div></div>
+  <div class="callout ok"><div><b>الحفظ تلقائي.</b> تُحفظ المسودة على الخادم كل بضع ثوانٍ (يظهر «محفوظ ✓»)، فتستكملها من أي جهاز عبر «سجل مشاهداتي». وإذا انقطع الإنترنت تُحفظ نسخة على جهازك وتُستعاد عند العودة.</div></div>
+
+  <h3>المحاور الستة وبنودها (26 بنداً)</h3>
+  <div class="tw"><table class="t"><thead><tr><th>المحور</th><th>عدد البنود</th><th>أمثلة</th></tr></thead><tbody>
+    <tr><td>1. الحضور المهني والتواصل</td><td>4</td><td>تقنيات الصوت ولغة الجسد، توظيف مفردات اللغة</td></tr>
+    <tr><td>2. الإدارة الصفية والبيئة التعليمية</td><td>5</td><td>تواصل إيجابي، تشجيع الحوار، التعامل مع المشاغبة</td></tr>
+    <tr><td>3. تهيئة الدرس وتنفيذه ووسائله</td><td>7</td><td>التمهيد، التقييم التشخيصي، الأهداف، الوسائل والتكنولوجيا</td></tr>
+    <tr><td>4. التنوع والفروق الفردية واستراتيجيات التدريس</td><td>4</td><td>استراتيجيات منوعة، الفروق الفردية، دعم الضعفاء وإثراء المتميزين</td></tr>
+    <tr><td>5. التقييم والتغذية الراجعة وختام الحصة</td><td>3</td><td>تقييمات بنائية، تصحيح الأخطاء، التغذية الراجعة وغلق الحصة</td></tr>
+    <tr><td>6. القيم والمهارات</td><td>3</td><td>الربط بالواقع، القيم والأخلاق، الفكر الإبداعي</td></tr>
+  </tbody></table></div>
+
+  <h3>كيف يُحسب المجموع؟ جرّب</h3>
+  <p style="color:var(--muted)">المجموع = مجموع الدرجات ÷ (عدد البنود المُقيَّمة × 4) × 100. البنود «لم يُلاحظ» لا تدخل في الحساب. (نسخة مصغّرة بستة بنود.)</p>
+  <div class="demo"><div class="dh">محاكي التقييم</div>
+    <div class="ringbox"><div class="ring"><svg viewBox="0 0 72 72"><circle class="tr" cx="36" cy="36" r="30"/><circle class="ar" id="dsArc" cx="36" cy="36" r="30"/></svg><span class="rv" id="dsVal">—</span></div>
+      <div><b id="dsVerdict" style="font:800 19px Cairo">لم يبدأ التقييم</b><div id="dsFormula" style="color:var(--muted);font-size:13.5px;margin-top:2px"></div></div></div>
+    <div class="bands" id="dsBands"></div>
+    <div id="dsItems" style="margin-top:10px"></div>
+    <p style="margin-top:8px"><button class="btn sm" id="dsReset" type="button">إعادة ضبط</button></p>
+    <p class="hs-hint">في المنظومة الفعلية: إذا قيّمت أقل من 16 بنداً من 26 يظهر الحكم مع عبارة «تقييم جزئي».</p>
+  </div>
+</section>
+
+<section class="sec" id="c-hist" data-title="سجل مشاهداتي">
+  <h2>سجل مشاهداتي</h2>
+  <p class="lead">كل مشاهداتك: المسودات والمُصدَّرة. لا يراها غيرك من المنسقين.</p>
+  <ul class="ck"><li>صنّف بين <b>الكل</b> و<b>قيد الاستكمال</b> و<b>مُصدَّرة</b>.</li><li><b>متابعة</b> تعيدك إلى الخطوة التي توقفت عندها، و<b>عرض</b> تفتح التقرير المُصدَّر.</li><li><b>حذف</b> متاح للمسودات فقط (بضغطتين).</li><li><b>تنزيل PDF</b> للمشاهدات المُصدَّرة.</li></ul>
+</section>
+
+<section class="sec" id="c-team" data-title="تسليمات معلميّ والتذكير">
+  <h2>تسليمات معلميّ والتذكير</h2>
+  <p class="lead">تشاهد تسليمات معلمي مادتك، وتذكّر مَن تأخر. والإدارة ترى ما تفعله.</p>
+  <div class="mock" id="mockR">
+    <div class="bar"><i></i><i></i><i></i></div>
+    <div class="mrow"><div class="mk"><div class="v" style="color:var(--v-low)">4</div><div class="l">متأخر عن الموعد</div></div><div class="mk"><button class="hs" data-i="1">1</button><div class="v" style="color:var(--v-ok)">2</div><div class="l">ذُكِّر بهم</div></div><div class="mk"><div class="v" style="color:var(--v-low)">2</div><div class="l">لم يُذكَّر بهم</div></div></div>
+    <div class="mbox"><button class="hs" data-i="2">2</button><div class="mh">الخطة السنوية – العام الدراسي 2026/2027 &nbsp; <span style="color:var(--muted);font-weight:500">1 من 5 • 4 لم يسلّم</span></div>
+      <div class="mtask"><div><b>معلم (أ)</b><br><small>اللغة الإنجليزية</small></div><span class="chip" style="--c:var(--v-low)">متأخر</span><div style="grid-column:1/-1;display:flex;gap:8px;align-items:center;position:relative"><span class="btn primary sm">تذكير</span><button class="hs" data-i="3" style="inset-inline-end:auto;inset-inline-start:48px;top:-10px">3</button><small style="color:var(--v-low);font-weight:700">لم يُذكَّر</small></div></div>
+      <div class="mtask"><div><b>معلم (ب)</b><br><small>اللغة الإنجليزية</small></div><span class="chip" style="--c:var(--v-low)">متأخر</span><div style="grid-column:1/-1"><small>ذُكِّر ×1 • 16/10/2026</small></div></div>
+      <div style="padding-top:8px;position:relative"><span class="btn primary sm">تذكير غير المسلّمين (4)</span><button class="hs" data-i="4" style="inset-inline-end:auto;inset-inline-start:150px;top:0">4</button></div></div>
+  </div>
+  <div class="hs-info" id="infoR"></div><div class="hs-hint">اضغط على الأرقام.</div>
+  <h3>جرّب توليد رسالة التذكير</h3>
+  <div class="demo"><div class="dh">منشئ رسالة التذكير (مثل الذي ينسخه النظام)</div>
+    <div class="row"><div class="fld"><label>اسم المعلم(ة)</label><input class="inp" id="rmName" value="الأستاذ أحمد"></div><div class="fld"><label>المطلوب</label><select class="inp" id="rmType"><option>الخطة السنوية</option><option>التقييم المستمر</option><option>الامتحان</option></select></div><div class="fld"><label>الفترة</label><input class="inp" id="rmPeriod" value="العام الدراسي 2026/2027"></div><div class="fld"><label>المادة</label><input class="inp" id="rmSubj" value="اللغة الإنجليزية"></div><div class="fld"><label>آخر موعد</label><input class="inp" id="rmDue" type="date" value="2026-10-31"></div><div class="fld"><label>اسمك</label><input class="inp" id="rmMe" value="المنسقة"></div></div>
+    <div class="seg" id="rmSt" style="margin:10px 0"><button data-v="open" class="on">لم ينتهِ الموعد</button><button data-v="overdue">انتهى الموعد</button></div>
+    <div class="out" id="rmOut"></div>
+    <p style="margin-top:8px"><button class="btn primary sm" id="rmCopy" type="button">نسخ الرسالة</button> <span id="rmOk" style="color:var(--green);font-weight:700"></span></p>
+  </div>
+  <div class="callout"><div><b>كيف يعمل زر «تذكير»؟</b> ينسخ رسالة جاهزة للّصق في واتساب، ويسجّل في النظام أنك ذكّرت (مرة واحدة لكل معلم في اليوم). النظام <b>لا يرسل</b> الرسالة بنفسه. تظهر التذكيرات للإدارة لتعرف مَن تابع.</div></div>
+  <ul class="ck"><li>فعّل «غير المسلّمين فقط» لتركّز على المتأخرين.</li><li>تقدر تنزّل ملفات معلميك (الخطط والتقييمات والامتحانات) وتصدّر قائمة CSV.</li><li>تحت كل مطلوب بالنتائج (تقييم مستمر/امتحان) ترى <b>إحصاءات مجمّعة</b> حسب المادة.</li><li>الخطة السنوية تظهر <b>لكل مادة ولكل صف</b>: إذا درّس المعلم المادة بصفين فله صفان في القائمة.</li><li>لا تظهر في قائمة معلميك أنت نفسك إن كنت تدرّس؛ تسليماتك كمعلم تتابعها الإدارة مباشرة.</li></ul>
+</section>
+
+<section class="sec" id="c-mine" data-title="مطلوباتي كمنسق: النماذج">
+  <h2>مطلوباتي كمنسق: النماذج</h2>
+  <p class="lead">محضر التنسيق والتقرير التقييمي عن كل معلم يُعبَّآن بنموذج موحّد، وليسا ملفاً يُرفع. يتولّد منهما PDF بالهوية البصرية ويُحفظ تلقائياً.</p>
+  <div class="grid2"><div class="panel"><h3 style="margin-top:0">محضر اجتماع التنسيق</h3><p style="color:var(--muted)">التاريخ والصيغة، <b>الحضور والغياب</b> (قائمة معلميك تلقائية: حاضر / غائب بعذر / غائب بلا عذر)، نقاط البحث، القرارات والإجراءات، والتكليفات للمتابعة، ثم الملاحظات.</p></div>
+  <div class="panel"><h3 style="margin-top:0">التقرير التقييمي الشهري</h3><p style="color:var(--muted)">لكل معلم: <b>مؤشرات تلقائية</b> (مشاهداته وتسليماته وحضوره)، التقدير العام، نقاط القوة، مجالات التطوير، التوصيات، التحديات، ممارسة جيدة، ومتابعة توصيات الشهر الماضي.</p></div></div>
+  <h3>كيف تعمل؟</h3>
+  <div class="steps">
+    <div class="step"><h4>افتح «مطلوباتي كمنسق»</h4><p>تجد مطلوب كل شهر: «تعبئة المحضر» وبجانبه «تعبئة التقرير» لكل معلم من معلميك (عن: اسم المعلم).</p></div>
+    <div class="step"><h4>املأ النموذج</h4><p>تُحفظ المسودة تلقائياً. تقدر تخرج وتعود في أي وقت من الزر <b>«متابعة المسودة»</b> بالمكان نفسه، ومن أي جهاز.</p></div>
+    <div class="step"><h4>عاين ثم صدّر</h4><p>«معاينة» تُظهر الورقة كما ستُحفظ. «تصدير» (ضغطتان للتأكيد) يقفل النموذج، ويُنشئ PDF، ويظهر لك وللإدارة. التقرير التقييمي لا يراه المعلم.</p></div>
+    <div class="step"><h4>ارجع إليه متى شئت</h4><p>كل ما صدّرته يبقى تحت المطلوب نفسه: «عرض» لقراءته و«PDF» لتنزيله. والمنجز يُطوى تحت «تم التسليم».</p></div>
+  </div>
+  <h3>متابعة التكليفات</h3>
+  <p style="color:var(--muted)">كل تكليف تسجّله في محضر مُصدَّر ينتقل إلى قائمة <b>«التكليفات للمتابعة»</b> أعلى «مطلوباتي كمنسق». تقدر تغيّر حالة أي تكليف (أُنجز / جزئياً / لم يُنجز) <b>في أي وقت</b> دون فتح المحضر المقفل، وتُسجَّل الحالة بتاريخها. وبالاجتماع التالي تظهر لك التكليفات المفتوحة تلقائياً لتراجعها. وتراها الإدارة: المفتوحة والمتأخرة.</p>
+  <div class="callout ok"><div><b>اجتماعات أكثر من واحد بالشهر؟</b> المطلوب اجتماع واحد شهرياً، وزر <b>«+ اجتماع جديد»</b> يتيح المزيد، ويُرقَّم الاجتماع تلقائياً.</div></div>
+  <div class="callout"><div><b>بطاقات المتابعة:</b> أعلى الصفحة تجد اجتماعات هذا الشهر، ومتوسط حضور معلميك، والتكليفات المفتوحة والمتأخرة.</div></div>
+  <div class="callout"><div>إذا كنت تدرّس أيضاً فستجد تبويب «المطلوب مني» لخطتك وتقييماتك، و«تقارير مشاهداتي» لما يُجرى عليك.</div></div>
+</section>
+
+<section class="sec pcard" id="c-ref" data-title="بطاقة المنسق السريعة">
+  <h2>بطاقة المنسق السريعة</h2>
+  <div class="qcard"><h3>أهم ما تحتاجه</h3><ol>
+    <li>مشاهدة صفية: بيانات الحصة ← المحاور ← الخاتمة ← التقرير.</li>
+    <li>الحفظ تلقائي. «سجل مشاهداتي» للاستكمال.</li>
+    <li>«لم يُلاحظ» لا يدخل في المجموع.</li>
+    <li>التصدير نهائي ويصل للمعلم فوراً مع PDF.</li>
+    <li>«تسليمات معلميّ»: اضغط «تذكير» وألصق الرسالة في واتساب.</li>
+    <li>شهرياً: املأ محضر التنسيق والتقرير التقييمي لكل معلم (مسودة تلقائية ثم تصدير).</li><li>غيّر حالة التكليفات من «التكليفات للمتابعة» متى شئت.</li></ol></div>
+  <p style="margin-top:10px"><button class="btn sm no-print" data-print="c-ref" type="button">طباعة البطاقة</button></p>
+</section>
+</article>
+
+<!-- ===================== الإدارة ===================== -->
+<article data-tab="admin">
+
+<section class="sec" id="a-start" data-title="قائمة البدء للإدارة">
+  <h2>قائمة البدء</h2>
+  <p class="lead">دورك الإشراف واتخاذ القرار: ترى الصورة كاملة دون أن تُدخل بيانات بنفسك.</p>
+  <div class="panel cl" data-cl="admin"><div class="pbar"><i></i></div>
+    <label><input type="checkbox"><span>فتحت «لوحة المتابعة» وفهمت مؤشراتها الأربعة.</span></label>
+    <label><input type="checkbox"><span>زرت «المتابعة الإدارية والأكاديمية» وأقسامها الأربعة.</span></label>
+    <label><input type="checkbox"><span>فهمت قسم «متابعة المنسقين للمتأخرين».</span></label>
+    <label><input type="checkbox"><span>رأيت «الاجتماعات والمتابعة»: طلبات الدعم والتكليفات المتأخرة.</span></label>
+    <label><input type="checkbox"><span>أعرف أين تُعدَّل المواعيد والإعدادات (ورقة الـ Sheet).</span></label>
+  </div>
+</section>
+
+<section class="sec" id="a-dash" data-title="لوحة المتابعة">
+  <h2>لوحة المتابعة</h2>
+  <p class="lead">نظرة على المشاهدات الصفية المُصدَّرة. اضغط على الأرقام في الصورة لقراءة كل عنصر.</p>
+  <div class="mock" id="mockA">
+    <div class="bar"><i></i><i></i><i></i></div>
+    <div class="mrow"><div class="mk"><button class="hs" data-i="1">1</button><div class="v">24</div><div class="l">مشاهدة مُصدَّرة</div></div><div class="mk"><button class="hs" data-i="2">2</button><div class="v">31%</div><div class="l">تغطية المعلمين (18 من 58)</div></div><div class="mk"><button class="hs" data-i="3">3</button><div class="v" style="color:var(--v-g)">73</div><div class="l">متوسط المجموع – جيد</div></div><div class="mk"><button class="hs" data-i="4">4</button><div class="v" style="color:var(--v-ok)">8</div><div class="l">تحتاج متابعة</div></div></div>
+    <div class="grid2"><div class="mbox"><button class="hs" data-i="5">5</button><div class="mh">توزيع الأحكام</div><div style="display:flex;height:14px;border-radius:7px;overflow:hidden"><i style="flex:12;background:var(--v-vg)"></i><i style="flex:4;background:var(--v-g)"></i><i style="flex:8;background:var(--v-low)"></i></div></div>
+    <div class="mbox"><button class="hs" data-i="6">6</button><div class="mh">أداء المحاور</div><div class="mbar" style="margin-bottom:5px"><i style="width:74%;background:var(--v-g)"></i></div><div class="mbar"><i style="width:70%;background:var(--v-g)"></i></div></div></div>
+    <div class="grid2"><div class="mbox"><button class="hs" data-i="7">7</button><div class="mh">أضعف البنود</div><div class="mbar"><i style="width:62%;background:var(--v-ok)"></i></div></div>
+    <div class="mbox"><button class="hs" data-i="8">8</button><div class="mh">المنسقون</div><small style="color:var(--muted)">معلموه • المشاهَدون • التغطية • المعدل</small></div></div>
+    <div class="mbox"><button class="hs" data-i="9">9</button><div class="mh">المشاهدات المُصدَّرة</div><small style="color:var(--muted)">اضغط على أي صف لفتح التقرير وتنزيل PDF</small></div>
+  </div>
+  <div class="hs-info" id="infoA"></div><div class="hs-hint">اضغط على الأرقام.</div>
+</section>
+
+<section class="sec" id="a-hub" data-title="المتابعة الإدارية والأكاديمية">
+  <h2>المتابعة الإدارية والأكاديمية</h2>
+  <p class="lead">تبويب واحد بأربعة أقسام. اختر قسماً لقراءة شرحه.</p>
+  <div class="seg" id="hubSeg" style="margin-bottom:12px"><button data-v="subs" class="on">حالة التسليم</button><button data-v="results">نتائج الطلاب</button><button data-v="teachers">تقييم المعلمين</button><button data-v="forms">الاجتماعات والمتابعة</button></div>
+  <div class="panel" id="hubBox"></div>
+</section>
+
+<section class="sec" id="a-do" data-title="ما تفعله الإدارة وما لا تفعله">
+  <h2>ما تفعله الإدارة وما لا تفعله</h2>
+  <div class="grid2">
+    <div class="callout ok" style="display:block"><b>تستطيع</b><ul class="ck" style="margin-top:6px"><li>رؤية كل المشاهدات المُصدَّرة وتقاريرها وPDF.</li><li>رؤية كل التسليمات وتنزيل أي ملف.</li><li>تصدير جداول CSV للتسليمات والنتائج.</li><li>مراقبة تذكيرات المنسقين.</li></ul></div>
+    <div class="callout no" style="display:block"><b>لا تفعل (بالمنظومة)</b><ul class="ck" style="margin-top:6px"><li>لا تعبّئ مشاهدات ولا ترفع ملفات.</li><li>لا تذكّر المعلمين: هذا دور المنسق.</li><li>لا تعدّل مشاهدة بعد تصديرها.</li><li>لا ترى مسودات المنسقين.</li></ul></div>
+  </div>
+</section>
+
+<section class="sec" id="a-sys" data-title="مهام مشرف النظام (الـ Sheet)">
+  <h2>مهام مشرف النظام</h2>
+  <p class="lead">للشخص المكلّف بإدارة النظام من داخل جدول البيانات (Google Sheet). لا يحتاجها بقية الإدارة.</p>
+  <div class="tw"><table class="t"><thead><tr><th>المهمة</th><th>أين وكيف</th></tr></thead><tbody>
+    <tr><td><b>تعديل المواعيد</b></td><td>ورقة <b>المطلوبات</b>: أعمدة النوع، الفترة، <b>يفتح</b>، <b>آخر موعد</b> (بصيغة 2026-10-31)، <b>فعّال</b> (نعم/لا)، ملاحظة.</td></tr>
+    <tr><td><b>إيقاف ظهور التقارير للمعلم</b></td><td>ورقة <b>الإعدادات</b> ← <span class="k">teacherSeesReports</span> = FALSE (الأصل TRUE).</td></tr>
+    <tr><td><b>توليد رموز لأشخاص جدد</b></td><td>قائمة <b>منظومة المتابعة ← توليد الرموز لمن لا رمز له</b>. تظهر رسائل جاهزة في ورقة <b>روابط_التوزيع</b>؛ انسخها وأرسلها ثم احذف الورقة من القائمة نفسها.</td></tr>
+    <tr><td><b>تجديد رمز ضاع أو انكشف</b></td><td>قائمة <b>تجديد رمز شخص</b> وأدخل المعرّف (مثل T05). يُلغى الرمز القديم فوراً.</td></tr>
+    <tr><td><b>إضافة معلم أو منسق</b></td><td>صف جديد في ورقة <b>المعلمون</b> أو <b>المنسقون</b> (بمعرّف فريد)، وإسناداته (شعبة × مادة × معلم) في ورقة <b>التوزيع</b>، ثم قائمة <b>تحديث الذاكرة المؤقتة</b>، ثم توليد رمز له.</td></tr>
+    <tr><td><b>تحديث الذاكرة المؤقتة</b></td><td>تحتفظ المنظومة بنسخة سريعة من اللوائح (المعلمون، المنسقون، التوزيع) لمدة 5 دقائق لتسريع العمل. بعد أي تعديل عليها شغّل قائمة <b>منظومة المتابعة ← تحديث الذاكرة المؤقتة</b> لتظهر فوراً، وإلا ظهرت خلال 5 دقائق.</td></tr>
+    <tr><td><b>نسخ احتياطي</b></td><td>قائمة <b>نسخة احتياطية الآن</b> أو <b>تفعيل النسخ الأسبوعي</b>.</td></tr>
+    <tr><td><b>أوراق النماذج</b></td><td>ورقة <b>المحاضر</b> و<b>التقارير_التقييمية</b> و<b>التكليفات</b> تُنشأ تلقائياً بتشغيل «إعداد الأوراق». لا تعدّل فيها يدوياً إلا لتصحيح استثنائي، وبعد أخذ نسخة احتياطية.</td></tr>
+    <tr><td><b>مراجعة النشاط</b></td><td>ورقة <b>السجل</b>: الدخول والحفظ والتصدير والرفع والتنزيل والتذكير.</td></tr>
+  </tbody></table></div>
+  <div class="callout warn"><div><b>احذر:</b> لا تشارك صلاحية تعديل الـ Sheet إلا مع من يلزم، ولا تغيّر المعرّفات (T01، C02…) بعد إنشائها، ولا تحذف سطوراً من «المشاهدات» أو «التسليمات» إلا عند الضرورة. راقب مساحة الدرايف.</div></div>
+</section>
+
+<section class="sec pcard" id="a-ref" data-title="بطاقة الإدارة السريعة">
+  <h2>بطاقة الإدارة السريعة</h2>
+  <div class="qcard"><h3>أهم ما تحتاجه</h3><ol>
+    <li>«لوحة المتابعة»: المشاهدات والمعدلات وقائمة المتابعة.</li>
+    <li>«المتابعة الإدارية والأكاديمية»: التسليم، نتائج الطلاب، تقييم المعلمين.</li>
+    <li>«لم يُذكَّر بهم»: متأخرون لم يتابعهم منسقهم.</li>
+    <li>المعدلات موزونة بعدد الطلاب في كل شعبة.</li>
+    <li>الإشراف دون إدخال بيانات؛ التذكير دور المنسق.</li>
+    <li>المواعيد والإعدادات من ورقة «المطلوبات» و«الإعدادات».</li></ol></div>
+  <p style="margin-top:10px"><button class="btn sm no-print" data-print="a-ref" type="button">طباعة البطاقة</button></p>
+</section>
+</article>
+
+<!-- ===================== الأسئلة الشائعة ===================== -->
+<article data-tab="faq">
+<section class="sec" id="f-all" data-title="الأسئلة الشائعة">
+  <h2>الأسئلة الشائعة</h2>
+  <p class="lead">اضغط على السؤال لقراءة الجواب. يمكنك أيضاً استعمال البحث أعلى الصفحة.</p>
+  <div class="faq" id="faqBox"></div>
+</section>
+</article>
+
+<!-- ===================== اختبر فهمك ===================== -->
+<article data-tab="quiz">
+<section class="sec" id="q-all" data-title="اختبر فهمك">
+  <h2>اختبر فهمك</h2>
+  <p class="lead">خمسة أسئلة قصيرة لكل دور. لا درجات رسمية، فقط للتأكد أنك جاهز.</p>
+  <div class="seg" id="qRole" style="margin-bottom:12px"><button data-v="teacher" class="on">المعلم</button><button data-v="coordinator">المنسق</button><button data-v="admin">الإدارة</button></div>
+  <div class="panel quiz" id="quizBox"></div>
+</section>
+</article>
+
+</main>
+</div>
+<footer><div class="wrap">لأي استفسار أو مشكلة تقنية تواصل مع إدارة المدرسة. &nbsp;•&nbsp; دليل المنظومة، الإصدار 1.0 – تشرين الأول 2026</div></footer>
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s);},$$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+var TABS=['general','teacher','coordinator','admin','faq','quiz'],TAB_NAME={general:'نظرة عامة',teacher:'المعلم',coordinator:'المنسق',admin:'الإدارة',faq:'الأسئلة الشائعة',quiz:'اختبر فهمك'};
+function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+/* ───── التبويبات والتوجيه ───── */
+var cur='general';
+function parseHash(){var h=(location.hash||'').replace('#','').split('/');return {tab:TABS.indexOf(h[0])>-1?h[0]:null,sec:h[1]||''};}
+function showTab(t,sec,noScroll){
+  if(TABS.indexOf(t)<0)t='general';cur=t;
+  $$('article').forEach(function(a){a.classList.toggle('show',a.dataset.tab===t);});
+  $$('#tabs .tab').forEach(function(b){b.setAttribute('aria-selected',b.dataset.tab===t?'true':'false');});
+  lsSet('aman-guide-tab',t);buildToc();
+  var target=sec?document.getElementById(sec):null;
+  if(history.replaceState)history.replaceState(null,'','#'+t+(sec?'/'+sec:''));
+  if(!noScroll){if(target){setTimeout(function(){target.scrollIntoView({behavior:'smooth',block:'start'});flash(target);},60);}else{var art=$('article.show');window.scrollTo({top:Math.max(0,art.getBoundingClientRect().top+window.scrollY-150),behavior:'smooth'});}}
+}
+function flash(el){el.classList.add('hl');setTimeout(function(){el.classList.remove('hl');},1800);}
+function buildToc(){
+  var a=$('article.show'),h='<h4>في هذا القسم</h4>';
+  $$('.sec',a).forEach(function(s){h+='<a href="#'+cur+'/'+s.id+'" data-s="'+s.id+'">'+esc(s.dataset.title||s.id)+'</a>';});
+  $('#toc').innerHTML=h;spy();
+}
+var spyObs=null;
+function spy(){
+  if(spyObs)spyObs.disconnect();
+  if(!('IntersectionObserver' in window))return;
+  spyObs=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){$$('#toc a').forEach(function(l){l.classList.toggle('on',l.dataset.s===e.target.id);});}});},{rootMargin:'-140px 0px -60% 0px'});
+  $$('article.show .sec').forEach(function(s){spyObs.observe(s);});
+}
+document.addEventListener('click',function(e){
+  var t=e.target,g=t.closest('[data-go]');if(g){showTab(g.dataset.go);return;}
+  var tb=t.closest('#tabs .tab');if(tb){showTab(tb.dataset.tab);return;}
+  var tl=t.closest('#toc a');if(tl){e.preventDefault();var id=tl.dataset.s;showTab(cur,id);return;}
+  var pr=t.closest('[data-print]');if(pr){printCard(pr.dataset.print);return;}
+});
+function printCard(id){var el=document.getElementById(id);document.body.classList.add('pc');el.classList.add('prn');setTimeout(function(){window.print();setTimeout(function(){document.body.classList.remove('pc');el.classList.remove('prn');},500);},80);}
+
+/* ───── البحث ───── */
+function norm(s){return String(s).toLowerCase().replace(/[\u064B-\u065F\u0670]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/\s+/g,' ');}
+var INDEX=[];
+function buildIndex(){
+  INDEX=[];
+  $$('article').forEach(function(a){
+    $$('.sec',a).forEach(function(s){
+      if(s.id==='f-all')return;
+      INDEX.push({tab:a.dataset.tab,id:s.id,title:s.dataset.title||s.id,text:(s.textContent||'').replace(/\s+/g,' ').trim()});
+    });
+  });
+  $$('#faqBox details').forEach(function(d){INDEX.push({tab:'faq',id:d.id,title:$('summary',d).textContent.trim(),text:d.textContent.replace(/\s+/g,' ').trim()});});
+  INDEX.forEach(function(e){e.n=norm(e.text);e.nt=norm(e.title);});
+}
+function runSearch(){
+  var q=norm($('#q').value.trim()),box=$('#results');
+  if(q.length<2){box.classList.remove('show');box.innerHTML='';return;}
+  var res=INDEX.filter(function(e){return e.nt.indexOf(q)>-1||e.n.indexOf(q)>-1;}).sort(function(a,b){return (b.nt.indexOf(q)>-1?1:0)-(a.nt.indexOf(q)>-1?1:0);}).slice(0,8);
+  if(!res.length){box.innerHTML='<div class="res"><b>لا نتائج</b><span>جرّب كلمة أخرى</span></div>';box.classList.add('show');return;}
+  box.innerHTML=res.map(function(e,i){
+    var idx=e.n.indexOf(q),snip='';
+    if(idx>-1){var raw=e.text,start=Math.max(0,Math.min(idx,raw.length)-30);snip=raw.slice(start,start+110);}
+    return '<button class="res" type="button" data-i="'+i+'"><b>'+esc(e.title)+'</b><span>'+esc(TAB_NAME[e.tab])+(snip?' • '+esc(snip)+'…':'')+'</span></button>';
+  }).join('');
+  box.classList.add('show');box._res=res;
+}
+$('#q').addEventListener('input',runSearch);
+$('#q').addEventListener('keydown',function(e){if(e.key==='Escape'){$('#results').classList.remove('show');}});
+document.addEventListener('click',function(e){
+  var r=e.target.closest('#results .res[data-i]');
+  if(r){var o=$('#results')._res[+r.dataset.i];$('#results').classList.remove('show');$('#q').value='';
+    if(o.tab==='faq'){showTab('faq','');var d=document.getElementById(o.id);if(d){d.open=true;setTimeout(function(){d.scrollIntoView({behavior:'smooth',block:'center'});flash(d);},80);}}
+    else showTab(o.tab,o.id);return;}
+  if(!e.target.closest('.search'))$('#results').classList.remove('show');
+});
+
+/* ───── جدول الصلاحيات ───── */
+var MX=[
+ ['تعبئة المشاهدة الصفية وتصديرها',['n',''],['y','المنسق وحده يُجري المشاهدة ويصدّرها.'],['n','']],
+ ['رؤية سجل المشاهدات (مسودات ومُصدَّرة)',['n',''],['y','يرى مشاهداته هو فقط.'],['p','يرى المُصدَّرة فقط، دون المسودات.']],
+ ['رؤية تقرير مشاهدة ونسخة PDF',['y','يرى تقارير المشاهدات التي أُجريت عليه، تلقائياً بعد التصدير.'],['y','المشاهدات التي أجراها.'],['y','كل المشاهدات المُصدَّرة.']],
+ ['رفع الخطة السنوية والتقييم المستمر والامتحان',['y','لموادّه وشعبه.'],['p','فقط إن كان يدرّس مادة.'],['n','']],
+ ['تعبئة محضر التنسيق والتقرير التقييمي',['n',''],['y','نموذج شهري لكل معلم + محضر الاجتماع، يُحفظ بـ PDF.'],['n','']],
+ ['رؤية المحاضر والتقارير التقييمية',['n','التقرير التقييمي لا يراه المعلم.'],['y','ما أنشأه هو فقط.'],['y','كل المُصدَّر مع PDF.']],
+ ['متابعة التكليفات وتحديث حالتها',['n',''],['y','تكليفات اجتماعاته.'],['p','تشاهد المفتوحة والمتأخرة فقط.']],
+ ['رؤية تسليمات المعلمين',['n','يرى تسليماته هو فقط.'],['p','معلمو مادته فقط.'],['y','الجميع.']],
+ ['تنزيل ملفات المعلمين',['n','ملفاته هو فقط.'],['p','ملفات معلمي مادته (الخطط والتقييم والامتحان).'],['y','أي ملف.']],
+ ['تذكير المتأخرين',['n',''],['y','عبر رسالة جاهزة ينسخها ويلصقها في واتساب.'],['n','تشرف فقط وترى مَن ذُكِّر.']],
+ ['لوحة المتابعة ونتائج الطلاب وتقييم المعلمين',['n',''],['p','إحصاءات مادته ضمن «تسليمات معلميّ».'],['y','كل اللوحات.']],
+ ['تعديل مشاهدة بعد تصديرها',['n',''],['n','لا يمكن.'],['n','لا يمكن من الواجهة.']]
+];
+var SYM={y:'✓',n:'—',p:'◐'};
+(function(){
+  var tb=$('#mx tbody');
+  tb.innerHTML=MX.map(function(r,ri){return '<tr><td>'+esc(r[0])+'</td>'+[1,2,3].map(function(c){var x=r[c];return '<td class="c" data-r="'+ri+'" data-c="'+c+'"><span class="'+x[0]+'">'+SYM[x[0]]+'</span></td>';}).join('')+'</tr>';}).join('');
+  var info=$('#mxInfo');
+  tb.addEventListener('click',function(e){var td=e.target.closest('td.c');if(!td)return;var r=MX[+td.dataset.r],c=+td.dataset.c,who=['','المعلم','المنسق','الإدارة'][c],x=r[c];
+    var kind={y:'متاح',n:'غير متاح',p:'متاح جزئياً'}[x[0]];info.innerHTML='<b>'+esc(who)+' – '+esc(r[0])+'</b><br>'+kind+(x[1]?': '+esc(x[1]):'.');});
+  $('#mxSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$$('#mxSeg button').forEach(function(x){x.classList.toggle('on',x===b);});var c=b.dataset.r;
+    $$('#mx th,#mx td').forEach(function(x){x.classList.remove('hl');});
+    if(c){var i=+c;$$('#mx tr').forEach(function(tr){var cell=tr.children[i];if(cell)cell.classList.add('hl');});}});
+})();
+
+/* ───── رمز الشعبة ───── */
+(function(){
+  var G=['','الأول','الثاني','الثالث','الرابع','الخامس','السادس','السابع','الثامن','التاسع'];
+  function dec(){
+    var v=$('#secIn').value.trim().toUpperCase(),m=/^([1-9])([EF])([A-D])$/.exec(v),out=$('#secOut');
+    if(!m){out.className='msg bad';out.textContent='الصيغة: رقم الصف (1 إلى 9) + حرف البرنامج (E أو F) + حرف الشعبة (A إلى D). مثال: 1EA';return;}
+    out.className='msg ok';out.textContent='الصف '+G[+m[1]]+'، البرنامج '+(m[2]==='E'?'الإنجليزي':'الفرنسي')+'، الشعبة '+m[3];
+  }
+  $('#secIn').addEventListener('input',dec);
+  $('#secEx').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$('#secIn').value=b.dataset.v;dec();});
+  dec();
+})();
+
+/* ───── دورة المشاهدة ───── */
+(function(){
+  var S=[['تعبئة','المنسق يعبّئ المشاهدة. تُحفظ مسودةً تلقائياً على الخادم ويمكن استكمالها من أي جهاز.'],
+   ['مراجعة','تظهر النتيجة الحية والحكم والعبارات المقترحة. يراجع المنسق التقرير قبل التصدير.'],
+   ['تصدير','يضغط المنسق «تصدير» ويؤكد. تُقفل المشاهدة ولا تُعدَّل بعدها.'],
+   ['PDF','يُنشأ ملف PDF ثابت من التقرير ويُحفظ في الأرشيف المنظّم باسم المعلم.'],
+   ['المعلم','يصل التقرير ونسخة PDF للمعلم تلقائياً، ويظهر في «تقارير مشاهداتي».'],
+   ['الإدارة','تظهر المشاهدة في اللوحات وفي جدول المشاهدات المُصدَّرة مع التقرير وPDF.']];
+  var box=$('#cyc');box.innerHTML=S.map(function(s,i){return '<button class="cs'+(i?'':' on')+'" data-i="'+i+'" type="button"><span class="n">'+(i+1)+'</span>'+s[0]+'</button>';}).join('');
+  var info=$('#cycInfo');info.innerHTML='<b>'+S[0][0]+'</b><br>'+S[0][1];
+  box.addEventListener('click',function(e){var b=e.target.closest('.cs');if(!b)return;$$('.cs',box).forEach(function(x){x.classList.toggle('on',x===b);});info.innerHTML='<b>'+S[+b.dataset.i][0]+'</b><br>'+S[+b.dataset.i][1];});
+})();
+
+/* ───── النقاط الساخنة ───── */
+function hotspots(mockId,infoId,data){
+  var m=$('#'+mockId),info=$('#'+infoId);if(!m)return;
+  function pick(i){$$('.hs',m).forEach(function(h){h.classList.toggle('on',h.dataset.i===String(i));});info.innerHTML='<b>'+i+'.</b> '+data[i];}
+  m.addEventListener('click',function(e){var h=e.target.closest('.hs');if(!h)return;e.preventDefault();pick(h.dataset.i);});
+  pick(1);
+}
+hotspots('mockT','infoT',{1:'ملخص سريع: عدد المطلوبات المفتوحة والمتأخرة والمُسلَّمة.',2:'لكل نوع مطلوب مجموعة: الخطط السنوية، التقييم المستمر، الامتحانات.',3:'حالة المطلوب بلون واضح: مفتوح (أزرق)، متأخر (أحمر)، تم التسليم (أخضر).',4:'زر «رفع» يفتح صفحة الرفع. بعد التسليم يتحول إلى «تحديث الملف» ويظهر «تنزيل الملف».',5:'الأقسام المطوية: «تم التسليم» لما أنجزته، و«القادمة» لما سيُفتح لاحقاً.'});
+hotspots('mockC','infoC',{1:'بطاقة المجموع الحي: المجموع من 100 والحكم وعدد البنود المُقيَّمة، وتتحدّث مع كل ضغطة.',2:'خطوات النموذج: بيانات الحصة، المحاور الستة، الخاتمة، التقرير. الرقم بجانب المحور = البنود المُنجزة منه.',3:'درجات البند من 1 (ضعيف) إلى 4 (ممتاز).',4:'«لم يُلاحظ» لبند لم يظهر في الحصة: يُستبعد من المجموع ولا يخفضه.',5:'«حفظ» للتأكيد (الحفظ تلقائي أيضاً)، و«مشاهدة جديدة» تحفظ الحالية وتبدأ جديدة. «محفوظ ✓» يعني أن آخر تعديل وصل للخادم.'});
+hotspots('mockR','infoR',{1:'ملخص المتابعة: كم متأخر، وكم منهم ذُكِّر به، وكم لم يُذكَّر بعد.',2:'كل مطلوب بطاقة: المُسلَّم من المطلوب وعدد من لم يسلّم.',3:'«تذكير» ينسخ رسالة جاهزة لهذا المعلم ويسجّل التذكير. بعدها يظهر «ذُكِّر ×1» مع التاريخ.',4:'«تذكير غير المسلّمين» ينسخ رسالة واحدة تذكر الأسماء للّصق في مجموعة واتساب، ويسجّل التذكير لكل منهم.'});
+hotspots('mockA','infoA',{1:'عدد المشاهدات الصفية التي صدّرها المنسقون.',2:'التغطية = المعلمون الذين لهم مشاهدة مُصدَّرة ÷ كل المعلمين.',3:'متوسط مجموع المشاهدات وحكمه.',4:'الحصص التي فعّل المنسق عليها «تحتاج مشاهدة متابعة».',5:'كم مشاهدة في كل حكم، بألوان الأحكام.',6:'متوسط كل محور من المحاور الستة (من 100).',7:'البنود الأضعف على مستوى المدرسة (دون 90 من 100) لتحديد الحاجة لتدريب.',8:'لكل منسق: عدد معلميه والمُشاهَدون والتغطية وعدد المشاهدات ومعدلها وآخر مشاهدة.',9:'جدول بكل المشاهدات المُصدَّرة مع فلاتر المنسق والحكم. الضغط على صف يفتح التقرير مع زر تنزيل PDF.'});
+
+/* ───── محاكي الحالة ───── */
+(function(){
+  var st={day:'in',up:'no'};
+  function render(){
+    var chip=$('#stChip'),txt=$('#stTxt'),c,l,t;
+    if(st.day==='before'){c='var(--muted)';l='لم يحن موعده';t='المطلوب لم يُفتح بعد، فلا يمكن الرفع الآن. يُفتح في التاريخ المبيّن بجانبه.';}
+    else if(st.day==='in'){if(st.up==='no'){c='var(--v-g)';l='مفتوح';t='يمكنك الرفع الآن، وآخر موعد لم يحن بعد.';}else{c='var(--v-vg)';l='تم التسليم';t='رُفع الملف ضمن الموعد.'+(st.up==='late'?' (الرفع «بعد الموعد» غير ممكن لأن الموعد لم ينتهِ.)':'');}}
+    else{if(st.up==='no'){c='var(--v-low)';l='متأخر';t='انتهى الموعد ولم يُرفع شيء. ارفع الآن وسيُسجَّل «سُلِّم متأخراً».';}else if(st.up==='ontime'){c='var(--v-vg)';l='تم التسليم';t='رُفع الملف ضمن الموعد قبل انتهائه.';}else{c='var(--v-ok)';l='سُلِّم متأخراً';t='رُفع الملف بعد انتهاء الموعد، فسُجِّل متأخراً (مقبول لكنه ظاهر للمنسق والإدارة).';}}
+    chip.style.setProperty('--c',c);chip.textContent=l;txt.textContent=t;
+  }
+  function seg(id,key){$('#'+id).addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st[key]=b.dataset.v;$$('#'+id+' button').forEach(function(x){x.classList.toggle('on',x===b);});render();});}
+  seg('stDay','day');seg('stUp','up');render();
+})();
+
+/* ───── التحقق من الأرقام ───── */
+(function(){
+  var box=$('#stRow'),msg=$('#stMsg');
+  function val(){
+    var o={};$$('input',box).forEach(function(i){var v=i.value.replace(',','.').trim();o[i.dataset.f]=v===''?NaN:Number(v);});
+    var m=msg,e='';
+    if([o.n,o.max,o.min,o.avg,o.pass].some(isNaN))e='أكمل كل الأرقام بقيم صالحة.';
+    else if(Math.floor(o.n)!==o.n||o.n<1||o.n>500)e='عدد الطلاب يجب أن يكون عدداً صحيحاً (1 إلى 500).';
+    else if(o.min<0||o.min>o.avg||o.avg>o.max)e='يجب أن يكون: الأدنى ≤ المعدل ≤ الأعلى.';
+    else if(o.pass<0||o.pass>100)e='نسبة النجاح بين 0 و100.';
+    m.className='msg '+(e?'bad':'ok');m.textContent=e||'الأرقام صالحة ✓ جاهزة للرفع.';
+  }
+  box.addEventListener('input',val);val();
+})();
+
+/* ───── محاكي التقييم ───── */
+(function(){
+  var ITEMS=['تواصل إيجابي مع المتعلمين','إجراء تمهيد للدرس يحفّز المتعلمين','استخدام استراتيجيات منوعة تخدم تحقيق أهداف التعلم','مراعاة الفروق الفردية وأنماط التعلم المختلفة','إجراء تقييمات بنائية حول أهداف الدرس','تعزيز القيم والأخلاق وخدمة المجتمع'];
+  var LV=[[90,'ممتاز','var(--v-ex)'],[80,'جيد جداً','var(--v-vg)'],[70,'جيد','var(--v-g)'],[60,'مقبول','var(--v-ok)'],[0,'يحتاج دعماً','var(--v-low)']];
+  var sc={},C=2*Math.PI*30,L=['ضعيف','مقبول','جيد','ممتاز'];
+  var box=$('#dsItems');
+  box.innerHTML=ITEMS.map(function(t,i){return '<div class="sitem"><div class="q">'+(i+1)+'. '+t+'</div><div class="scale" data-i="'+i+'">'+[1,2,3,4].map(function(v){return '<button type="button" class="s'+v+'" data-v="'+v+'"><b>'+v+'</b><span>'+L[v-1]+'</span></button>';}).join('')+'<button type="button" class="na" data-v="na"><span>لم يُلاحظ</span></button></div></div>';}).join('');
+  var bands=$('#dsBands');bands.innerHTML=LV.slice().reverse().map(function(l,i){return '<div class="band" data-l="'+l[1]+'" style="background:'+l[2]+';'+(l[1]==='ممتاز'?'color:var(--on-brand)':'')+'">'+l[1]+'<br>'+(l[0]?l[0]+'+':'<60')+'</div>';}).join('');
+  function calc(){
+    var s=0,n=0;Object.keys(sc).forEach(function(k){if(typeof sc[k]==='number'){s+=sc[k];n++;}});
+    var pct=n?Math.round(s/(n*4)*100):null,lv=null;if(pct!=null)for(var i=0;i<LV.length;i++){if(pct>=LV[i][0]){lv=LV[i];break;}}
+    $('#dsVal').textContent=pct==null?'—':pct;var arc=$('#dsArc');arc.style.strokeDasharray=C;arc.style.strokeDashoffset=C*(1-(pct||0)/100);arc.style.stroke=lv?lv[2]:'var(--border)';
+    var v=$('#dsVerdict');v.textContent=lv?lv[1]:'لم يبدأ التقييم';v.style.color=lv?lv[2]:'var(--text)';
+    $('#dsFormula').textContent=n?(s+' ÷ ('+n+' × 4) × 100 = '+pct):'قيّم بنداً واحداً على الأقل';
+    $$('.band',bands).forEach(function(b){b.classList.toggle('on',!!lv&&b.dataset.l===lv[1]);});
+    $$('.scale',box).forEach(function(sw){var v=sc[sw.dataset.i];$$('button',sw).forEach(function(b){b.classList.toggle('on',(b.dataset.v==='na'?'na':+b.dataset.v)===v);});});
+  }
+  box.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var i=b.parentNode.dataset.i,v=b.dataset.v==='na'?'na':+b.dataset.v;if(sc[i]===v)delete sc[i];else sc[i]=v;calc();});
+  $('#dsReset').addEventListener('click',function(){sc={};calc();});calc();
+})();
+
+/* ───── منشئ رسالة التذكير ───── */
+(function(){
+  var st='open';
+  function fmt(d){var p=String(d||'').split('-');return p.length===3?(+p[2])+'/'+(+p[1])+'/'+p[0]:d;}
+  function gen(){
+    var name=$('#rmName').value.trim()||'الزميل/ة',ty=$('#rmType').value,per=$('#rmPeriod').value.trim(),sj=$('#rmSubj').value.trim(),due=$('#rmDue').value,me=$('#rmMe').value.trim();
+    $('#rmOut').textContent='السلام عليكم '+name+'،\nنذكّركم بتسليم «'+ty+' – '+per+'»'+(sj?' ('+sj+')':'')+(st==='overdue'?' وقد انتهى موعده بتاريخ '+fmt(due):' قبل '+fmt(due))+'.\nشكراً لتعاونكم.\n'+me;
+  }
+  $$('#rmName,#rmType,#rmPeriod,#rmSubj,#rmDue,#rmMe').forEach(function(i){i.addEventListener('input',gen);i.addEventListener('change',gen);});
+  $('#rmSt').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st=b.dataset.v;$$('#rmSt button').forEach(function(x){x.classList.toggle('on',x===b);});gen();});
+  $('#rmCopy').addEventListener('click',function(){var t=$('#rmOut').textContent,ok=$('#rmOk');
+    var done=function(){ok.textContent='نُسخت الرسالة ✓';setTimeout(function(){ok.textContent='';},2200);};
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(done).catch(function(){window.prompt('انسخ الرسالة:',t);});else window.prompt('انسخ الرسالة:',t);});
+  gen();
+})();
+
+/* ───── قسم المتابعة الإدارية ───── */
+(function(){
+  var H={subs:['حالة التسليم',['لكل مطلوب بطاقة فيها: آخر موعد، والمُسلَّم من المطلوب، وشريط التغطية، وعدد المتأخرين.','داخل البطاقة جدول بالأشخاص وحالاتهم ووقت الرفع وزر تنزيل الملف.','الفلاتر: النوع، المنسق، و«غير المسلّمين فقط».','قسم <b>«متابعة المنسقين للمتأخرين»</b>: لكل منسق عدد المتأخرين، وكم ذُكِّر بهم، وكم <b>لم يُذكَّر بهم</b>، وآخر تذكير. ارتفاع «لم يُذكَّر بهم» يعني أن المنسق يحتاج متابعة.','تسليمات المنسقين أنفسهم (التقارير التقييمية والمحاضر وخططهم كمعلمين) تتابعها الإدارة مباشرة.','تصدير CSV لكل مطلوب.']],
+   results:['نتائج الطلاب',['معدلات مجمّعة من أرقام التقييم المستمر والامتحانات التي رفعها المعلمون.','المؤشرات: عدد الطلاب، المعدل العام (موزون بعدد الطلاب)، نسبة النجاح، عدد الشعب.','جداول حسب المادة، وحسب الصف، وحسب البرنامج (إنجليزي/فرنسي)، مع تفصيل لكل شعبة.','الفلاتر: التقييم أو الامتحان، والصف، والبرنامج.','أرقام الشعب التي لم تُرفع لا تدخل في الحساب؛ فتأكد من التسليم قبل المقارنة.']],
+   forms:['الاجتماعات والمتابعة',['بطاقات: عدد الاجتماعات المُصدَّرة، ومتوسط الحضور، والتكليفات المفتوحة والمتأخرة، وطلبات الدعم.','جدول المنسقين: اجتماعاتهم وآخر اجتماع ومتوسط حضور معلميهم وتكليفاتهم المفتوحة والمتأخرة.','<b>طلبات الدعم</b>: ما طلبه المنسقون من الإدارة لمعلميهم (من آخر تقرير لكل معلم) مع زر لعرض التقرير.','<b>الممارسات الجيدة</b> القابلة للتعميم التي سجّلها المنسقون، لتجمعها الإدارة وتعمّمها.','المحاضر المُصدَّرة (عرض وPDF) والتكليفات المفتوحة بمواعيدها.']],
+   teachers:['تقييم المعلمين',['جدول بكل معلم: منسقه، عدد مشاهداته، معدلها، آخر حكم، <b>آخر تقدير للمنسق</b>، <b>حضوره لاجتماعات التنسيق</b>، تقاريره التقييمية (مثلاً 3 / 5)، وإن كان <b>يحتاج دعماً</b>.','مرتّب من الأدنى معدلاً لتنتبه للحالات أولاً، والمعلمون بلا مشاهدات في الآخر.','الفلاتر: المنسق، و«بلا مشاهدات فقط».','يجمع بين نتائج المشاهدات الصفية والتقارير التقييمية الشهرية التي يرفعها المنسقون.']]};
+  function show(k){var d=H[k];$('#hubBox').innerHTML='<h3 style="margin-top:0">'+d[0]+'</h3><ul class="ck">'+d[1].map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>';}
+  $('#hubSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;$$('#hubSeg button').forEach(function(x){x.classList.toggle('on',x===b);});show(b.dataset.v);});
+  show('subs');
+})();
+
+/* ───── قوائم البدء ───── */
+(function(){
+  var KEY='aman-guide-cl',data={};try{data=JSON.parse(lsGet(KEY)||'{}');}catch(e){data={};}
+  $$('.cl[data-cl]').forEach(function(box){
+    var role=box.dataset.cl,inputs=$$('input',box),saved=data[role]||[];
+    function paint(){var n=0;inputs.forEach(function(i){i.parentNode.classList.toggle('done',i.checked);if(i.checked)n++;});$('.pbar i',box).style.width=(n/inputs.length*100)+'%';}
+    inputs.forEach(function(i,ix){i.checked=!!saved[ix];i.addEventListener('change',function(){data[role]=inputs.map(function(x){return x.checked;});lsSet(KEY,JSON.stringify(data));paint();});});
+    paint();
+  });
+})();
+
+/* ───── الأسئلة الشائعة ───── */
+(function(){
+  var F=[['الدخول',[
+   ['ظهرت رسالة: «الرمز غير صالح أو أُلغي»','رمزك غير مطابق، أو جُدِّد لك رمز جديد فأُلغي القديم. اطلب من الإدارة رابطاً جديداً.'],
+   ['أضعت رابطي أو نسيته','اطلب من الإدارة رابطاً جديداً، ولا تستخدم رابط زميل أبداً لأنه يدخلك باسمه.'],
+   ['الصفحة لا تفتح أو تظهر «تعذّر الاتصال»','تحقق من الإنترنت ثم حدّث الصفحة (Ctrl+Shift+R). قد يتأخر الخادم بضع ثوانٍ في الاستجابة، فأعد المحاولة بعد لحظات.']]],
+  ['المشاهدة الصفية',[
+   ['اسم المعلم غير موجود في القائمة','قائمتك تعرض معلمي مادتك فقط. فعّل «عرض كل المعلمين والمواد» للزيارة المشتركة. وإذا كان المعلم من مادتك ولا يظهر، اطلب من الإدارة مراجعة إسناداته.'],
+   ['هل أستطيع تعديل مشاهدة بعد تصديرها؟','لا من الواجهة، لأنها تُقفل وتصل للمعلم. في حالة استثنائية يُصحَّح الأمر يدوياً من الإدارة (مشرف النظام) في ملف البيانات.'],
+   ['انقطع الإنترنت وأنا أقيّم','لا تقلق: تُحفظ نسخة على جهازك وتُستعاد عند العودة. اضغط «حفظ» لتأكيد وصولها للخادم.'],
+   ['أدرّس المادة نفسها في أكثر من صف، كم خطة أرفع؟','واحدة لكل صف. تظهر في قائمتك بصيغة «المادة – الصف»، وترفع كل خطة على حدة. أما التقييم المستمر والامتحان فلكل مادة بأرقام لكل شعبة.'],
+   ['ما معنى «تقييم جزئي»؟','أنك قيّمت أقل من 16 بنداً من 26، فالحكم مبني على جزء من البنود فقط.'],
+   ['لم يظهر زر «تنزيل PDF» بعد التصدير','قد يتأخر بضع ثوانٍ. إذا بقي زر «حفظ نسخة PDF» ظاهراً فاضغطه لإعادة المحاولة (يحتاج إنترنت).']]],
+  ['رفع الملفات',[
+   ['رُفض ملفي','الأسباب المعتادة: صيغة غير مسموحة، أو حجمه أكبر من 10 ميغابايت، أو ملف تالف أو اسمه لا يطابق محتواه. الصيغ المقبولة: PDF وWord وExcel وPowerPoint وCSV وصور.'],
+   ['رفعت الملف الخطأ','افتح المطلوب واضغط «تحديث الملف» وارفع الصحيح. الأخير هو المعتمد.'],
+   ['يظهر المطلوب «لم يحن موعده»','لم يُفتح بعد. سيُفتح في التاريخ المبيّن، وعندها يمكنك الرفع.'],
+   ['لا أرى أي مطلوب في صفحتي','قد لا يكون لك إسناد (مادة/شعبة) في التوزيع. تواصل مع الإدارة لمراجعة الإسنادات.']]],
+  ['التقارير',[
+   ['لا أرى تقارير مشاهداتي','إما لم تُصدَّر مشاهدة عليك بعد، أو أوقفت الإدارة الخدمة مؤقتاً. وتصلك التقارير تلقائياً بعد تصدير المنسق.'],
+   ['من يرى التقارير التقييمية التي يملؤها المنسق؟','المنسق الذي أنشأها والإدارة فقط. لا يراها المعلم المعنيّ ولا منسق آخر.'],
+   ['كيف أعود لمحضر أو تقرير سبق أن بدأته أو صدّرته؟','من «مطلوباتي كمنسق»: «متابعة المسودة» لما لم يُصدَّر، و«عرض» أو «PDF» لما صُدِّر. ولا يُعدَّل شيء بعد التصدير.'],
+   ['كيف أتابع تكليفات اجتماع سابق؟','من قائمة «التكليفات للمتابعة» أعلى «مطلوباتي كمنسق»: غيّر الحالة (أُنجز / جزئياً / لم يُنجز) في أي وقت، وستظهر لك بالمحضر التالي لتراجعها.'],
+   ['لا أستطيع تصدير المحضر','يلزم: التاريخ، وحالة الحضور لكل معلم، ونقطة بحث واحدة على الأقل. وللتقرير: التقدير العام ونقطة قوة وتطوير وتوصية، ووصف الدعم إن فعّلت «يحتاج دعماً».']]],
+  ['للإدارة',[
+   ['كيف تُحسب «تغطية المعلمين»؟','عدد المعلمين الذين لهم مشاهدة مُصدَّرة ÷ عدد المعلمين الكلي.'],
+   ['كيف تُحسب معدلات نتائج الطلاب؟','موزونة بعدد الطلاب في كل شعبة، وكذلك نسبة النجاح. فالشعبة الأكبر لها وزن أكبر.'],
+   ['أين أجد طلبات الدعم من المنسقين؟','في «المتابعة الإدارية والأكاديمية ← الاجتماعات والمتابعة ← طلبات الدعم»، مع زر لعرض التقرير الذي ورد فيه الطلب.'],
+   ['لماذا لا يظهر معلم الرياضة أو الفنون أو الروبوت في متابعة المنسقين؟','هذه المواد بلا منسق، فتتابعها الإدارة مباشرة عبر جداول التسليم.']]]];
+  var h='',n=0;
+  F.forEach(function(c){h+='<div class="cat">'+c[0]+'</div>';c[1].forEach(function(q){n++;h+='<details id="faq-'+n+'"><summary>'+esc(q[0])+'</summary><div>'+esc(q[1])+'</div></details>';});});
+  $('#faqBox').innerHTML=h;
+})();
+
+/* ───── الاختبار ───── */
+(function(){
+  var Q={
+   teacher:[
+    ['ماذا يحدث عندما ترفع ملفاً جديداً لمطلوب سبق أن سلّمته؟',['يُضاف بجانب القديم دون اعتماد','يستبدل القديم ويصير هو المعتمد','يُرفض لأن الرفع مسموح مرة واحدة','يحذف القديم نهائياً من الأرشيف'],1,'الأخير هو المعتمد، والسابق يبقى محفوظاً في الأرشيف.'],
+    ['أي مجموعة أرقام لن يقبلها النظام لشعبة؟',['أدنى 40، معدل 71، أعلى 95','أدنى 80، معدل 70، أعلى 95','عدد الطلاب 22، نجاح 82%','عدد الطلاب 30، نجاح 100%'],1,'يجب أن يكون الأدنى ≤ المعدل ≤ الأعلى.'],
+    ['متى تظهر لك تقارير مشاهداتك؟',['بعد أن تطلبها من المنسق','عند نهاية العام الدراسي','تلقائياً بعد أن يصدّر المنسق المشاهدة','فقط بعد موافقة الإدارة على كل تقرير'],2,'تصل تلقائياً بعد التصدير، مع نسخة PDF.'],
+    ['ما الحد الأقصى لحجم الملف؟',['2 ميغابايت','10 ميغابايت','50 ميغابايت','لا حد'],1,'الحد 10 ميغابايت.'],
+    ['تدرّس الفرنسي في الصفين الثاني والثالث. كم خطة سنوية تُطلب منك؟',['خطة واحدة للمادة','خطتان: واحدة لكل صف','خطة لكل شعبة','لا تُطلب خطة'],1,'الخطة السنوية لكل مادة ولكل صف.'],
+    ['ضاع رابطك الشخصي. ماذا تفعل؟',['تستخدم رابط زميل مؤقتاً','تنشئ رمزاً بنفسك','تطلب رابطاً جديداً من الإدارة','تنتظر حتى يظهر وحده'],2,'الرابط شخصي؛ تجدّده الإدارة فيُلغى القديم.']],
+   coordinator:[
+    ['ما أثر «لم يُلاحظ» على المجموع؟',['يُحسب بدرجة صفر','يُحسب بدرجة 4','يُستبعد من الحساب ولا يخفض المجموع','يمنع التصدير'],2,'البند غير المُلاحَظ لا يدخل في الحساب.'],
+    ['ماذا يحدث عند تصدير المشاهدة؟',['تبقى قابلة للتعديل','تُقفل ويُنشأ PDF ويصل للمعلم فوراً','تنتظر موافقة الإدارة','تُحذف المسودة فقط'],1,'التصدير نهائي ويصل للمعلم فوراً.'],
+    ['ماذا يفعل زر «تذكير»؟',['يرسل واتساب تلقائياً للمعلم','ينسخ رسالة جاهزة ويسجّل أنك ذكّرت','يطلب من الإدارة التذكير','يحذف المتأخر من القائمة'],1,'ينسخ الرسالة لتلصقها بنفسك، ويسجّل التذكير للإشراف.'],
+    ['من يرى التقرير التقييمي الشهري الذي تملؤه عن معلم؟',['المعلم المعني','كل المنسقين','أنت والإدارة فقط','كل المعلمين'],2,'أنت والإدارة فقط.'],
+    ['كيف تغيّر حالة تكليف من اجتماع سبق تصديره؟',['بإعادة فتح المحضر وتعديله','من قائمة «التكليفات للمتابعة» دون المساس بالمحضر','لا يمكن تغييرها','بطلب ذلك من الإدارة'],1,'المحضر المُصدَّر مقفل، وتُحدَّث حالة التكليف من قائمته في أي وقت.'],
+    ['متى يظهر «تقييم جزئي»؟',['إذا لم تكتب ملاحظات','إذا قيّمت أقل من 16 بنداً من 26','إذا اخترت «تحتاج متابعة»','إذا كان المجموع أقل من 60'],1,'أقل من 16 بنداً مُقيَّماً.']],
+   admin:[
+    ['ماذا تعني «تغطية المعلمين» في اللوحة؟',['نسبة المعلمين الذين رفعوا خططهم','نسبة المعلمين الذين لهم مشاهدة صفية مُصدَّرة','نسبة المنسقين النشطين','نسبة التقارير المفتوحة'],1,'المعلمون المشاهَدون ÷ كل المعلمين.'],
+    ['ما معنى «لم يُذكَّر بهم» في متابعة المنسقين؟',['معلمون لا يريدون التذكير','متأخرون لم يتابعهم منسقهم بتذكير','منسقون لم يدخلوا المنظومة','ملفات لم تُحمَّل'],1,'متأخرون لم يذكّرهم منسقهم بعد.'],
+    ['أين تُعدَّل مواعيد التسليم؟',['من لوحة المتابعة','من صفحة المعلم','من ورقة «المطلوبات» في الـ Sheet','لا يمكن تعديلها'],2,'ورقة «المطلوبات»: أعمدة يفتح وآخر موعد وفعّال.'],
+    ['المعدل العام لنتائج الطلاب موزون بماذا؟',['بعدد المواد','بعدد الطلاب في كل شعبة','بعدد المعلمين','بالتساوي بين الشعب'],1,'الشعبة الأكبر لها وزن أكبر.'],
+    ['أين تجد طلبات الدعم التي أرسلها المنسقون؟',['لوحة المتابعة','الاجتماعات والمتابعة ← طلبات الدعم','نتائج الطلاب','لا تظهر للإدارة'],1,'تظهر من آخر تقرير تقييمي لكل معلم.'],
+    ['هل تستطيع الإدارة تعديل مشاهدة بعد تصديرها من الواجهة؟',['نعم من لوحة المتابعة','نعم عبر زر «تعديل»','لا، وتُصحَّح الحالات الاستثنائية يدوياً من الـ Sheet','فقط خلال 24 ساعة'],2,'المشاهدة المُصدَّرة مقفلة.']]
+  };
+  var role='teacher',i=0,score=0,box=$('#quizBox');
+  function render(){
+    var qs=Q[role];
+    if(i>=qs.length){var best=+lsGet('aman-guide-best-'+role)||0;if(score>best){best=score;lsSet('aman-guide-best-'+role,String(best));}
+      box.innerHTML='<div class="qprog"><i style="width:100%"></i></div><h3 style="margin-top:0">نتيجتك: '+score+' من '+qs.length+'</h3><p style="color:var(--muted)">'+(score===qs.length?'ممتاز! أنت جاهز تماماً.':score>=3?'جيد جداً. راجع النقاط التي أخطأت فيها في دليل دورك.':'راجع دليل دورك ثم أعد المحاولة.')+'</p>'+(score===qs.length?'<p><span class="badge">أتممت دليل '+({teacher:'المعلم',coordinator:'المنسق',admin:'الإدارة'}[role])+'</span></p>':'')+'<p style="color:var(--muted);font-size:14px">أفضل نتيجة سابقة: '+best+' من '+qs.length+'</p><p><button class="btn primary" id="qAgain" type="button">إعادة الاختبار</button></p>';return;}
+    var q=qs[i];
+    box.innerHTML='<div class="qprog"><i style="width:'+(i/qs.length*100)+'%"></i></div><div style="color:var(--muted);font-size:14px;margin-bottom:4px">السؤال '+(i+1)+' من '+qs.length+'</div><h3 style="margin-top:0">'+esc(q[0])+'</h3>'+q[1].map(function(o,k){return '<button type="button" class="opt" data-k="'+k+'">'+esc(o)+'</button>';}).join('')+'<div id="qFb"></div>';
+  }
+  box.addEventListener('click',function(e){
+    if(e.target.closest('#qAgain')){i=0;score=0;render();return;}
+    if(e.target.closest('#qNext')){i++;render();return;}
+    var b=e.target.closest('.opt');if(!b||b.disabled)return;
+    var q=Q[role][i],k=+b.dataset.k,ok=k===q[2];if(ok)score++;
+    $$('.opt',box).forEach(function(x){x.disabled=true;var kk=+x.dataset.k;if(kk===q[2])x.classList.add('good');else if(x===b)x.classList.add('bad');});
+    $('#qFb').innerHTML='<div class="callout '+(ok?'ok':'no')+'"><div><b>'+(ok?'صحيح!':'ليس تماماً.')+'</b> '+esc(q[3])+'</div></div><button class="btn primary" id="qNext" type="button">'+(i===Q[role].length-1?'عرض النتيجة':'السؤال التالي')+'</button>';
+  });
+  $('#qRole').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;role=b.dataset.v;i=0;score=0;$$('#qRole button').forEach(function(x){x.classList.toggle('on',x===b);});render();});
+  render();
+})();
+
+/* ───── التشغيل ───── */
+(function(){
+  var h=parseHash(),qs=new URLSearchParams(location.search),r=(qs.get('r')||'').split(',')[0];
+  var start=h.tab||(TABS.indexOf(r)>-1?r:null)||lsGet('aman-guide-tab')||'general';
+  buildIndex();showTab(start,h.sec,true);
+  if(h.sec){setTimeout(function(){var t=document.getElementById(h.sec);if(t){t.scrollIntoView({block:'start'});flash(t);}},120);}
+  window.addEventListener('hashchange',function(){var x=parseHash();if(x.tab&&(x.tab!==cur))showTab(x.tab,x.sec);});
+})();
+})();
+</script>
+</body>
+</html>
