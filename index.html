@@ -489,6 +489,7 @@ details.req[open]>summary{background:var(--surface2)}
 .sh-kp span{display:block;font-size:11px;color:#66708A}.sh-kp b{font:900 17px 'Cairo',sans-serif;color:#0F0E9F}
 .sh-rate{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:#F5F9FC;border-radius:14px}
 .sh-rate h2{font:900 22px 'Cairo',sans-serif}
+.as-b{background:var(--surface2);border-radius:10px;padding:6px 10px;margin-top:8px;border-top:0}
 </style>
 </head>
 <body>
@@ -701,7 +702,7 @@ var INV={teacher:'المعلم غير معروف.',date:'التاريخ غير �
   file_type:'نوع الملف غير مسموح أو الملف تالف.',file_missing:'اختر الملف أولاً.',file_size:'حجم الملف أكبر من 10 ميغابايت.',not_open:'هذا المطلوب لم يُفتح بعد.',
   stats_section:'شعبة غير صحيحة في الأرقام.',stats_missing:'أدخل أرقام كل الشعب.',stats_number:'الأرقام غير صالحة.',stats_n:'عدد الطلاب يجب أن يكون عدداً صحيحاً (1 إلى 500).',
   stats_order:'يجب أن يكون: الأدنى ≤ المعدل ≤ الأعلى.',stats_pass:'نسبة النجاح بين 0 و100.',
-  use_form:'يُعبَّأ هذا المطلوب بنموذج لا بملف.',closed:'أغلقت الإدارة هذا المطلوب، فلا يمكن التسليم أو التعديل.',date_order:'آخر موعد قبل تاريخ الفتح.',date:'تاريخ غير صحيح.',pstart:'بداية الفترة يجب أن تسبق آخر موعد.',ids:'حدّد مطلوباً واحداً على الأقل.',too_many_files:'بلغت الحد الأقصى: 12 ملفاً لهذا المطلوب.',attendance:'حدّد حالة الحضور لكل المعلمين.',agenda:'أضف نقطة بحث واحدة على الأقل.',rating:'اختر التقدير العام.',strengths:'أضف نقطة قوة واحدة على الأقل.',dev:'أضف مجال تطوير واحداً على الأقل.',recs:'أضف توصية واحدة على الأقل.',support:'اكتب الدعم المطلوب من الإدارة.',requirement:'المطلوب غير صحيح.',status:'حالة غير صحيحة.'};
+  use_form:'يُعبَّأ هذا المطلوب بنموذج لا بملف.',type:'هذا الإجراء لا ينطبق على هذا المطلوب.',closed:'أغلقت الإدارة هذا المطلوب، فلا يمكن التسليم أو التعديل.',date_order:'آخر موعد قبل تاريخ الفتح.',date:'تاريخ غير صحيح.',pstart:'بداية الفترة يجب أن تسبق آخر موعد.',ids:'حدّد مطلوباً واحداً على الأقل.',too_many_files:'بلغت الحد الأقصى: 12 ملفاً لهذا المطلوب.',attendance:'حدّد حالة الحضور لكل المعلمين.',agenda:'أضف نقطة بحث واحدة على الأقل.',rating:'اختر التقدير العام.',strengths:'أضف نقطة قوة واحدة على الأقل.',dev:'أضف مجال تطوير واحداً على الأقل.',recs:'أضف توصية واحدة على الأقل.',support:'اكتب الدعم المطلوب من الإدارة.',requirement:'المطلوب غير صحيح.',status:'حالة غير صحيحة.'};
 function errText(e){if(e.code==='invalid')return INV[e.detail]||'بيانات غير صالحة.';return ERR[e.code]||ERR.server;}
 function has(role){return !!(ME&&ME.roles.indexOf(role)>-1);}
 
@@ -1208,10 +1209,10 @@ function taskRow(t){
   var sub=t.submission,key=esc(t.reqId+'|'+t.unit),files=sub?((sub.files&&sub.files.length)?sub.files:[{id:sub.id,name:sub.fileName,when:sub.when,late:sub.late}]):[];
   var s='<div class="task'+(t.status==='upcoming'?' up':'')+'"><div><div class="task-t">'+esc(t.period)+(t.target?' – عن: '+esc(t.target):(t.subject?' – '+esc(unitLbl(t)):''))+'</div>'+
    '<div class="task-s">آخر موعد: '+fmtDate(t.due)+(t.status==='upcoming'?' • يُفتح في '+fmtDate(t.opens):'')+(t.sections.length?' • الشعب: '+esc(t.sections.join('، ')):'')+'</div>';
-  files.forEach(function(f){s+='<div class="fm-rl"><span>'+esc(f.name)+' • '+fmtDT(f.when)+(f.late?' <span class="tag-late">(متأخر)</span>':'')+'</span><span><button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'">تنزيل</button>'+(t.closed?'':' <button class="btn xs" type="button" data-delf="'+esc(f.id)+'">حذف</button>')+'</span></div>';});
+  if(t.needStats)s+=assessRowsHTML(t,sub,key);else files.forEach(function(f){s+='<div class="fm-rl"><span>'+esc(f.name)+' • '+fmtDT(f.when)+(f.late?' <span class="tag-late">(متأخر)</span>':'')+'</span><span><button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'">تنزيل</button>'+(t.closed?'':' <button class="btn xs" type="button" data-delf="'+esc(f.id)+'">حذف</button>')+'</span></div>';});
   if(t.closed)s+='<div class="task-s" style="color:var(--v-low)">أغلقت الإدارة هذا المطلوب، فلا يمكن التسليم أو التعديل.</div>';
   s+='</div><span class="chipv" style="--c:'+ST_COLOR[t.status]+'">'+ST_LABEL[t.status]+'</span><div class="task-btns">';
-  if(t.status!=='upcoming'&&!t.closed)s+='<button class="btn primary sm" type="button" data-upl="'+key+'">'+(files.length?'+ إضافة ملف':'رفع')+'</button>';
+  if(t.status!=='upcoming'&&!t.closed)s+='<button class="btn primary sm" type="button" data-upl="'+key+'">'+(files.length?(t.needStats?'+ تقييم جديد':'+ إضافة ملف'):'رفع')+'</button>';
   return s+'</div></div>';
 }
 function renderTasks(){
@@ -1234,57 +1235,8 @@ function renderTasks(){
   });
   $('#view').innerHTML=h;
 }
-function showUpload(key){
-  VIEWSEQ++;
-  var p=key.split('|'),t=TASKS.filter(function(x){return x.reqId===p[0]&&x.unit===(p[1]||'');})[0];if(!t)return;
-  UP={task:t};window.scrollTo(0,0);
-  var sub=t.submission,prev={};if(sub&&sub.stats)sub.stats.forEach(function(x){prev[x.section]=x;});
-  var h='<div class="panel upl"><div class="panel-h"><div><h2>'+esc(t.label)+' – '+esc(t.period)+'</h2><div class="sub">'+(t.subject?esc(unitLbl(t))+' • ':'')+'آخر موعد: '+fmtDate(t.due)+(t.status==='overdue'?' (انتهى الموعد، سيُسجَّل متأخراً)':'')+'</div></div></div><div class="fields">'+
-   '<div class="fld"><label for="upFile">'+(sub?'إضافة ملف أو أكثر (تُضاف إلى الملفات السابقة)':'الملف (يمكن اختيار أكثر من ملف)')+'</label>'+(sub&&sub.files&&sub.files.length?'<div class="task-s" style="margin-bottom:6px">الملفات الحالية ('+sub.files.length+'): '+sub.files.map(function(f){return esc(f.name);}).join('، ')+'</div>':'')+'<div class="filebox"><input type="file" id="upFile" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.jpg,.jpeg,.png"><div style="margin-top:8px;color:var(--muted);font-size:12.5px">PDF أو Word أو Excel أو PowerPoint أو صورة، حتى 10 ميغابايت لكل ملف، وحتى 12 ملفاً للمطلوب</div></div></div>';
-  if(t.needStats){
-    h+='<div class="fld"><label>أرقام النتائج لكل شعبة'+(sub?' (محفوظة سابقاً؛ عدّلها إن تغيّرت)':'')+'</label><div class="tbl-wrap"><table class="stbl"><thead><tr><th>الشعبة</th><th>عدد الطلاب</th><th>أعلى علامة</th><th>أدنى علامة</th><th>المعدل</th><th>نسبة النجاح %</th></tr></thead><tbody>'+
-     t.sections.map(function(c){var v=prev[c]||{};return '<tr data-sec="'+esc(c)+'"><td>'+esc(c)+'</td>'+['n','max','min','avg','pass'].map(function(f){return '<td data-l="'+{n:'عدد الطلاب',max:'أعلى علامة',min:'أدنى علامة',avg:'المعدل',pass:'نسبة النجاح %'}[f]+'"><input data-sf="'+f+'" inputmode="decimal" autocomplete="off" value="'+(v[f]!=null?esc(v[f]):'')+'"></td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div></div>';
-  }
-  h+='<div class="fld"><label for="upNotes">'+esc(t.notesLabel||'ملاحظات')+' (اختياري)</label><textarea class="inp" id="upNotes" placeholder="اكتب هنا إن وجد">'+esc(sub?sub.notes:'')+'</textarea></div></div>'+
-   '<div id="upMsg" class="msg-err" hidden style="margin:0 16px 12px"></div><div class="row-btns"><button class="btn primary" type="button" id="upSubmit">رفع</button><button class="btn" type="button" id="upCancel">إلغاء</button></div></div>';
-  $('#view').innerHTML=h;
-}
 function readB64(file){return new Promise(function(res,rej){var fr=new FileReader();fr.onload=function(){var s=String(fr.result);res(s.slice(s.indexOf(',')+1));};fr.onerror=function(){rej(new Error('read'));};fr.readAsDataURL(file);});}
 function upErr(m){var el=$('#upMsg');el.hidden=false;el.textContent=m;if(el.scrollIntoView)el.scrollIntoView({block:'center'});}
-function doUpload(){
-  var t=UP.task,list=Array.prototype.slice.call($('#upFile').files),btn=$('#upSubmit');$('#upMsg').hidden=true;
-  if(!list.length){upErr('اختر ملفاً واحداً على الأقل.');return;}
-  var cur=(t.submission&&t.submission.files)?t.submission.files.length:(t.submission?1:0);
-  if(cur+list.length>12){upErr('الحد الأقصى 12 ملفاً للمطلوب الواحد (لديك '+cur+').');return;}
-  for(var i=0;i<list.length;i++){
-    var ext=(list[i].name.split('.').pop()||'').toLowerCase();
-    if(['pdf','doc','docx','xls','xlsx','ppt','pptx','csv','jpg','jpeg','png'].indexOf(ext)<0){upErr('نوع الملف غير مسموح: '+list[i].name);return;}
-    if(list[i].size>10*1024*1024){upErr('الملف «'+list[i].name+'» أكبر من 10 ميغابايت.');return;}
-  }
-  var stats=[];
-  if(t.needStats){
-    var bad='';
-    $$('#view tr[data-sec]').forEach(function(tr){
-      var o={section:tr.dataset.sec},ok=true;
-      ['n','max','min','avg','pass'].forEach(function(f){var v=$('input[data-sf="'+f+'"]',tr).value.replace(',','.').trim();if(v===''||isNaN(Number(v))){ok=false;}o[f]=Number(v);});
-      if(!ok){bad=bad||('أكمل أرقام الشعبة '+o.section+'.');return;}
-      if(Math.floor(o.n)!==o.n||o.n<1)bad=bad||('عدد طلاب الشعبة '+o.section+' يجب أن يكون عدداً صحيحاً موجباً.');
-      else if(o.min<0||o.min>o.avg||o.avg>o.max)bad=bad||('الشعبة '+o.section+': يجب أن يكون الأدنى ≤ المعدل ≤ الأعلى.');
-      else if(o.pass<0||o.pass>100)bad=bad||('الشعبة '+o.section+': نسبة النجاح بين 0 و100.');
-      stats.push(o);
-    });
-    if(bad){upErr(bad);return;}
-  }
-  btn.disabled=true;var done=0,late=false,notes=($('#upNotes').value||'');
-  list.reduce(function(pr,fi,i){return pr.then(function(){
-    btn.textContent='جارٍ رفع '+(i+1)+' من '+list.length+'… قد يستغرق دقيقة';
-    return readB64(fi).then(function(b64){return api('upload',{reqId:t.reqId,unit:t.unit,file:{name:fi.name,data:b64},stats:i===0?stats:[],notes:i===0?notes:''});}).then(function(r){done++;if(r.late)late=true;});
-  });},Promise.resolve()).then(function(){
-    toast((done>1?'تم رفع '+done+' ملفات':'تم الرفع')+(late?' (سُجّل متأخراً).':' بنجاح.'));invalidate();showTasks(TASKMODE);
-  }).catch(function(e){
-    btn.disabled=false;btn.textContent='رفع';if(done){invalidate();upErr('رُفع '+done+' من '+list.length+' قبل حدوث خطأ: '+errText(e)+' ارجع إلى القائمة وأضف الملفات المتبقية.');}else upErr(errText(e));
-  });
-}
 function saveBlob(name,mime,data,isB64){
   var blob;
   if(isB64){var bin=atob(data),arr=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);blob=new Blob([arr],{type:mime});}
@@ -1313,11 +1265,18 @@ function showSubs(mode){
   swr(act,null,function(r){SUBS=r;renderSubs();},function(e){$('#view').innerHTML=errPanel(e).replace('id="retryBtn"','id="subsRefresh"');});
 }
 function csvCell(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
-function aggStats(rows){
-  var by={};
-  rows.forEach(function(x){var k=x.subject;var o=by[k]||(by[k]={subject:k,secs:0,n:0,w:0,pw:0,max:-1e9,min:1e9});o.secs++;o.n+=x.n;o.w+=x.avg*x.n;o.pw+=x.pass*x.n;o.max=Math.max(o.max,x.max);o.min=Math.min(o.min,x.min);});
-  return Object.keys(by).map(function(k){var o=by[k];return {subject:o.subject,secs:o.secs,n:o.n,avg:o.w/o.n,pass:o.pw/o.n,max:o.max,min:o.min};}).sort(function(a,b){return a.subject.localeCompare(b.subject,'ar');});
+function aggRows(rows,keyFn,labelFn){
+  var by={},order=[];
+  rows.forEach(function(x){
+    var k=keyFn(x),o=by[k];
+    if(!o){o=by[k]={key:k,label:labelFn?labelFn(k):k,sec:{},wsum:0,w:0,pw:0,max:-1e9,min:1e9,as:{}};order.push(k);}
+    var sk=(x.reqId||'')+'|'+(x.tid||'')+'|'+x.subject+'|'+x.section;
+    o.sec[sk]=Math.max(o.sec[sk]||0,x.n);
+    o.wsum+=x.n;o.w+=x.avg*x.n;o.pw+=x.pass*x.n;o.max=Math.max(o.max,x.max);o.min=Math.min(o.min,x.min);o.as[(x.reqId||'')+'|'+(x.tid||'')+'|'+(x.batch||'')]=1;
+  });
+  return order.map(function(k){var o=by[k],ks=Object.keys(o.sec);return {key:o.key,label:o.label,subject:o.label,secs:ks.length,n:ks.reduce(function(a,b){return a+o.sec[b];},0),avg:o.w/o.wsum,pass:o.pw/o.wsum,max:o.max,min:o.min,assessments:Object.keys(o.as).length};});
 }
+function aggStats(rows){return aggRows(rows,function(x){return x.subject;}).sort(function(a,b){return a.subject.localeCompare(b.subject,'ar');});}
 function isDone(u){return u.status==='done'||u.status==='done_late';}
 function isMiss(u){return u.status==='open'||u.status==='overdue';}
 function remTxt(u){
@@ -1358,14 +1317,14 @@ function renderSubs(){
     us.sort(function(a,b){var o={overdue:0,open:1,done_late:2,done:3};return (o[a.status]-o[b.status])||a.name.localeCompare(b.name,'ar');});
     var cols=admin?7:6;
     h+=us.length?us.map(function(u){
-      var act=u.subId?(/^[ME]/.test(u.subId)?'<button class="btn xs" type="button" data-pdf="'+esc(u.subId)+'">PDF</button>':((u.files&&u.files.length>1)?u.files.map(function(f,i){return '<button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'" title="'+esc(f.name)+'">ملف '+(i+1)+'</button>';}).join(' '):'<button class="btn xs" type="button" data-dl="'+esc(u.subId)+'" data-fn="'+esc(u.fileName)+'">تنزيل</button>')):((!admin&&isMiss(u))?'<button class="btn xs primary" type="button" data-rem="'+esc(r.id+'|'+u.unit+'|'+u.pid)+'">تذكير</button>':'—');
+      var act=u.subId?(/^[ME]/.test(u.subId)?'<button class="btn xs" type="button" data-pdf="'+esc(u.subId)+'">PDF</button>':((u.batches&&u.batches.length>1)?u.batches.map(function(b){return '<div class="fm-hint">'+esc(b.title)+'</div>'+b.files.map(function(f,i){return '<button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'" title="'+esc(f.name)+'">ملف '+(i+1)+'</button>';}).join(' ');}).join(''):(u.files&&u.files.length>1)?u.files.map(function(f,i){return '<button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'" title="'+esc(f.name)+'">ملف '+(i+1)+'</button>';}).join(' '):'<button class="btn xs" type="button" data-dl="'+esc(u.subId)+'" data-fn="'+esc(u.fileName)+'">تنزيل</button>')):((!admin&&isMiss(u))?'<button class="btn xs primary" type="button" data-rem="'+esc(r.id+'|'+u.unit+'|'+u.pid)+'">تذكير</button>':'—');
       return '<tr><td><b>'+esc(u.name)+'</b></td><td>'+(u.target?'عن: '+esc(u.target):esc(unitLbl(u)||'—'))+'</td>'+(admin?'<td>'+esc(u.coord||'—')+'</td>':'')+'<td><span class="chipv" style="--c:'+ST_COLOR[u.status]+'">'+ST_LABEL[u.status]+'</span></td><td>'+(u.when?fmtDT(u.when):'—')+'</td><td>'+remTxt(u)+'</td><td>'+act+'</td></tr>';}).join(''):'<tr><td colspan="'+cols+'" style="text-align:center;color:var(--muted);padding:16px">لا توجد عناصر مطابقة.</td></tr>';
     h+='</tbody></table></div>';
     var sr=d.stats.filter(function(x){return x.reqId===r.id&&(!admin||!subF.coord||x.cid===subF.coord);});
     if(sr.length){
-      h+='<div class="grp-h" style="margin-top:6px">إحصاءات النتائج حسب المادة</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المادة</th><th>الشعب</th><th>الطلاب</th><th>المعدل</th><th>أعلى علامة</th><th>أدنى علامة</th><th>نسبة النجاح</th></tr></thead><tbody>'+
-       aggStats(sr).map(function(a){return '<tr><td><b>'+esc(a.subject)+'</b></td><td class="tn">'+a.secs+'</td><td class="tn">'+a.n+'</td><td class="tn">'+num2(a.avg)+'</td><td class="tn">'+num2(a.max)+'</td><td class="tn">'+num2(a.min)+'</td><td class="tn">'+num2(a.pass)+'%</td></tr>';}).join('')+'</tbody></table></div>'+
-       '<div class="subbar"><button class="btn" type="button" data-csv-stats="'+r.id+'">تصدير الأرقام CSV</button></div>';
+      h+='<div class="grp-h" style="margin-top:6px">إحصاءات النتائج حسب المادة</div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المادة</th><th>الشعب</th><th>التقييمات</th><th>الطلاب</th><th>المعدل</th><th>أعلى علامة</th><th>أدنى علامة</th><th>نسبة النجاح</th></tr></thead><tbody>'+
+       aggStats(sr).map(function(a){return '<tr><td><b>'+esc(a.subject)+'</b></td><td class="tn">'+a.secs+'</td><td class="tn">'+a.assessments+'</td><td class="tn">'+a.n+'</td><td class="tn">'+num2(a.avg)+'</td><td class="tn">'+num2(a.max)+'</td><td class="tn">'+num2(a.min)+'</td><td class="tn">'+num2(a.pass)+'%</td></tr>';}).join('')+'</tbody></table></div>'+
+       stDetailHTML(sr)+'<div class="subbar"><button class="btn" type="button" data-csv-stats="'+r.id+'">تصدير الأرقام CSV</button></div>';
     }
     h+='</details>';
   });
@@ -1378,7 +1337,7 @@ function exportCsv(rid,stats){
   var admin=SUBMODE==='admin',r=SUBS.requirements.filter(function(x){return x.id===rid;})[0],rows;
   var f=function(c){return !admin||!subF.coord||c===subF.coord;};
   if(stats){
-    rows=[['الاسم','المادة','الشعبة','عدد الطلاب','أعلى علامة','أدنى علامة','المعدل','نسبة النجاح']].concat(SUBS.stats.filter(function(x){return x.reqId===rid&&f(x.cid);}).map(function(x){return [x.teacher,x.subject,x.section,x.n,x.max,x.min,x.avg,x.pass];}));
+    rows=[['الاسم','المادة','التقييم','الشعبة','عدد الطلاب','أعلى علامة','أدنى علامة','المعدل','نسبة النجاح']].concat(SUBS.stats.filter(function(x){return x.reqId===rid&&f(x.cid);}).map(function(x){return [x.teacher,x.subject,x.assessment||'',x.section,x.n,x.max,x.min,x.avg,x.pass];}));
   }else{
     rows=[['الاسم','المادة / عن معلم','المنسق','الحالة','وقت الرفع','عدد التذكيرات']].concat(r.units.filter(function(u){return f(u.cid);}).map(function(u){return [u.name,u.target||unitLbl(u),u.coord,ST_LABEL[u.status],u.when,u.remind?u.remind.n:0];}));
   }
@@ -1440,14 +1399,10 @@ function hubHead(){
 function renderHub(){if(HUB==='results')renderResults();else if(HUB==='teachers')renderTeachersEval();else if(HUB==='forms')renderFormsHub();else if(HUB==='reqs')renderReqs();else renderSubs();}
 function gradeOf(c){return parseInt(c,10);}
 function streamOf(c){return String(c||'').charAt(1);}
-function aggBy(rows,keyFn,labelFn){
-  var by={};
-  rows.forEach(function(x){var k=keyFn(x),o=by[k]||(by[k]={key:k,label:labelFn?labelFn(k):k,secs:0,n:0,w:0,pw:0,max:-1e9,min:1e9});o.secs++;o.n+=x.n;o.w+=x.avg*x.n;o.pw+=x.pass*x.n;o.max=Math.max(o.max,x.max);o.min=Math.min(o.min,x.min);});
-  return Object.keys(by).map(function(k){var o=by[k];return {key:o.key,label:o.label,secs:o.secs,n:o.n,avg:o.w/o.n,pass:o.pw/o.n,max:o.max,min:o.min};});
-}
+function aggBy(rows,keyFn,labelFn){return aggRows(rows,keyFn,labelFn);}
 function aggTable(rows,firstHead){
-  return '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>'+firstHead+'</th><th>الشعب</th><th>الطلاب</th><th>المعدل</th><th>أعلى علامة</th><th>أدنى علامة</th><th>نسبة النجاح</th></tr></thead><tbody>'+
-   rows.map(function(a){return '<tr><td><b>'+esc(a.label)+'</b></td><td class="tn">'+a.secs+'</td><td class="tn">'+a.n+'</td><td class="tn">'+num2(a.avg)+'</td><td class="tn">'+num2(a.max)+'</td><td class="tn">'+num2(a.min)+'</td><td class="tn">'+num2(a.pass)+'%</td></tr>';}).join('')+'</tbody></table></div>';
+  return '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>'+firstHead+'</th><th>الشعب</th><th>التقييمات</th><th>الطلاب</th><th>المعدل</th><th>أعلى علامة</th><th>أدنى علامة</th><th>نسبة النجاح</th></tr></thead><tbody>'+
+   rows.map(function(a){return '<tr><td><b>'+esc(a.label)+'</b></td><td class="tn">'+a.secs+'</td><td class="tn">'+a.assessments+'</td><td class="tn">'+a.n+'</td><td class="tn">'+num2(a.avg)+'</td><td class="tn">'+num2(a.max)+'</td><td class="tn">'+num2(a.min)+'</td><td class="tn">'+num2(a.pass)+'%</td></tr>';}).join('')+'</tbody></table></div>';
 }
 function renderResults(){
   var d=SUBS,reqs=d.requirements.filter(function(r){return (r.type==='exam'||r.type==='ca')&&r.state!=='upcoming';});
@@ -1463,8 +1418,8 @@ function renderResults(){
   var byStream=aggBy(rows,function(x){return streamOf(x.section);},function(k){return k==='E'?'الإنجليزي (E)':k==='F'?'الفرنسي (F)':k;});
   h+='<div class="dgrid"><div class="panel sect"><div class="panel-h"><h2>حسب المادة</h2></div>'+aggTable(bySubj,'المادة')+'</div><div class="panel sect"><div class="panel-h"><h2>حسب الصف</h2></div>'+aggTable(byGrade,'الصف')+'<div class="panel-h" style="border-top:1px solid var(--border)"><h2>حسب البرنامج</h2></div>'+aggTable(byStream,'البرنامج')+'</div></div>';
   var det=rows.slice().sort(function(a,b){return a.subject.localeCompare(b.subject,'ar')||a.section.localeCompare(b.section);});
-  h+='<div class="panel sect"><details class="grp"><summary><span>تفصيل الشعب</span><span class="badge">'+det.length+'</span></summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المادة</th><th>الشعبة</th><th>المعلم(ة)</th><th>الطلاب</th><th>المعدل</th><th>أعلى</th><th>أدنى</th><th>النجاح</th></tr></thead><tbody>'+
-   det.map(function(x){return '<tr><td>'+esc(x.subject)+'</td><td class="tn">'+esc(x.section)+'</td><td>'+esc(x.teacher)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td></tr>';}).join('')+'</tbody></table></div></details></div>';
+  h+='<div class="panel sect"><details class="grp"><summary><span>تفصيل الشعب</span><span class="badge">'+det.length+'</span></summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المادة</th><th>التقييم</th><th>الشعبة</th><th>المعلم(ة)</th><th>الطلاب</th><th>المعدل</th><th>أعلى</th><th>أدنى</th><th>النجاح</th></tr></thead><tbody>'+
+   det.map(function(x){return '<tr><td>'+esc(x.subject)+'</td><td>'+esc(x.assessment||'')+'</td><td class="tn">'+esc(x.section)+'</td><td>'+esc(x.teacher)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td></tr>';}).join('')+'</tbody></table></div></details></div>';
   $('#view').innerHTML=h;
 }
 function renderTeachersEval(){
@@ -1980,11 +1935,222 @@ function rqClick(e){
 document.addEventListener('change',function(e){if(e.target&&e.target.id==='rqType'&&RQ_EDIT){var b=$('#rqPsBox');if(b)b.hidden=e.target.value!=='report';}});
 
 function rqLbl(st){return {open:'مفتوح',pastdue:'انتهى الموعد (التسليم المتأخر مفتوح)',closed:'مُغلق من الإدارة',upcoming:'قادم'}[st]||st;}
+/* ───────── التقييمات المتعددة واستيراد العلامات من Excel ───────── */
+var MK={wb:null,file:null},xlsxP=null,asxArm={};
+function ensureXlsx(){
+  if(window.XLSX)return Promise.resolve();
+  if(!xlsxP)xlsxP=loadScript('vendor/xlsx.full.min.js').catch(function(e){xlsxP=null;throw e;});
+  return xlsxP;
+}
+function mkNorm(v){return String(v==null?'':v).trim().toUpperCase().replace(/\s+/g,'');}
+function mkNum(v){if(typeof v==='number')return isFinite(v)?v:null;var s=String(v==null?'':v).trim().replace(',','.');if(s===''||isNaN(Number(s)))return null;return Number(s);}
+function mkRound(v){return Math.round(v*100)/100;}
+function mkHeader(rows){
+  var hm=/علامة|العلامة|درجة|الدرجة|mark|score|grade|total|المجموع/i,hs=/شعبة|الشعبة|section|class/i,skip=/عظمى|النجاح|الكاملة|max|pass|full/i;
+  for(var i=0;i<Math.min(rows.length,25);i++){
+    var r=rows[i],mc=-1,sc=-1;
+    for(var j=0;j<r.length;j++){var c=String(r[j]==null?'':r[j]).trim();if(!c)continue;if(sc<0&&hs.test(c))sc=j;if(mc<0&&hm.test(c)&&!skip.test(c))mc=j;}
+    if(mc>-1)return {row:i,secCol:sc,markCol:mc};
+  }
+  return null;
+}
+function mkSetting(rows,re){
+  for(var i=0;i<rows.length;i++)for(var j=0;j<rows[i].length;j++){
+    if(re.test(String(rows[i][j]==null?'':rows[i][j]))){for(var k=j+1;k<=j+2&&k<rows[i].length;k++){var n=mkNum(rows[i][k]);if(n!=null)return n;}}
+  }
+  return null;
+}
+function parseMarks(wb,sections,opts){
+  var secMap={};sections.forEach(function(c){secMap[mkNorm(c)]=c;});
+  var marks={},skipped=0,unknown={},srcMax=null,srcPass=null,used=0;
+  wb.SheetNames.forEach(function(nm){
+    var rows=XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,raw:true,defval:''}),h=mkHeader(rows);if(!h)return;
+    used++;
+    var sm=mkSetting(rows,/العلامة العظمى|الدرجة العظمى|العلامة الكاملة|full mark|max mark|maximum/i),sp=mkSetting(rows,/علامة النجاح|درجة النجاح|pass mark|passing/i);
+    if(srcMax==null&&sm!=null)srcMax=sm;if(srcPass==null&&sp!=null)srcPass=sp;
+    var sheetSec=secMap[mkNorm(nm)]||(sections.length===1?sections[0]:null);
+    for(var i=h.row+1;i<rows.length;i++){
+      var r=rows[i],m=mkNum(r[h.markCol]);
+      if(m==null){if(r.some(function(c){return String(c==null?'':c).trim()!=='';})&&String(r[h.markCol]==null?'':r[h.markCol]).trim()!=='')skipped++;continue;}
+      var sec=null;
+      if(h.secCol>-1){var sv=mkNorm(r[h.secCol]);if(sv===''){sec=sheetSec;}else if(secMap[sv]){sec=secMap[sv];}else{unknown[sv]=(unknown[sv]||0)+1;continue;}}
+      else sec=sheetSec;
+      if(!sec){skipped++;continue;}
+      (marks[sec]=marks[sec]||[]).push(m);
+    }
+  });
+  if(!used)return {error:'لم أجد عمود «العلامة» في الملف. استخدم النموذج الجاهز أو سمِّ العمود «العلامة».'};
+  var maxM=opts.max!=null?opts.max:(srcMax!=null?srcMax:100),passM=opts.pass!=null?opts.pass:(srcPass!=null?srcPass:maxM*0.5);
+  if(!(maxM>0))return {error:'العلامة العظمى يجب أن تكون أكبر من صفر.'};
+  var f=100/maxM,stats=[],missing=[],over=0;
+  sections.forEach(function(c){
+    var a=marks[c];if(!a||!a.length){missing.push(c);return;}
+    var sum=0,mx=-1e9,mn=1e9,pc=0;a.forEach(function(v){if(v>maxM)over++;sum+=v;mx=Math.max(mx,v);mn=Math.min(mn,v);if(v>=passM)pc++;});
+    stats.push({section:c,n:a.length,max:mkRound(Math.min(mx*f,100)),min:mkRound(Math.max(mn*f,0)),avg:mkRound(Math.min(sum/a.length*f,100)),pass:mkRound(pc/a.length*100)});
+  });
+  return {stats:stats,missing:missing,unknown:Object.keys(unknown),skipped:skipped,over:over,maxM:maxM,passM:passM,total:Object.keys(marks).reduce(function(a,k){return a+marks[k].length;},0)};
+}
+function mkInfo(html,bad){var el=$('#mkInfo');if(!el)return;el.hidden=!html;el.className=bad?'msg-err':'fm-banner';el.style.margin='8px 0';el.innerHTML=html||'';}
+function mkReadFile(file){
+  return new Promise(function(res,rej){
+    var fr=new FileReader(),csv=/\.csv$/i.test(file.name);
+    fr.onload=function(){res(csv?{type:'string',data:String(fr.result).replace(/^\uFEFF/,'')}:{type:'array',data:fr.result});};fr.onerror=function(){rej(new Error('read'));};
+    if(csv)fr.readAsText(file,'UTF-8');else fr.readAsArrayBuffer(file);
+  });
+}
+function mkApply(){
+  if(!MK.wb||!UP||!UP.task)return;
+  var mx=mkNum($('#mkMax').value),ps=mkNum($('#mkPass').value),res;
+  try{res=parseMarks(MK.wb,UP.task.sections,{max:mx,pass:ps});}catch(e){mkInfo('تعذّرت قراءة الملف: '+esc(e.message||e),true);return;}
+  if(res.error){mkInfo(esc(res.error),true);return;}
+  res.stats.forEach(function(x){var tr=$('tr[data-sec="'+x.section+'"]');if(!tr)return;['n','max','min','avg','pass'].forEach(function(f){var i=$('input[data-sf="'+f+'"]',tr);if(i)i.value=x[f];});});
+  var h='قُرئت <b>'+res.total+'</b> علامة لـ <b>'+res.stats.length+'</b> شعبة (العلامة العظمى '+res.maxM+'، علامة النجاح '+res.passM+'). حُوّلت الأرقام إلى <b>100</b> وملأت الجدول أدناه، وتستطيع تعديلها.';
+  var warn=[];
+  if(res.missing.length)warn.push('لا علامات في الملف للشعب: '+esc(res.missing.join('، '))+' (عبّئها يدوياً).');
+  if(res.unknown.length)warn.push('شعب في الملف ليست من شعبك وتُجوهلت: '+esc(res.unknown.join('، '))+'.');
+  if(res.skipped)warn.push('تُجوهل '+res.skipped+' سطر بلا علامة صالحة أو بلا شعبة.');
+  if(res.over)warn.push('<b>'+res.over+'</b> علامة أكبر من العلامة العظمى ('+res.maxM+'): راجع الملف أو عدّل العلامة العظمى.');
+  mkInfo(h+(warn.length?'<ul style="margin:6px 18px 0;font-weight:500">'+warn.map(function(w){return '<li>'+w+'</li>';}).join('')+'</ul>':''),false);
+  if(warn.length&&(res.over||res.missing.length)){var el=$('#mkInfo');el.className='msg-err';}
+}
+function mkOnFile(file){
+  MK.file=file;if(!file){MK.wb=null;mkInfo('');return;}
+  if(file.size>10*1024*1024){mkInfo('الملف أكبر من 10 ميغابايت.',true);return;}
+  mkInfo('جارٍ قراءة العلامات…',false);
+  ensureXlsx().then(function(){return mkReadFile(file);}).then(function(r){MK.wb=XLSX.read(r.data,{type:r.type});mkApply();})
+  .catch(function(e){mkInfo(e&&e.code==='load'?'تعذّر تحميل مكوّن قراءة Excel. تحقق من الاتصال وأعد المحاولة.':'تعذّرت قراءة الملف: تأكد أنه Excel أو CSV سليم.',true);});
+}
+function mkTemplate(){
+  var t=UP&&UP.task;if(!t)return;
+  ensureXlsx().then(function(){
+    var rows=[['الشعبة','اسم الطالب','العلامة','','العلامة العظمى',100],['','','','','علامة النجاح',50]];
+    t.sections.forEach(function(c){for(var i=0;i<4;i++)rows.push([c,'','']);});
+    var ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:12},{wch:28},{wch:12},{wch:3},{wch:18},{wch:10}];
+    var ws2=XLSX.utils.aoa_to_sheet([['كيف تعبّئ الملف'],['1) اكتب رمز الشعبة (مثل '+(t.sections[0]||'1EA')+') في عمود «الشعبة» لكل طالب، واسم الطالب اختياري.'],['2) اكتب علامة كل طالب في عمود «العلامة». اترك الخانة فارغة للغائب.'],['3) عدّل «العلامة العظمى» و«علامة النجاح» إن اختلفتا (الأصل 100 و50).'],['4) يمكنك أيضاً تسمية كل ورقة برمز الشعبة وإبقاء عمود «الشعبة» فارغاً.'],['5) ارفع الملف في البوابة: تُحسب الأرقام (العدد، الأعلى، الأدنى، المعدل، نسبة النجاح) وتُحوَّل إلى 100.']]);
+    ws2['!cols']=[{wch:100}];
+    var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'العلامات');XLSX.utils.book_append_sheet(wb,ws2,'تعليمات');
+    var b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});
+    saveBlob('نموذج_العلامات.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',b64,true);
+  }).catch(function(){toast('تعذّر تحميل مكوّن Excel.');});
+}
+function mkAvg(stats){var n=0,w=0;(stats||[]).forEach(function(x){n+=x.n;w+=x.avg*x.n;});return {n:n,avg:n?Math.round(w/n*10)/10:null};}
+function readStatsTable(){
+  var stats=[],bad='';
+  $$('#view tr[data-sec]').forEach(function(tr){
+    var o={section:tr.dataset.sec},ok=true;
+    ['n','max','min','avg','pass'].forEach(function(f){var v=$('input[data-sf="'+f+'"]',tr).value.replace(',','.').trim();if(v===''||isNaN(Number(v))){ok=false;}o[f]=Number(v);});
+    if(!ok){bad=bad||('أكمل أرقام الشعبة '+o.section+'.');return;}
+    if(Math.floor(o.n)!==o.n||o.n<1)bad=bad||('عدد طلاب الشعبة '+o.section+' يجب أن يكون عدداً صحيحاً موجباً.');
+    else if(o.min<0||o.min>o.avg||o.avg>o.max)bad=bad||('الشعبة '+o.section+': يجب أن يكون الأدنى ≤ المعدل ≤ الأعلى.');
+    else if(o.max>100||o.pass<0||o.pass>100)bad=bad||('الشعبة '+o.section+': العلامات من 100، ونسبة النجاح بين 0 و100.');
+    stats.push(o);
+  });
+  return {stats:stats,error:bad};
+}
+function showUpload(key,mode,batch){
+  VIEWSEQ++;
+  var p=key.split('|'),t=TASKS.filter(function(x){return x.reqId===p[0]&&x.unit===(p[1]||'');})[0];if(!t)return;
+  mode=t.needStats?(mode||'new'):'files';
+  var sub=t.submission,b=null;
+  if(t.needStats&&batch)b=((sub&&sub.batches)||[]).filter(function(x){return x.id===batch;})[0];
+  if(t.needStats&&mode!=='new'&&!b){toast('التقييم غير موجود.');return;}
+  UP={task:t,mode:mode,batch:batch||'',b:b};MK={wb:null,file:null};window.scrollTo(0,0);
+  var prev={};if(b&&b.stats)b.stats.forEach(function(x){prev[x.section]=x;});
+  var head=mode==='add'?'إضافة ملف إلى: '+b.title:mode==='edit'?'تعديل علامات: '+b.title:(t.needStats?'تقييم جديد':esc(t.label));
+  var h='<div class="panel upl"><div class="panel-h"><div><h2>'+esc(t.label)+' – '+esc(t.period)+'</h2><div class="sub">'+head+' • '+(t.subject?esc(unitLbl(t))+' • ':'')+'آخر موعد: '+fmtDate(t.due)+(t.status==='overdue'?' (انتهى الموعد، سيُسجَّل متأخراً)':'')+'</div></div></div><div class="fields">';
+  if(t.needStats&&mode!=='add'){
+    h+='<div class="fld"><label for="upTitle">عنوان التقييم (اختياري)</label><input class="inp" id="upTitle" maxlength="80" placeholder="مثال: اختبار الوحدة الثانية" value="'+esc(b?b.title:'')+'"></div>';
+    h+='<div class="fld"><label>قراءة العلامات من ملف Excel</label><div class="filebox"><input type="file" id="mkFile" accept=".xlsx,.xls,.csv"><div style="margin-top:8px;color:var(--muted);font-size:12.5px">ملف فيه عمود «الشعبة» وعمود «العلامة» (أو ورقة لكل شعبة). يحسب النظام العدد والأعلى والأدنى والمعدل ونسبة النجاح ويحوّلها إلى 100. <button class="btn xs" type="button" data-asx="tpl">تحميل نموذج Excel جاهز</button></div>'+
+     '<div class="row" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><div><label class="fm-hint" for="mkMax">العلامة العظمى</label><input class="inp" id="mkMax" inputmode="decimal" placeholder="100" style="max-width:130px"></div><div><label class="fm-hint" for="mkPass">علامة النجاح</label><input class="inp" id="mkPass" inputmode="decimal" placeholder="50" style="max-width:130px"></div></div>'+
+     (mode==='new'?'<label class="chk" style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="mkAttach" checked> إرفاق ملف Excel نفسه مع التقييم</label>':'')+'<div id="mkInfo" hidden></div></div></div>';
+    h+='<div class="fld"><label>أرقام النتائج لكل شعبة (من 100)'+(b?' — محفوظة سابقاً؛ عدّلها إن لزم':' — تُملأ تلقائياً من Excel أو تدخلها يدوياً')+'</label><div class="tbl-wrap"><table class="stbl"><thead><tr><th>الشعبة</th><th>عدد الطلاب</th><th>أعلى علامة</th><th>أدنى علامة</th><th>المعدل</th><th>نسبة النجاح %</th></tr></thead><tbody>'+
+     t.sections.map(function(c){var v=prev[c]||{};return '<tr data-sec="'+esc(c)+'"><td>'+esc(c)+'</td>'+['n','max','min','avg','pass'].map(function(f){return '<td data-l="'+{n:'عدد الطلاب',max:'أعلى علامة',min:'أدنى علامة',avg:'المعدل',pass:'نسبة النجاح %'}[f]+'"><input data-sf="'+f+'" inputmode="decimal" autocomplete="off" value="'+(v[f]!=null?esc(v[f]):'')+'"></td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div></div>';
+  }
+  var flab=mode==='add'?'الملفات الجديدة (يمكن اختيار أكثر من ملف)':mode==='edit'?'إضافة ملفات إلى هذا التقييم (اختياري)':(t.needStats?'ملفات إضافية للتقييم (اختياري إن أرفقت ملف Excel أعلاه)':(sub?'إضافة ملف أو أكثر (تُضاف إلى الملفات السابقة)':'الملف (يمكن اختيار أكثر من ملف)'));
+  h+='<div class="fld"><label for="upFile">'+flab+'</label>'+(sub&&sub.files&&sub.files.length&&!t.needStats?'<div class="task-s" style="margin-bottom:6px">الملفات الحالية ('+sub.files.length+'): '+sub.files.map(function(f){return esc(f.name);}).join('، ')+'</div>':'')+'<div class="filebox"><input type="file" id="upFile" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.jpg,.jpeg,.png"><div style="margin-top:8px;color:var(--muted);font-size:12.5px">PDF أو Word أو Excel أو PowerPoint أو صورة، حتى 10 ميغابايت لكل ملف، وحتى 12 ملفاً للمطلوب</div></div></div>';
+  if(mode!=='add')h+='<div class="fld"><label for="upNotes">'+esc(t.notesLabel||'ملاحظات')+' (اختياري)</label><textarea class="inp" id="upNotes" placeholder="اكتب هنا إن وجد">'+esc(b?b.notes:(sub&&!t.needStats?sub.notes:''))+'</textarea></div>';
+  h+='</div><div id="upMsg" class="msg-err" hidden style="margin:0 16px 12px"></div><div class="row-btns"><button class="btn primary" type="button" id="upSubmit">'+(mode==='edit'?'حفظ':'رفع')+'</button><button class="btn" type="button" id="upCancel">إلغاء</button></div></div>';
+  $('#view').innerHTML=h;
+}
+function doUpload(){
+  var t=UP.task,mode=UP.mode,btn=$('#upSubmit');$('#upMsg').hidden=true;
+  var files=Array.prototype.slice.call($('#upFile').files),mk=$('#mkFile'),att=$('#mkAttach');
+  if(t.needStats&&mode==='new'&&mk&&mk.files[0]&&att&&att.checked)files.unshift(mk.files[0]);
+  if(mode!=='edit'&&!files.length){upErr(t.needStats&&mode==='new'?'أرفق ملفاً واحداً على الأقل (يمكن إرفاق ملف Excel نفسه).':'اختر ملفاً واحداً على الأقل.');return;}
+  var cur=(t.submission&&t.submission.files)?t.submission.files.length:0;
+  if(cur+files.length>12){upErr('الحد الأقصى 12 ملفاً للمطلوب الواحد (لديك '+cur+').');return;}
+  for(var i=0;i<files.length;i++){
+    var ext=(files[i].name.split('.').pop()||'').toLowerCase();
+    if(['pdf','doc','docx','xls','xlsx','ppt','pptx','csv','jpg','jpeg','png'].indexOf(ext)<0){upErr('نوع الملف غير مسموح: '+files[i].name);return;}
+    if(files[i].size>10*1024*1024){upErr('الملف «'+files[i].name+'» أكبر من 10 ميغابايت.');return;}
+  }
+  var stats=[],title='',notes=$('#upNotes')?($('#upNotes').value||''):'';
+  if(t.needStats&&mode!=='add'){var r=readStatsTable();if(r.error){upErr(r.error);return;}stats=r.stats;title=($('#upTitle').value||'').trim();}
+  btn.disabled=true;var done=0,late=false,batch=UP.batch;
+  function seq(list,first){
+    return list.reduce(function(pr,fi,i){return pr.then(function(){
+      btn.textContent='جارٍ رفع '+(i+1)+' من '+list.length+'… قد يستغرق دقيقة';
+      return readB64(fi).then(function(b64){
+        var o={reqId:t.reqId,unit:t.unit,file:{name:fi.name,data:b64},stats:[],notes:''};
+        if(batch)o.batch=batch;
+        if(first&&i===0){o.stats=stats;o.title=title;o.notes=notes;}
+        return api('upload',o);
+      }).then(function(r){done++;if(r.late)late=true;if(t.needStats&&r.batch&&r.batch!=='L')batch=r.batch;else if(t.needStats&&r.batch==='L')batch='L';});
+    });},Promise.resolve());
+  }
+  var chain;
+  if(mode==='edit'){chain=api('updateStats',{reqId:t.reqId,unit:t.unit,batch:batch,stats:stats,title:title,notes:notes}).then(function(){return seq(files,false);});}
+  else if(mode==='add'){chain=seq(files,false);}
+  else{chain=seq(files,true);}
+  chain.then(function(){
+    toast(mode==='edit'?'تم حفظ التعديل.':(done>1?'تم رفع '+done+' ملفات':'تم الرفع')+(late?' (سُجّل متأخراً).':' بنجاح.'));invalidate();showTasks(TASKMODE);
+  }).catch(function(e){
+    btn.disabled=false;btn.textContent=mode==='edit'?'حفظ':'رفع';
+    if(done){invalidate();upErr('رُفع '+done+' من '+files.length+' قبل حدوث خطأ: '+errText(e)+' ارجع إلى القائمة وأضف الملفات المتبقية.');}else upErr(errText(e));
+  });
+}
+function asxClick(e){
+  var el=e.target.closest('[data-asx]');if(!el)return false;
+  var a=el.dataset.asx.split('|'),k=a[0],batch=a[1],key=a[2]+'|'+(a[3]||'');
+  if(k==='tpl'){mkTemplate();return true;}
+  if(k==='add'){showUpload(key,'add',batch);return true;}
+  if(k==='edit'){showUpload(key,'edit',batch);return true;}
+  if(k==='del'){
+    var id=a[2]+'|'+(a[3]||'')+'|'+batch;
+    if(!asxArm[id]){var old=el.textContent;el.textContent='تأكيد حذف التقييم';asxArm[id]=setTimeout(function(){delete asxArm[id];el.textContent=old;},4000);return true;}
+    clearTimeout(asxArm[id]);delete asxArm[id];el.disabled=true;
+    api('deleteAssessment',{reqId:a[2],unit:a[3]||'',batch:batch}).then(function(){toast('تم حذف التقييم وملفاته وعلاماته.');invalidate();showTasks(TASKMODE);}).catch(function(er){el.disabled=false;toast(errText(er));});
+    return true;
+  }
+  return true;
+}
+document.addEventListener('change',function(e){
+  var t=e.target;if(!t)return;
+  if(t.id==='mkFile'){mkOnFile(t.files[0]||null);return;}
+  if((t.id==='mkMax'||t.id==='mkPass')&&MK.wb)mkApply();
+});
+function assessRowsHTML(t,sub,key){
+  var s='',bs=(sub&&sub.batches)||[],k=esc(t.reqId+'|'+t.unit),pair=esc(t.reqId)+'|'+esc(t.unit);
+  bs.forEach(function(b){
+    var m=mkAvg(b.stats);
+    s+='<div class="fm-rl as-b"><span><b>'+esc(b.title)+'</b>'+(m.n?' • '+m.n+' طالب • المعدل '+m.avg:'')+' • '+b.files.length+' ملف'+'</span><span>'+
+      (t.closed?'':'<button class="btn xs" type="button" data-asx="add|'+esc(b.id)+'|'+pair+'">+ ملف</button> <button class="btn xs" type="button" data-asx="edit|'+esc(b.id)+'|'+pair+'">العلامات</button> <button class="btn xs" type="button" data-asx="del|'+esc(b.id)+'|'+pair+'">حذف التقييم</button>')+'</span></div>';
+    b.files.forEach(function(f){s+='<div class="fm-rl"><span>&nbsp;&nbsp;'+esc(f.name)+' • '+fmtDT(f.when)+(f.late?' <span class="tag-late">(متأخر)</span>':'')+'</span><span><button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'">تنزيل</button>'+(t.closed?'':' <button class="btn xs" type="button" data-delf="'+esc(f.id)+'">حذف</button>')+'</span></div>';});
+  });
+  return s;
+}
+
+function stDetailHTML(sr){
+  var rows=sr.slice().sort(function(a,b){return a.subject.localeCompare(b.subject,'ar')||a.teacher.localeCompare(b.teacher,'ar')||String(a.assessment).localeCompare(String(b.assessment),'ar')||a.section.localeCompare(b.section);});
+  return '<details class="grp"><summary><span>تفصيل التقييمات</span><span class="badge">'+rows.length+'</span></summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المعلم(ة)</th><th>المادة</th><th>التقييم</th><th>الشعبة</th><th>الطلاب</th><th>المعدل</th><th>أعلى</th><th>أدنى</th><th>النجاح</th></tr></thead><tbody>'+
+   rows.map(function(x){return '<tr><td>'+esc(x.teacher)+'</td><td>'+esc(x.subject)+'</td><td>'+esc(x.assessment||'')+'</td><td class="tn">'+esc(x.section)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td></tr>';}).join('')+'</tbody></table></div></details>';
+}
 /* ───────── الأحداث ───────── */
 document.addEventListener('click',function(e){
   var t=e.target;
   if(fmClick(e))return;
   if(rqClick(e))return;
+  if(asxClick(e))return;
   var pt=t.closest('[data-pt]');if(pt){go(pt.dataset.pt);return;}
   if(t.closest('#logoutBtn')){logout();return;}
   if(t.closest('#retryBtn')){CODE?loadMe():boot();return;}
