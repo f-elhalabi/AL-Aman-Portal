@@ -490,6 +490,7 @@ details.req[open]>summary{background:var(--surface2)}
 .sh-rate{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:#F5F9FC;border-radius:14px}
 .sh-rate h2{font:900 22px 'Cairo',sans-serif}
 .as-b{background:var(--surface2);border-radius:10px;padding:6px 10px;margin-top:8px;border-top:0}
+.avgbar{height:6px;border-radius:4px;background:var(--border);margin-top:4px;min-width:60px}.avgbar i{display:block;height:100%;border-radius:4px;background:var(--v-g)}
 </style>
 </head>
 <body>
@@ -1380,7 +1381,7 @@ function remindAll(rid,btn){
 
 
 /* ───────── المتابعة الإدارية والأكاديمية (الإدارة) ───────── */
-var HUB='subs',resF={req:'',grade:'',stream:''},teF={coord:'',noobs:false};
+var HUB='subs',resF={req:'',grade:'',stream:'',subj:''},teF={coord:'',noobs:false};
 var HUB_TABS=[['subs','حالة التسليم'],['results','نتائج الطلاب'],['teachers','تقييم المعلمين'],['forms','الاجتماعات والمتابعة'],['reqs','مواعيد التسليم']];
 function showHub(sec){
   if(sec)HUB=sec;SUBMODE='admin';
@@ -1402,12 +1403,12 @@ function streamOf(c){return String(c||'').charAt(1);}
 function aggBy(rows,keyFn,labelFn){return aggRows(rows,keyFn,labelFn);}
 function aggTable(rows,firstHead){
   return '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>'+firstHead+'</th><th>الشعب</th><th>التقييمات</th><th>الطلاب</th><th>المعدل</th><th>أعلى علامة</th><th>أدنى علامة</th><th>نسبة النجاح</th></tr></thead><tbody>'+
-   rows.map(function(a){return '<tr><td><b>'+esc(a.label)+'</b></td><td class="tn">'+a.secs+'</td><td class="tn">'+a.assessments+'</td><td class="tn">'+a.n+'</td><td class="tn">'+num2(a.avg)+'</td><td class="tn">'+num2(a.max)+'</td><td class="tn">'+num2(a.min)+'</td><td class="tn">'+num2(a.pass)+'%</td></tr>';}).join('')+'</tbody></table></div>';
+   rows.map(function(a){return '<tr><td><b>'+esc(a.label)+'</b></td><td class="tn">'+a.secs+'</td><td class="tn">'+a.assessments+'</td><td class="tn">'+a.n+'</td><td class="tn">'+num2(a.avg)+'<div class="avgbar"><i style="width:'+Math.max(0,Math.min(100,a.avg))+'%"></i></div></td><td class="tn">'+num2(a.max)+'</td><td class="tn">'+num2(a.min)+'</td><td class="tn">'+num2(a.pass)+'%</td></tr>';}).join('')+'</tbody></table></div>';
 }
 function renderResults(){
   var d=SUBS,reqs=d.requirements.filter(function(r){return (r.type==='exam'||r.type==='ca')&&r.state!=='upcoming';});
-  var rows=d.stats.filter(function(x){return (!resF.req||x.reqId===resF.req)&&(!resF.grade||gradeOf(x.section)===+resF.grade)&&(!resF.stream||streamOf(x.section)===resF.stream);});
-  var h=hubHead()+'<div class="panel sect" style="margin-bottom:12px"><div class="filters"><select id="rfReq"><option value="">كل التقييمات والامتحانات</option>'+reqs.map(function(r){return '<option value="'+r.id+'"'+(resF.req===r.id?' selected':'')+'>'+esc(r.label+' – '+r.period)+'</option>';}).join('')+'</select>'+
+  var rows=d.stats.filter(function(x){return (!resF.subj||x.subject===resF.subj)&&(!resF.req||x.reqId===resF.req)&&(!resF.grade||gradeOf(x.section)===+resF.grade)&&(!resF.stream||streamOf(x.section)===resF.stream);});
+  var h=hubHead()+'<div class="panel sect" style="margin-bottom:12px"><div class="filters"><select id="rfSubj">'+rfSubjOptions(d)+'</select><select id="rfReq"><option value="">كل التقييمات والامتحانات</option>'+reqs.map(function(r){return '<option value="'+r.id+'"'+(resF.req===r.id?' selected':'')+'>'+esc(r.label+' – '+r.period)+'</option>';}).join('')+'</select>'+
    '<select id="rfGrade"><option value="">كل الصفوف</option>'+[1,2,3,4,5,6,7,8,9].map(function(g){return '<option value="'+g+'"'+(+resF.grade===g?' selected':'')+'>الصف '+g+'</option>';}).join('')+'</select>'+
    '<select id="rfStream"><option value="">كل البرامج</option><option value="E"'+(resF.stream==='E'?' selected':'')+'>الإنجليزي (E)</option><option value="F"'+(resF.stream==='F'?' selected':'')+'>الفرنسي (F)</option></select></div></div>';
   if(!rows.length){$('#view').innerHTML=h+'<div class="panel"><div class="empty"><b>لا توجد أرقام نتائج مطابقة</b>تظهر هنا معدلات الطلاب عندما يرفع المعلمون نتائج التقييم المستمر والامتحانات.</div></div>';return;}
@@ -1416,7 +1417,7 @@ function renderResults(){
   var bySubj=aggBy(rows,function(x){return x.subject;}).sort(function(a,b){return a.label.localeCompare(b.label,'ar');});
   var byGrade=aggBy(rows,function(x){return gradeOf(x.section);},function(k){return 'الصف '+k;}).sort(function(a,b){return a.key-b.key;});
   var byStream=aggBy(rows,function(x){return streamOf(x.section);},function(k){return k==='E'?'الإنجليزي (E)':k==='F'?'الفرنسي (F)':k;});
-  h+='<div class="dgrid"><div class="panel sect"><div class="panel-h"><h2>حسب المادة</h2></div>'+aggTable(bySubj,'المادة')+'</div><div class="panel sect"><div class="panel-h"><h2>حسب الصف</h2></div>'+aggTable(byGrade,'الصف')+'<div class="panel-h" style="border-top:1px solid var(--border)"><h2>حسب البرنامج</h2></div>'+aggTable(byStream,'البرنامج')+'</div></div>';
+  h+='<div class="dgrid"><div class="panel sect"><div class="panel-h"><h2>حسب المادة</h2></div>'+aggTable(bySubj,'المادة')+'</div><div class="panel sect"><div class="panel-h"><h2>'+(resF.subj?'مقارنة «'+esc(resF.subj)+'» بين الصفوف':'حسب الصف')+'</h2></div>'+aggTable(byGrade,'الصف')+'<div class="panel-h" style="border-top:1px solid var(--border)"><h2>حسب البرنامج</h2></div>'+aggTable(byStream,'البرنامج')+'</div></div>';
   var det=rows.slice().sort(function(a,b){return a.subject.localeCompare(b.subject,'ar')||a.section.localeCompare(b.section);});
   h+='<div class="panel sect"><details class="grp"><summary><span>تفصيل الشعب</span><span class="badge">'+det.length+'</span></summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المادة</th><th>التقييم</th><th>الشعبة</th><th>المعلم(ة)</th><th>الطلاب</th><th>المعدل</th><th>أعلى</th><th>أدنى</th><th>النجاح</th></tr></thead><tbody>'+
    det.map(function(x){return '<tr><td>'+esc(x.subject)+'</td><td>'+esc(x.assessment||'')+'</td><td class="tn">'+esc(x.section)+'</td><td>'+esc(x.teacher)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td></tr>';}).join('')+'</tbody></table></div></details></div>';
@@ -1960,35 +1961,50 @@ function mkSetting(rows,re){
   }
   return null;
 }
+function mkGuess(rows,secMap){ // ملف بلا عناوين: العمود الأخير الغالب عليه الأرقام هو العلامة
+  var maxC=0;rows.forEach(function(r){maxC=Math.max(maxC,r.length);});
+  var best=-1,bc=0;
+  for(var j=0;j<maxC;j++){var cnt=0,tot=0;rows.forEach(function(r){var v=r[j];if(v===''||v==null)return;tot++;if(mkNum(v)!=null)cnt++;});if(cnt>=3&&cnt/Math.max(tot,1)>=0.6&&cnt>=bc){best=j;bc=cnt;}}
+  if(best<0)return null;
+  var first=0;for(;first<rows.length;first++){if(mkNum(rows[first][best])!=null)break;}
+  var sc=-1,sbest=0;
+  for(var k=0;k<maxC;k++){if(k===best)continue;var hit=0,tt=0;rows.forEach(function(r){var v=r[k];if(v===''||v==null)return;tt++;if(secMap[mkNorm(v)])hit++;});if(hit>=2&&hit/Math.max(tt,1)>=0.5&&hit>sbest){sc=k;sbest=hit;}}
+  return {row:first-1,secCol:sc,markCol:best,guessed:true};
+}
 function parseMarks(wb,sections,opts){
   var secMap={};sections.forEach(function(c){secMap[mkNorm(c)]=c;});
-  var marks={},skipped=0,unknown={},srcMax=null,srcPass=null,used=0;
+  var marks={},skipped=0,noSec=0,unknown={},srcMax=null,srcPass=null,used=0,guessed=0,guessCol=null;
   wb.SheetNames.forEach(function(nm){
-    var rows=XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,raw:true,defval:''}),h=mkHeader(rows);if(!h)return;
+    var rows=XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,raw:true,defval:''}),h=mkHeader(rows);
+    if(!h){h=mkGuess(rows,secMap);if(h){guessed++;guessCol=h.markCol+1;}}
+    if(!h)return;
     used++;
     var sm=mkSetting(rows,/العلامة العظمى|الدرجة العظمى|العلامة الكاملة|full mark|max mark|maximum/i),sp=mkSetting(rows,/علامة النجاح|درجة النجاح|pass mark|passing/i);
     if(srcMax==null&&sm!=null)srcMax=sm;if(srcPass==null&&sp!=null)srcPass=sp;
-    var sheetSec=secMap[mkNorm(nm)]||(sections.length===1?sections[0]:null);
+    var sheetSec=secMap[mkNorm(nm)]||(sections.length===1?sections[0]:null)||opts.defSec||null;
     for(var i=h.row+1;i<rows.length;i++){
       var r=rows[i],m=mkNum(r[h.markCol]);
-      if(m==null){if(r.some(function(c){return String(c==null?'':c).trim()!=='';})&&String(r[h.markCol]==null?'':r[h.markCol]).trim()!=='')skipped++;continue;}
+      if(m==null){if(String(r[h.markCol]==null?'':r[h.markCol]).trim()!=='')skipped++;continue;}
       var sec=null;
       if(h.secCol>-1){var sv=mkNorm(r[h.secCol]);if(sv===''){sec=sheetSec;}else if(secMap[sv]){sec=secMap[sv];}else{unknown[sv]=(unknown[sv]||0)+1;continue;}}
       else sec=sheetSec;
-      if(!sec){skipped++;continue;}
+      if(!sec){skipped++;noSec++;continue;}
       (marks[sec]=marks[sec]||[]).push(m);
     }
   });
-  if(!used)return {error:'لم أجد عمود «العلامة» في الملف. استخدم النموذج الجاهز أو سمِّ العمود «العلامة».'};
+  if(!used)return {error:'لم أجد علامات في الملف. اكتب العلامات في عمود واحد (ويفضَّل أن يكون عنوانه «العلامة»)، أو حمّل النموذج الجاهز.'};
   var maxM=opts.max!=null?opts.max:(srcMax!=null?srcMax:100),passM=opts.pass!=null?opts.pass:(srcPass!=null?srcPass:maxM*0.5);
   if(!(maxM>0))return {error:'العلامة العظمى يجب أن تكون أكبر من صفر.'};
+  var rawMax=-1e9;Object.keys(marks).forEach(function(k){marks[k].forEach(function(v){rawMax=Math.max(rawMax,v);});});
+  var cand=null;[10,20,25,30,40,50,60].some(function(x){if(x>=rawMax){cand=x;return true;}return false;});
+  var suggest=(opts.max==null&&srcMax==null&&cand!=null)?cand:null;
   var f=100/maxM,stats=[],missing=[],over=0;
   sections.forEach(function(c){
     var a=marks[c];if(!a||!a.length){missing.push(c);return;}
     var sum=0,mx=-1e9,mn=1e9,pc=0;a.forEach(function(v){if(v>maxM)over++;sum+=v;mx=Math.max(mx,v);mn=Math.min(mn,v);if(v>=passM)pc++;});
     stats.push({section:c,n:a.length,max:mkRound(Math.min(mx*f,100)),min:mkRound(Math.max(mn*f,0)),avg:mkRound(Math.min(sum/a.length*f,100)),pass:mkRound(pc/a.length*100)});
   });
-  return {stats:stats,missing:missing,unknown:Object.keys(unknown),skipped:skipped,over:over,maxM:maxM,passM:passM,total:Object.keys(marks).reduce(function(a,k){return a+marks[k].length;},0)};
+  return {stats:stats,missing:missing,unknown:Object.keys(unknown),skipped:skipped,over:over,maxM:maxM,passM:passM,total:Object.keys(marks).reduce(function(a,k){return a+marks[k].length;},0),guessed:guessed,guessCol:guessCol,rawMax:rawMax,suggest:suggest,needSection:noSec>0&&!opts.defSec&&sections.length>1};
 }
 function mkInfo(html,bad){var el=$('#mkInfo');if(!el)return;el.hidden=!html;el.className=bad?'msg-err':'fm-banner';el.style.margin='8px 0';el.innerHTML=html||'';}
 function mkReadFile(file){
@@ -2000,21 +2016,26 @@ function mkReadFile(file){
 }
 function mkApply(){
   if(!MK.wb||!UP||!UP.task)return;
-  var mx=mkNum($('#mkMax').value),ps=mkNum($('#mkPass').value),res;
-  try{res=parseMarks(MK.wb,UP.task.sections,{max:mx,pass:ps});}catch(e){mkInfo('تعذّرت قراءة الملف: '+esc(e.message||e),true);return;}
+  var mx=mkNum($('#mkMax').value),ps=mkNum($('#mkPass').value),ds=MK.defSec||'',res;
+  try{res=parseMarks(MK.wb,UP.task.sections,{max:mx,pass:ps,defSec:ds});}catch(e){mkInfo('تعذّرت قراءة الملف: '+esc(e.message||e),true);return;}
   if(res.error){mkInfo(esc(res.error),true);return;}
   res.stats.forEach(function(x){var tr=$('tr[data-sec="'+x.section+'"]');if(!tr)return;['n','max','min','avg','pass'].forEach(function(f){var i=$('input[data-sf="'+f+'"]',tr);if(i)i.value=x[f];});});
-  var h='قُرئت <b>'+res.total+'</b> علامة لـ <b>'+res.stats.length+'</b> شعبة (العلامة العظمى '+res.maxM+'، علامة النجاح '+res.passM+'). حُوّلت الأرقام إلى <b>100</b> وملأت الجدول أدناه، وتستطيع تعديلها.';
+  var h=res.stats.length?'قُرئت <b>'+res.total+'</b> علامة لـ <b>'+res.stats.length+'</b> شعبة (العلامة العظمى '+res.maxM+'، علامة النجاح '+res.passM+'). حُوّلت الأرقام إلى <b>100</b> وملأت الجدول أدناه، وتستطيع تعديلها.':'لم تُقرأ علامات لأي من شعبك.';
   var warn=[];
-  if(res.missing.length)warn.push('لا علامات في الملف للشعب: '+esc(res.missing.join('، '))+' (عبّئها يدوياً).');
+  if(res.suggest)warn.push('أعلى علامة في الملف <b>'+res.rawMax+'</b> والعلامة العظمى المعتمدة <b>100</b>، فتبدو الأرقام صغيرة. هل العلامات من <b>'+res.suggest+'</b>؟ <button class="btn xs primary" type="button" data-asx="setmax|'+res.suggest+'">نعم، اعتمد '+res.suggest+'</button>');
+  if(res.guessed)warn.push('لم أجد عنواناً لعمود العلامة، فاعتبرت <b>العمود رقم '+res.guessCol+'</b> هو علامات الطلاب. تأكد من الأرقام.');
+  if(res.needSection){warn.push('لا يوجد عمود «شعبة» في الملف وعندك أكثر من شعبة. اختر الشعبة التي تخصها علامات هذا الملف: <select id="mkSec" class="inp" style="display:inline-block;width:auto;min-height:36px"><option value="">— اختر —</option>'+UP.task.sections.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('')+'</select> (كرّر لكل شعبة بملفها).');}
+  if(ds&&!res.needSection)warn.push('نُسبت العلامات التي بلا شعبة إلى الشعبة <b>'+esc(ds)+'</b>.');
+  if(res.missing.length&&!res.needSection)warn.push('لا علامات في الملف للشعب: '+esc(res.missing.join('، '))+' (عبّئها يدوياً أو بملف آخر).');
   if(res.unknown.length)warn.push('شعب في الملف ليست من شعبك وتُجوهلت: '+esc(res.unknown.join('، '))+'.');
-  if(res.skipped)warn.push('تُجوهل '+res.skipped+' سطر بلا علامة صالحة أو بلا شعبة.');
+  if(res.skipped&&!res.needSection)warn.push('تُجوهل '+res.skipped+' سطر بلا علامة صالحة أو بلا شعبة.');
   if(res.over)warn.push('<b>'+res.over+'</b> علامة أكبر من العلامة العظمى ('+res.maxM+'): راجع الملف أو عدّل العلامة العظمى.');
   mkInfo(h+(warn.length?'<ul style="margin:6px 18px 0;font-weight:500">'+warn.map(function(w){return '<li>'+w+'</li>';}).join('')+'</ul>':''),false);
-  if(warn.length&&(res.over||res.missing.length)){var el=$('#mkInfo');el.className='msg-err';}
+  var sel=$('#mkSec');if(sel)sel.value=ds;
+  if(res.over||res.needSection||res.suggest||!res.stats.length){var el=$('#mkInfo');el.className='msg-err';}
 }
 function mkOnFile(file){
-  MK.file=file;if(!file){MK.wb=null;mkInfo('');return;}
+  MK.file=file;MK.defSec='';if(!file){MK.wb=null;mkInfo('');return;}
   if(file.size>10*1024*1024){mkInfo('الملف أكبر من 10 ميغابايت.',true);return;}
   mkInfo('جارٍ قراءة العلامات…',false);
   ensureXlsx().then(function(){return mkReadFile(file);}).then(function(r){MK.wb=XLSX.read(r.data,{type:r.type});mkApply();})
@@ -2113,6 +2134,12 @@ function asxClick(e){
   var el=e.target.closest('[data-asx]');if(!el)return false;
   var a=el.dataset.asx.split('|'),k=a[0],batch=a[1],key=a[2]+'|'+(a[3]||'');
   if(k==='tpl'){mkTemplate();return true;}
+  if(k==='setmax'){var inp=$('#mkMax');if(inp){inp.value=batch;mkApply();}return true;}
+  if(k==='split'){
+    el.disabled=true;
+    api('splitFile',{id:batch}).then(function(r){invalidate();return cfetch('myTasks').then(function(res){TASKS=res.tasks.filter(function(x){var co=(x.type==='minutes'||x.type==='report');return TASKMODE==='min'?co:!co;});toast('صار الملف تقييماً مستقلاً. أدخل علاماته الآن.');showUpload(a[2]+'|'+(a[3]||''),'edit',r.batch);});}).catch(function(er){el.disabled=false;toast(errText(er));});
+    return true;
+  }
   if(k==='add'){showUpload(key,'add',batch);return true;}
   if(k==='edit'){showUpload(key,'edit',batch);return true;}
   if(k==='del'){
@@ -2127,17 +2154,23 @@ function asxClick(e){
 document.addEventListener('change',function(e){
   var t=e.target;if(!t)return;
   if(t.id==='mkFile'){mkOnFile(t.files[0]||null);return;}
+  if(t.id==='mkSec'){MK.defSec=t.value;mkApply();return;}
   if((t.id==='mkMax'||t.id==='mkPass')&&MK.wb)mkApply();
 });
 function assessRowsHTML(t,sub,key){
-  var s='',bs=(sub&&sub.batches)||[],k=esc(t.reqId+'|'+t.unit),pair=esc(t.reqId)+'|'+esc(t.unit);
+  var s='',bs=(sub&&sub.batches)||[],pair=esc(t.reqId)+'|'+esc(t.unit);
   bs.forEach(function(b){
-    var m=mkAvg(b.stats);
-    s+='<div class="fm-rl as-b"><span><b>'+esc(b.title)+'</b>'+(m.n?' • '+m.n+' طالب • المعدل '+m.avg:'')+' • '+b.files.length+' ملف'+'</span><span>'+
-      (t.closed?'':'<button class="btn xs" type="button" data-asx="add|'+esc(b.id)+'|'+pair+'">+ ملف</button> <button class="btn xs" type="button" data-asx="edit|'+esc(b.id)+'|'+pair+'">العلامات</button> <button class="btn xs" type="button" data-asx="del|'+esc(b.id)+'|'+pair+'">حذف التقييم</button>')+'</span></div>';
-    b.files.forEach(function(f){s+='<div class="fm-rl"><span>&nbsp;&nbsp;'+esc(f.name)+' • '+fmtDT(f.when)+(f.late?' <span class="tag-late">(متأخر)</span>':'')+'</span><span><button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'">تنزيل</button>'+(t.closed?'':' <button class="btn xs" type="button" data-delf="'+esc(f.id)+'">حذف</button>')+'</span></div>';});
+    var mk=mkAvg(b.stats),multi=b.files.length>1;
+    s+='<div class="fm-rl as-b"><span><b>'+esc(b.title)+'</b>'+(mk.n?' • '+mk.n+' طالب • المعدل '+mk.avg:' • <span style="color:var(--v-low);font-weight:700">بلا علامات بعد</span>')+' • '+b.files.length+' ملف'+'</span><span>'+
+      (t.closed?'':'<button class="btn xs" type="button" data-asx="add|'+esc(b.id)+'|'+pair+'">+ ملف</button> <button class="btn xs'+(mk.n?'':' primary')+'" type="button" data-asx="edit|'+esc(b.id)+'|'+pair+'">العلامات</button> <button class="btn xs" type="button" data-asx="del|'+esc(b.id)+'|'+pair+'">حذف التقييم</button>')+'</span></div>';
+    b.files.forEach(function(f){s+='<div class="fm-rl"><span>&nbsp;&nbsp;'+esc(f.name)+' • '+fmtDT(f.when)+(f.late?' <span class="tag-late">(متأخر)</span>':'')+'</span><span><button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'">تنزيل</button>'+(t.closed?'':(multi?' <button class="btn xs" type="button" data-asx="split|'+esc(f.id)+'|'+pair+'" title="اجعل هذا الملف تقييماً مستقلاً بعلاماته">فصل كتقييم</button>':'')+' <button class="btn xs" type="button" data-delf="'+esc(f.id)+'">حذف</button>')+'</span></div>';});
   });
   return s;
+}
+function rfSubjOptions(d){
+  var seen={},list=[];(d.stats||[]).forEach(function(x){if(!seen[x.subject]){seen[x.subject]=1;list.push(x.subject);}});
+  list.sort(function(a,b){return a.localeCompare(b,'ar');});
+  return '<option value="">كل المواد</option>'+list.map(function(x){return '<option value="'+esc(x)+'"'+(resF.subj===x?' selected':'')+'>'+esc(x)+'</option>';}).join('');
 }
 
 function stDetailHTML(sr){
@@ -2226,6 +2259,7 @@ document.addEventListener('change',function(e){
   if(t.id==='sfType'){subF.type=t.value;renderSubs();return;}
   if(t.id==='sfCoord'){subF.coord=t.value;renderSubs();return;}
   if(t.id==='sfMissing'){subF.missing=t.checked;renderSubs();return;}
+  if(t.id==='rfSubj'){resF.subj=t.value;renderResults();return;}
   if(t.id==='rfReq'){resF.req=t.value;renderResults();return;}
   if(t.id==='rfGrade'){resF.grade=t.value;renderResults();return;}
   if(t.id==='rfStream'){resF.stream=t.value;renderResults();return;}
