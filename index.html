@@ -726,7 +726,7 @@ function boot(){
 }
 function loadMe(){
   $('#view').innerHTML=SKEL;
-  api('bootstrap').then(function(r){seed(r);ME=r.person;SETTINGS=r.settings||{};start();},function(e){
+  api('bootstrap').then(function(r){seed(r);SRV_VER=r.version||'';ME=r.person;SETTINGS=r.settings||{};start();},function(e){
     if(e.code==='invalid')return api('whoami').then(function(r){ME=r.person;SETTINGS=r.settings||{};start();});
     throw e;
   }).catch(function(e){
@@ -758,6 +758,7 @@ function start(){
   $('#ptabs').innerHTML=t.map(function(x){return '<button type="button" class="tab" data-pt="'+x[0]+'">'+esc(x[1])+'</button>';}).join('');
   var first=has('coordinator')?'obs':(has('admin')?'dash':'tasks');
   go(first);
+  verLine();
   setTimeout(prefetch,600);
 }
 function go(v){
@@ -1382,7 +1383,7 @@ function remindAll(rid,btn){
 
 /* ───────── المتابعة الإدارية والأكاديمية (الإدارة) ───────── */
 var HUB='subs',resF={req:'',grade:'',stream:'',subj:''},teF={coord:'',noobs:false};
-var HUB_TABS=[['subs','حالة التسليم'],['results','نتائج الطلاب'],['teachers','تقييم المعلمين'],['forms','الاجتماعات والمتابعة'],['reqs','مواعيد التسليم']];
+var HUB_TABS=[['subs','حالة التسليم'],['results','نتائج الطلاب'],['teachers','تقييم المعلمين'],['forms','الاجتماعات والمتابعة'],['reqs','مواعيد التسليم'],['demo','حساب تدريبي']];
 function showHub(sec){
   if(sec)HUB=sec;SUBMODE='admin';
   var seq=++VIEWSEQ,c1=CACHE['adminSubmissions'],c2=CACHE['adminData'],c3=CACHE['adminForms'],c4=CACHE['listRequirements'];
@@ -1397,7 +1398,7 @@ function hubHead(){
   return '<div class="rep-bar" style="justify-content:space-between;align-items:center"><div style="font:800 20px Cairo,sans-serif;color:var(--brand)">المتابعة الإدارية والأكاديمية</div><button class="btn xs" id="subsRefresh" type="button">تحديث</button></div>'+
    '<nav class="tabs hubnav">'+HUB_TABS.map(function(x){return '<button type="button" class="tab'+(HUB===x[0]?' on':'')+'" data-hub="'+x[0]+'">'+x[1]+'</button>';}).join('')+'</nav>';
 }
-function renderHub(){if(HUB==='results')renderResults();else if(HUB==='teachers')renderTeachersEval();else if(HUB==='forms')renderFormsHub();else if(HUB==='reqs')renderReqs();else renderSubs();}
+function renderHub(){if(HUB==='results')renderResults();else if(HUB==='teachers')renderTeachersEval();else if(HUB==='forms')renderFormsHub();else if(HUB==='reqs')renderReqs();else if(HUB==='demo')renderDemo();else renderSubs();}
 function gradeOf(c){return parseInt(c,10);}
 function streamOf(c){return String(c||'').charAt(1);}
 function aggBy(rows,keyFn,labelFn){return aggRows(rows,keyFn,labelFn);}
@@ -2178,11 +2179,45 @@ function stDetailHTML(sr){
   return '<details class="grp"><summary><span>تفصيل التقييمات</span><span class="badge">'+rows.length+'</span></summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المعلم(ة)</th><th>المادة</th><th>التقييم</th><th>الشعبة</th><th>الطلاب</th><th>المعدل</th><th>أعلى</th><th>أدنى</th><th>النجاح</th></tr></thead><tbody>'+
    rows.map(function(x){return '<tr><td>'+esc(x.teacher)+'</td><td>'+esc(x.subject)+'</td><td>'+esc(x.assessment||'')+'</td><td class="tn">'+esc(x.section)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td></tr>';}).join('')+'</tbody></table></div></details>';
 }
+/* ───────── حساب المعلم التدريبي (للإدارة) ───────── */
+var DEMO={link:'',name:'',busy:false},demoArm={},SRV_VER='',PORTAL_VER='2.1';
+function renderDemo(){
+  var h=hubHead()+'<div class="panel sect"><div class="panel-h"><div><h2>حساب المعلم التدريبي</h2><div class="sub">لعرض المنظومة في الورش والتدريب دون المساس ببيانات المعلمين الحقيقية.</div></div></div><div style="padding:0 16px 16px">'+
+   '<ul class="ck" style="margin-bottom:12px"><li>معلم باسم «معلم تجريبي (للتدريب)» بمادتين: الإنجليزية والرياضيات (الصف الأول، ثلاث شعب).</li><li>يعمل كأي معلم: رفع الخطة، التقييمات، استيراد Excel، الحذف والإضافة.</li><li><b>لا يدخل في الإحصاءات</b> ولا في متابعة المنسقين ولا في عدد المعلمين.</li><li>بعد الورشة اضغط «مسح بيانات التدريب» ليعود الحساب جديداً.</li></ul>'+
+   '<div class="row-btns" style="flex-wrap:wrap"><button class="btn primary" type="button" data-demo="create"'+(DEMO.busy?' disabled':'')+'>'+(DEMO.link?'تجديد الرابط (يُلغي السابق)':'إنشاء الرابط')+'</button><button class="btn" type="button" data-demo="clear"'+(DEMO.busy?' disabled':'')+'>مسح بيانات التدريب</button></div>';
+  if(DEMO.link)h+='<div class="fm-banner" style="margin-top:14px"><b>رابط الحساب التدريبي</b><small>افتحه في نافذة خاصة أو على جهاز آخر لتعرضه أمام المشاركين.</small><div class="fm-row2" style="margin-top:8px"><input class="inp" id="demoLink" readonly dir="ltr" value="'+esc(DEMO.link)+'" style="text-align:left"><button class="btn sm" type="button" data-demo="copy">نسخ</button><a class="btn sm primary" href="'+esc(DEMO.link)+'" target="_blank" rel="noopener" style="text-decoration:none">فتح</a></div></div>';
+  $('#view').innerHTML=h+'</div></div>';
+}
+function demoClick(e){
+  var el=e.target.closest('[data-demo]');if(!el||HUB!=='demo'||CUR!=='subs')return false;
+  var k=el.dataset.demo;
+  if(k==='copy'){var v=($('#demoLink')||{}).value||DEMO.link;copyText(v).then(function(ok){toast(ok?'نُسخ الرابط.':'انسخ الرابط يدوياً من الخانة.');if(!ok){var i=$('#demoLink');if(i){i.select();}}});return true;}
+  if(k==='create'||k==='clear'){
+    if(k==='create'&&DEMO.link||k==='clear'){
+      var key=k;if(!demoArm[key]){var old=el.textContent;el.textContent=k==='create'?'تأكيد التجديد':'تأكيد المسح';demoArm[key]=setTimeout(function(){delete demoArm[key];el.textContent=old;},4000);return true;}
+      clearTimeout(demoArm[key]);delete demoArm[key];
+    }
+    DEMO.busy=true;renderDemo();
+    api(k==='create'?'demoCreate':'demoClear').then(function(r){
+      DEMO.busy=false;
+      if(k==='create'){DEMO.link=r.demo.link;DEMO.name=r.demo.name;toast('الرابط جاهز.');}else toast('تم مسح '+r.cleared+' ملف من الحساب التدريبي.');
+      if(HUB==='demo')renderDemo();
+    }).catch(function(er){DEMO.busy=false;toast(errText(er));if(HUB==='demo')renderDemo();});
+    return true;
+  }
+  return true;
+}
+function verLine(){
+  var el=$('#verLine');if(!el){el=document.createElement('div');el.id='verLine';el.style.cssText='text-align:center;font-size:12px;color:var(--muted);padding:18px 12px 28px';document.body.appendChild(el);}
+  el.textContent='إصدار البوابة '+PORTAL_VER+(SRV_VER?' • إصدار الخادم '+SRV_VER:'');
+}
+
 /* ───────── الأحداث ───────── */
 document.addEventListener('click',function(e){
   var t=e.target;
   if(fmClick(e))return;
   if(rqClick(e))return;
+  if(demoClick(e))return;
   if(asxClick(e))return;
   var pt=t.closest('[data-pt]');if(pt){go(pt.dataset.pt);return;}
   if(t.closest('#logoutBtn')){logout();return;}
