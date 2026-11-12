@@ -520,7 +520,7 @@ var API='https://script.google.com/macros/s/AKfycbwBJVtMdO9oGtAMcrvP60NP0esOq8Mq
 var LS_CODE='aman-portal-code';
 
 /* ───────── البيانات: المحاور والبنود (27 بنداً) ───────── */
-var DOMAINS=[
+var DOMAINS_V1=[
  {id:'d1',title:'الحضور المهني والتواصل',short:'الحضور',items:[
   {id:'i1',t:'المظهر العام للمعلم(ة)'},
   {id:'i2',t:'تقنيات الصوت ولغة الجسد المساعدة للتعليم',h:'تقنيات الصوت • لغة جسد مساعدة للتعليم'},
@@ -554,10 +554,50 @@ var DOMAINS=[
   {id:'i26',t:'تعزيز القيم والأخلاق وخدمة المجتمع',h:'تعزيز المادة للقيم والأخلاق • توجيه المادة بطريقة تسهم بتطوير المجتمع'},
   {id:'i27',t:'الأسئلة والأنشطة تنمّي الفكر الإبداعي لدى المتعلم'}]}
 ];
-var TOTAL=26, PARTIAL_MIN=16;
-var ITEM={}; var NUM=0;
-DOMAINS.forEach(function(d){d.items.forEach(function(it){NUM++;it.n=NUM;it.d=d.id;ITEM[it.id]=it;});});
-var DOM={}; DOMAINS.forEach(function(d){DOM[d.id]=d;});
+var DOMAINS_V2=[
+ {id:'d1',title:'الحضور المهني والتواصل',short:'الحضور',items:[
+  {id:'i1',t:'الالتزام بالزي المدرسي',w:'التزام المعلم(ة) بالزي المعتمد للمدرسة.'},
+  {id:'i2',t:'تقنيات الصوت ولغة الجسد المساعدة للتعليم',w:'وضوح الصوت وتنوّع نبرته، واستخدام الحركة والإيماءات والتواصل البصري لدعم الشرح.'},
+  {id:'i3',t:'الثقة والحضور أمام المتعلمين',w:'ثقة وهدوء وثبات انفعالي، وجذب انتباه الصف دون رفع الصوت.'},
+  {id:'i4',t:'سلامة لغة التدريس',w:'استخدام مفردات وتراكيب صحيحة وواضحة بلغة التدريس.'}]},
+ {id:'d2',title:'الإدارة الصفية والبيئة التعليمية',short:'الإدارة الصفية',items:[
+  {id:'i5',t:'تواصل إيجابي مع المتعلمين',w:'احترام المعلم(ة) للمتعلمين، ونبرته المشجعة، وتفاعله مع أسمائهم وأسئلتهم.'},
+  {id:'i7',t:'تشجيع الحوار والنقاش الصفي',w:'إتاحة الفرصة للمتعلمين للتعبير والنقاش، فلا تقتصر الحصة على كلام المعلم(ة).'},
+  {id:'i8',t:'التعامل مع المشاغبة وضبط ردات الفعل',w:'هدوؤه وحزمه مع السلوك غير المرغوب. إن لم تظهر مشاغبة فاختر «لم يُلاحظ».'},
+  {id:'i9',t:'توفير بيئة صفية إيجابية للتعلم',w:'إرساء الاحترام بين المتعلمين وتوفير الأمان، والحدّ من ممارسات التنمر -إن وجدت- بما يساعد على التركيز والمشاركة.'}]},
+ {id:'d3',title:'تهيئة الدرس وتنفيذه ووسائله',short:'تهيئة الدرس وتنفيذه',items:[
+  {id:'i10',t:'إجراء تمهيد للدرس يحفّز المتعلمين',w:'بداية الحصة بنشاط أو سؤال أو موقف يثير الاهتمام ويربط بالدرس.'},
+  {id:'i21',t:'إجراء تقييم تشخيصي بداية الحصة',w:'تحقق سريع من المعرفة السابقة اللازمة للدرس (أسئلة أو مراجعة قصيرة للتحقق من الجاهزية لحصة اليوم).'},
+  {id:'i11',t:'تحديد أهداف الدرس وكتابتها على اللوح',w:'إعلان أهداف الدرس بوضوح وتدوينها على اللوح.'},
+  {id:'i13',t:'الإلمام بكفايات المادة',w:'التمكّن من محتوى الدرس والكفايات المستهدفة، ودقة المعلومات.'},
+  {id:'i14',t:'استخدام وسائل إيضاح مساعدة',w:'أدوات تسهم بتحقيق النواتج (لوح، بطاقات، نماذج، أدوات مخبرية…) أثناء الشرح.'},
+  {id:'i15',t:'ملاءمة الوسائل التعليمية (من حيث الوقت والمضمون)',w:'مناسبة الوسيلة لهدف الدرس وللوقت المخصص، دون إضاعة الحصة.'},
+  {id:'i16',t:'توظيف التكنولوجيا في التعليم',w:'استخدام الأجهزة، التطبيقات، المحاكاة، العرض الرقمي لخدمة التعلم. إن لم تُستخدم فاختر «لم يُلاحظ».'}]},
+ {id:'d4',title:'التنوع والفروق الفردية واستراتيجيات التدريس',short:'التنوع والاستراتيجيات',items:[
+  {id:'i17',t:'استخدام استراتيجيات منوعة تخدم تحقيق أهداف التعلم',w:'تنويع أساليب التدريس (حوار، عمل جماعي، تعلم بالنشاط…) بما يخدم هدف الدرس.'},
+  {id:'i18',t:'طرح أسئلة تشجع المشاركة ومنح وقت للتفكير',w:'أسئلة مفتوحة تستثير التفكير، مع إمهال المتعلمين وقتًا كافيًا للإجابة.'},
+  {id:'i19',t:'مراعاة الفروق الفردية وأنماط التعلم المختلفة',w:'تنويع المهام وتقديم المحتوى بصيغ متنوعة تدعم المتعلمين وأنماط تعلمهم.'},
+  {id:'i20',t:'دعم الضعفاء وإثراء المتميزين',w:'مساعدة المتعثرين، وتقديم تحديات إضافية للمتميزين.'}]},
+ {id:'d5',title:'التقييم والتغذية الراجعة وختام الحصة',short:'التقييم والتغذية الراجعة',items:[
+  {id:'i22',t:'إجراء تقييمات بنائية حول أهداف الدرس',w:'أسئلة أو أنشطة قصيرة أثناء الحصة تسهم في بناء المكتسبات وتكشف مدى تحقق أهداف الدرس.'},
+  {id:'i23',t:'تصحيح الإجابات الخاطئة بعد مناقشتها',w:'معالجة الخطأ بمناقشته مع المتعلمين وبيان الصواب دون إحراج.'},
+  {id:'i24',t:'تغذية راجعة وغلق الحصة',w:'ملاحظات للمتعلمين، وختم الحصة بتلخيص أو مراجعة تربط ما تعلّموه بالأهداف.'}]},
+ {id:'d6',title:'القيم والمهارات',short:'القيم والمهارات',items:[
+  {id:'i25',t:'ربط الدرس بواقع المتعلم وبأمثلة حسية',w:'أمثلة من حياة المتعلمين وبيئتهم أو أشياء ملموسة تقرّب الفكرة.'},
+  {id:'i26',t:'تعزيز القيم والأخلاق وخدمة المجتمع',w:'إبراز قيم كالاحترام والصدق والتعاون، وربط المادة بما ينفع المجتمع.'},
+  {id:'i27',t:'الأسئلة والأنشطة تنمّي الفكر الإبداعي',w:'أسئلة وأنشطة تتطلب أفكارًا جديدة أو حلولاً متعددة، لا إجابة محفوظة واحدة.'}]}
+];
+var DOMAINS,TOTAL,PARTIAL_MIN,ITEM={},DOM={},CURFV=0,ITEM_ALL={};
+/* النموذج 1: 26 بنداً (المشاهدات القديمة) • النموذج 2: 25 بنداً بأسطر توضيحية (الحالي). تُبدَّل التعريفات حسب نسخة المشاهدة */
+function useForm(v){
+  v=(v===1)?1:2;if(CURFV===v)return;
+  var src=v===1?DOMAINS_V1:DOMAINS_V2,n=0;DOMAINS=src;ITEM={};DOM={};
+  src.forEach(function(d){d.items.forEach(function(it){n++;it.n=n;it.d=d.id;ITEM[it.id]=it;});DOM[d.id]=d;});
+  TOTAL=n;PARTIAL_MIN=(v===1?16:15);CURFV=v;
+}
+DOMAINS_V1.forEach(function(d){d.items.forEach(function(it){ITEM_ALL[it.id]={t:it.t};});});
+DOMAINS_V2.forEach(function(d){d.items.forEach(function(it){ITEM_ALL[it.id]={t:it.t};});});
+useForm(2);
 
 var SCALE=[{v:1,l:'ضعيف',d:'الممارسة غائبة أو تعيق التعلم.'},{v:2,l:'مقبول',d:'حاضرة جزئياً وتحتاج إلى تطوير.'},{v:3,l:'جيد',d:'حاضرة وتحقق الغرض منها بوضوح.'},{v:4,l:'ممتاز',d:'متقنة ومُلهمة، وتصلح نموذجاً لغيرها.'}];
 
@@ -573,8 +613,8 @@ function level(p){ if(p==null) return null; for(var i=0;i<LEVELS.length;i++){ if
 /* ───────── بنك العبارات (أولي للمراجعة) ───────── */
 var S=[
  {d:'d1',i:'i2',t:'صوت واضح ومعبّر، ولغة جسد تُوظَّف بفاعلية لخدمة الشرح.'},
- {d:'d1',i:'i3',t:'حضور مهني واثق وشخصية محببة تكسب انتباه الطلاب.'},
- {d:'d1',i:'i4',t:'لغة سليمة ومفردات دقيقة تُقدَّم بأسلوب مناسب لمستوى الطلاب.'},
+ {d:'d1',i:'i3',t:'ثقة وهدوء وحضور مهني يكسب انتباه الطلاب دون رفع الصوت.'},
+ {d:'d1',i:'i4',t:'لغة تدريس سليمة ومفردات دقيقة تُقدَّم بأسلوب مناسب لمستوى الطلاب.'},
  {d:'d2',i:'i5',t:'علاقة إيجابية دافئة مع الطلاب تقوم على الاحترام والتشجيع.'},
  {d:'d2',i:'i7',t:'تشجيع واضح للحوار والنقاش الصفي وإتاحة الفرصة لأكبر عدد من الطلاب.'},
  {d:'d2',i:'i8',t:'صف منضبط وتعامل هادئ وحكيم مع السلوكيات غير المرغوبة.'},
@@ -589,13 +629,15 @@ var S=[
  {d:'d5',i:'i24',t:'تغذية راجعة محددة وإغلاق للحصة يلخّص المفاهيم ويربطها بالأهداف.'},
  {d:'d6',i:'i25',t:'ربط الدرس بواقع الطلاب وحياتهم بأمثلة حسية قرّبت المفهوم.'},
  {d:'d6',i:'i26',t:'تعزيز طبيعي للقيم والأخلاق وربط المادة بخدمة المجتمع.'},
- {d:'d6',i:'i27',t:'أسئلة وأنشطة تنمّي التفكير الإبداعي لدى الطلاب.'}
+ {d:'d6',i:'i27',t:'أسئلة وأنشطة تنمّي التفكير الإبداعي لدى الطلاب.'},
+ {d:'d1',i:'i1',t:'التزام بالزي المدرسي المعتمد ومظهر مهني مناسب.'},
+ {d:'d2',i:'i9',t:'بيئة صفية آمنة يسودها الاحترام بين المتعلمين وتدعم التركيز والمشاركة.'}
 ];
 var DV=[
  {d:'d1',i:'i2',t:'يُنصح بتنويع نبرة الصوت وتوظيف حركة الجسد لدعم الشرح وشدّ الانتباه.'},
- {d:'d1',i:'i3',t:'يُقترح تعزيز الحضور المهني داخل الصف وتثبيت الثقة في إدارة الحصة.'},
- {d:'d1',i:'i4',t:'يُنصح بالانتباه إلى سلامة اللغة المستخدمة وتصحيح الأخطاء اللغوية المتكررة.'},
- {d:'d2',i:'i6',t:'يُنصح بإظهار مزيد من الحماس لإثارة دافعية الطلاب نحو التعلم.'},
+ {d:'d1',i:'i3',t:'يُقترح تعزيز الثقة والهدوء أمام الطلاب وتثبيت الحضور في إدارة الحصة.'},
+ {d:'d1',i:'i4',t:'يُنصح بالانتباه إلى سلامة لغة التدريس وتصحيح الأخطاء اللغوية المتكررة.'},
+ {d:'d2',i:'i6',x:1,t:'يُنصح بإظهار مزيد من الحماس لإثارة دافعية الطلاب نحو التعلم.'},
  {d:'d2',i:'i7',t:'يُقترح تفعيل الحوار والنقاش الصفي وعدم الاكتفاء بالإلقاء المباشر.'},
  {d:'d2',i:'i8',t:'يُنصح بالتشديد على قوانين الصف والتعامل بحزم وهدوء مع الحالات المشاغبة.'},
  {d:'d3',i:'i10',t:'يُنصح ببدء الحصة بتمهيد محفّز يستحضر المعرفة السابقة ويثير فضول الطلاب.'},
@@ -609,7 +651,9 @@ var DV=[
  {d:'d5',i:'i24',t:'يُفضَّل إغلاق الحصة بتقييم بسيط يلخّص المفاهيم، وتخصيص دقائق كافية لذلك.'},
  {d:'d6',i:'i25',t:'يُنصح بالإكثار من الأمثلة الحسية من بيئة الطلاب وحياتهم اليومية.'},
  {d:'d6',i:'i26',t:'يُقترح ربط محتوى الدرس بالقيم والأخلاق بصورة أوضح ومنهجية.'},
- {d:'d6',i:'i27',t:'يُنصح بتصميم أنشطة وأسئلة تفتح المجال للتفكير الإبداعي.'}
+ {d:'d6',i:'i27',t:'يُنصح بتصميم أنشطة وأسئلة تفتح المجال للتفكير الإبداعي.'},
+ {d:'d1',i:'i1',t:'يُنصح بالالتزام بالزي المدرسي المعتمد.'},
+ {d:'d2',i:'i9',t:'يُقترح ترسيخ الاحترام والأمان بين المتعلمين والحدّ من ممارسات التنمر لتعزيز بيئة الصف الإيجابية.'}
 ];
 var RECS=[
  'مشاهدة متابعة بعد أسبوعين',
@@ -622,6 +666,7 @@ var RECS=[
  'تعميم الممارسة المتميزة على معلمي المادة'
 ];
 S.forEach(function(p,i){p.id='s'+i;}); DV.forEach(function(p,i){p.id='v'+i;});
+function retiredPhraseIds(){return S.concat(DV).filter(function(p){return p.x;}).map(function(p){return p.id;});}
 
 
 
@@ -792,7 +837,7 @@ function sectionsFor(tid,subj){
 }
 
 /* ───────── حالة المشاهدة ───────── */
-function freshState(){return {id:null,status:'draft',pdf:false,step:0,exportedAt:'',saved:null,info:{teacherId:'',teacher:'',subject:'',grade:'',date:todayISO(),period:'',topic:'',showAll:false},scores:{},pS:[],pD:[],pR:[],notes:'',follow:false};}
+function freshState(){useForm(2);return {fv:2,id:null,status:'draft',pdf:false,step:0,exportedAt:'',saved:null,info:{teacherId:'',teacher:'',subject:'',grade:'',date:todayISO(),period:'',topic:'',showAll:false},scores:{},pS:[],pD:[],pR:[],notes:'',follow:false};}
 var state=freshState();
 function hasData(){var i=state.info;return !!(i.teacherId||i.subject||i.topic||Object.keys(state.scores).length||state.notes.trim()||state.pS.length||state.pD.length||state.pR.length);}
 function calcScores(sc){
@@ -807,14 +852,16 @@ function texts(list,ids){return list.filter(function(p){return ids.indexOf(p.id)
 function payload(){
   var i=state.info;
   return {info:{teacherId:i.teacherId,subject:i.subject,grade:i.grade,date:i.date,period:i.period,topic:i.topic,showAll:!!i.showAll},
-    scores:state.scores,pS:state.pS,pD:state.pD,pR:state.pR,step:state.step,
+    fv:state.fv||2,scores:state.scores,pS:state.pS,pD:state.pD,pR:state.pR,step:state.step,
     report:{strengths:texts(S,state.pS),dev:texts(DV,state.pD),recs:RECS.filter(function(t,k){return state.pR.indexOf('r'+k)>-1;}),notes:state.notes,follow:state.follow}};
 }
 function stateFromServer(o){
   var s=o.summary,d=o.data||{},st=freshState();
+  var fv=(s.status==='exported')?(d.fv===2?2:1):2;useForm(fv);st.fv=fv;
   st.id=s.id;st.status=s.status;st.pdf=!!s.pdf;st.exportedAt=s.exported;
   st.info={teacherId:s.teacherId,teacher:s.teacher,subject:s.subject,grade:s.section,date:s.date,period:s.period,topic:s.topic,showAll:!!d.showAll};
   st.scores=d.scores||{};st.pS=d.pS||[];st.pD=d.pD||[];st.pR=d.pR||[];st.notes=d.notes||'';st.follow=!!d.follow;
+  if(fv===2){delete st.scores.i6;var rt=retiredPhraseIds();st.pS=st.pS.filter(function(x){return rt.indexOf(x)<0;});st.pD=st.pD.filter(function(x){return rt.indexOf(x)<0;});} // المسودات القديمة تنتقل للنموذج الجديد
   st.saved={strengths:d.strengths||[],dev:d.dev||[],recs:d.recs||[]};
   st.step=s.status==='exported'?STEPS.length-1:(d.step||0);
   return st;
@@ -941,7 +988,7 @@ function renderDomain(d){
   SCALE.forEach(function(s){h+='<li><b>'+s.v+'</b> '+esc(s.l)+': '+esc(s.d)+'</li>';});
   h+='</ul></details>';
   d.items.forEach(function(it){
-    h+='<div class="item" data-id="'+it.id+'"><div class="item-top"><span class="num">'+it.n+'</span><div><div class="t">'+esc(it.t)+'</div>'+(it.h?'<div class="h">'+esc(it.h)+'</div>':'')+'</div></div><div class="scale" role="group" aria-label="'+esc(it.t)+'">';
+    h+='<div class="item" data-id="'+it.id+'"><div class="item-top"><span class="num">'+it.n+'</span><div><div class="t">'+esc(it.t)+'</div>'+((it.w||it.h)?'<div class="h">'+esc(it.w||it.h)+'</div>':'')+'</div></div><div class="scale" role="group" aria-label="'+esc(it.t)+'">';
     SCALE.forEach(function(s){h+='<button type="button" class="sc'+s.v+'" data-v="'+s.v+'" aria-pressed="false"><b>'+s.v+'</b><span>'+s.l+'</span></button>';});
     h+='<button type="button" class="na" data-v="na" aria-pressed="false"><span>لم يُلاحظ</span></button></div></div>';
   });
@@ -952,7 +999,7 @@ function chipHTML(p,kind,pressed,sug){return '<button type="button" class="chip"
 function groupHTML(list,kind,sel){
   var h='';
   DOMAINS.forEach(function(d){
-    var arr=list.filter(function(p){return p.d===d.id;});
+    var arr=list.filter(function(p){return p.d===d.id&&!p.x;});
     arr.sort(function(a,b){return (suggested(kind,b)?1:0)-(suggested(kind,a)?1:0);});
     var sc=arr.filter(function(p){return suggested(kind,p);}).length,chosen=arr.filter(function(p){return sel.indexOf(p.id)>-1;}).length;
     h+='<details class="grp"'+((sc||chosen)?' open':'')+'><summary><span>'+esc(d.title)+'</span><span class="badge">'+(sc?sc+' مقترحة':(chosen?chosen+' محددة':'—'))+'</span></summary><div class="chips">';
@@ -1019,16 +1066,17 @@ function ringSVG(p,hex){var c=2*Math.PI*48,off=c*(1-(p||0)/100);
   return '<svg viewBox="0 0 112 112"><circle cx="56" cy="56" r="48" fill="none" stroke="#E3ECF4" stroke-width="10"/><circle cx="56" cy="56" r="48" fill="none" stroke="'+hex+'" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'"/></svg>';}
 function modelFromState(){
   var i=state.info,sv=state.saved;
-  return {info:{teacher:i.teacher,coord:ME.name,subject:i.subject,grade:i.grade,date:i.date,period:i.period,topic:i.topic},scores:state.scores,
+  return {fv:state.fv||2,info:{teacher:i.teacher,coord:ME.name,subject:i.subject,grade:i.grade,date:i.date,period:i.period,topic:i.topic},scores:state.scores,
     strengths:(state.status==='exported'&&sv)?sv.strengths:texts(S,state.pS),dev:(state.status==='exported'&&sv)?sv.dev:texts(DV,state.pD),
     recs:(state.status==='exported'&&sv)?sv.recs:RECS.filter(function(t,k){return state.pR.indexOf('r'+k)>-1;}),notes:state.notes,follow:state.follow};
 }
 function modelFromServer(o){
   var s=o.summary,d=o.data||{};
-  return {info:{teacher:s.teacher,coord:s.coord,subject:s.subject,grade:s.section,date:s.date,period:s.period,topic:s.topic},scores:d.scores||{},
+  return {fv:d.fv===2?2:1,info:{teacher:s.teacher,coord:s.coord,subject:s.subject,grade:s.section,date:s.date,period:s.period,topic:s.topic},scores:d.scores||{},
     strengths:d.strengths||[],dev:d.dev||[],recs:d.recs||[],notes:d.notes||'',follow:!!d.follow};
 }
-function buildSheet(m){
+function buildSheet(m){var prev=CURFV;useForm(m&&m.fv===2?2:1);try{return buildSheetCore(m);}finally{useForm(prev);}}
+function buildSheetCore(m){
   var r=calcScores(m.scores),L=level(r.pct),i=m.info,hex=L?L.hex:'#9aa4bd';
   var el=document.createElement('div');el.className='sheet';
   function meta(lbl,val,cls){return '<div'+(cls?' class="'+cls+'"':'')+'><span>'+lbl+'</span><b>'+(val?esc(val):'—')+'</b></div>';}
@@ -1156,7 +1204,7 @@ function renderDash(){
     g+='<div class="panel sect"><div class="panel-h"><h2>توزيع الأحكام</h2></div><div class="pad"><div class="dist">'+order.map(function(k){var n=d.levels[k]||0;return n?'<i style="width:'+(n/tot*100)+'%;background:'+lvVar(k)+'"></i>':'';}).join('')+'</div><div class="legend2">'+order.map(function(k){return '<span style="--c:'+lvVar(k)+'">'+esc(k)+': <b>'+(d.levels[k]||0)+'</b></span>';}).join('')+'</div></div></div>';
     g+='<div class="panel sect"><div class="panel-h"><h2>أداء المحاور</h2></div><div class="pad">'+d.domains.map(function(x){var l=lvOf(x.avg);return '<div class="hb"><div class="t"><span>'+esc(x.name)+'</span><b style="color:'+lvVar(l)+'">'+(x.avg==null?'—':x.avg)+'</b></div><div class="b"><i style="width:'+(x.avg||0)+'%;background:'+lvVar(l)+'"></i></div></div>';}).join('')+'</div></div>';
     var items=Object.keys(d.itemAvg).map(function(k){return {id:k,avg:d.itemAvg[k]};}).filter(function(x){return x.avg/4*100<90;}).sort(function(a,b){return a.avg-b.avg;}).slice(0,6);
-    g+='<div class="panel sect"><div class="panel-h"><h2>أضعف البنود على مستوى المدرسة</h2></div><div class="pad">'+(items.length?'':'<div class="empty" style="padding:10px">لا توجد بنود دون 90 حالياً.</div>')+items.map(function(x){var p=Math.round(x.avg/4*100),l=lvOf(p);return '<div class="hb"><div class="t"><span>'+esc(ITEM[x.id]?ITEM[x.id].t:x.id)+'</span><b style="color:'+lvVar(l)+'">'+p+'</b></div><div class="b"><i style="width:'+p+'%;background:'+lvVar(l)+'"></i></div></div>';}).join('')+'</div></div>';
+    g+='<div class="panel sect"><div class="panel-h"><h2>أضعف البنود على مستوى المدرسة</h2></div><div class="pad">'+(items.length?'':'<div class="empty" style="padding:10px">لا توجد بنود دون 90 حالياً.</div>')+items.map(function(x){var p=Math.round(x.avg/4*100),l=lvOf(p);return '<div class="hb"><div class="t"><span>'+esc(ITEM_ALL[x.id]?ITEM_ALL[x.id].t:x.id)+'</span><b style="color:'+lvVar(l)+'">'+p+'</b></div><div class="b"><i style="width:'+p+'%;background:'+lvVar(l)+'"></i></div></div>';}).join('')+'</div></div>';
     g+='<div class="panel sect"><div class="panel-h"><h2>تحتاج مشاهدة متابعة</h2></div>'+(d.followUp.length?d.followUp.map(function(s){return '<div class="fu" data-open="'+esc(s.id)+'"><div><b>'+esc(s.teacher)+'</b><div class="rec-s">'+esc(s.subject)+' – '+esc(s.section)+' – '+fmtDate(s.date)+'</div></div><div class="tn" style="font:800 18px Cairo,sans-serif;color:'+lvVar(s.level)+'">'+(s.pct==null?'—':s.pct)+'</div></div>';}).join(''):'<div class="empty" style="padding:22px">لا توجد حصص بحاجة لمتابعة.</div>')+'</div>';
     h+='<div class="dgrid">'+g+'</div>';
   }
@@ -2180,7 +2228,7 @@ function stDetailHTML(sr){
    rows.map(function(x){return '<tr><td>'+esc(x.teacher)+'</td><td>'+esc(x.subject)+'</td><td>'+esc(x.assessment||'')+'</td><td class="tn">'+esc(x.section)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td></tr>';}).join('')+'</tbody></table></div></details>';
 }
 /* ───────── حساب المعلم التدريبي (للإدارة) ───────── */
-var DEMO={link:'',name:'',busy:false},demoArm={},SRV_VER='',PORTAL_VER='2.1';
+var DEMO={link:'',name:'',busy:false},demoArm={},SRV_VER='',PORTAL_VER='2.2';
 function renderDemo(){
   var h=hubHead()+'<div class="panel sect"><div class="panel-h"><div><h2>حساب المعلم التدريبي</h2><div class="sub">لعرض المنظومة في الورش والتدريب دون المساس ببيانات المعلمين الحقيقية.</div></div></div><div style="padding:0 16px 16px">'+
    '<ul class="ck" style="margin-bottom:12px"><li>معلم باسم «معلم تجريبي (للتدريب)» بمادتين: الإنجليزية والرياضيات (الصف الأول، ثلاث شعب).</li><li>يعمل كأي معلم: رفع الخطة، التقييمات، استيراد Excel، الحذف والإضافة.</li><li><b>لا يدخل في الإحصاءات</b> ولا في متابعة المنسقين ولا في عدد المعلمين.</li><li>بعد الورشة اضغط «مسح بيانات التدريب» ليعود الحساب جديداً.</li></ul>'+
