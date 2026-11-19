@@ -1468,8 +1468,8 @@ function renderResults(){
   var byStream=aggBy(rows,function(x){return streamOf(x.section);},function(k){return k==='E'?'الإنجليزي (E)':k==='F'?'الفرنسي (F)':k;});
   h+='<div class="dgrid"><div class="panel sect"><div class="panel-h"><h2>حسب المادة</h2></div>'+aggTable(bySubj,'المادة')+'</div><div class="panel sect"><div class="panel-h"><h2>'+(resF.subj?'مقارنة «'+esc(resF.subj)+'» بين الصفوف':'حسب الصف')+'</h2></div>'+aggTable(byGrade,'الصف')+'<div class="panel-h" style="border-top:1px solid var(--border)"><h2>حسب البرنامج</h2></div>'+aggTable(byStream,'البرنامج')+'</div></div>';
   var det=rows.slice().sort(function(a,b){return a.subject.localeCompare(b.subject,'ar')||a.section.localeCompare(b.section);});
-  h+='<div class="panel sect"><details class="grp"><summary><span>تفصيل الشعب</span><span class="badge">'+det.length+'</span></summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المادة</th><th>التقييم</th><th>الشعبة</th><th>المعلم(ة)</th><th>الطلاب</th><th>المعدل</th><th>أعلى</th><th>أدنى</th><th>النجاح</th></tr></thead><tbody>'+
-   det.map(function(x){return '<tr><td>'+esc(x.subject)+'</td><td>'+esc(x.assessment||'')+'</td><td class="tn">'+esc(x.section)+'</td><td>'+esc(x.teacher)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td></tr>';}).join('')+'</tbody></table></div></details></div>';
+  h+='<div class="panel sect"><details class="grp"><summary><span>تفصيل الشعب</span><span class="badge">'+det.length+'</span></summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المادة</th><th>التقييم</th><th>الشعبة</th><th>المعلم(ة)</th><th>الطلاب</th><th>المعدل</th><th>أعلى</th><th>أدنى</th><th>النجاح</th><th>الملف</th></tr></thead><tbody>'+
+   det.map(function(x){return '<tr><td>'+esc(x.subject)+'</td><td>'+esc(x.assessment||'')+'</td><td class="tn">'+esc(x.section)+'</td><td>'+esc(x.teacher)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td><td>'+fileBtns(x)+'</td></tr>';}).join('')+'</tbody></table></div></details></div>';
   $('#view').innerHTML=h;
 }
 function renderTeachersEval(){
@@ -1985,134 +1985,20 @@ function rqClick(e){
 document.addEventListener('change',function(e){if(e.target&&e.target.id==='rqType'&&RQ_EDIT){var b=$('#rqPsBox');if(b)b.hidden=e.target.value!=='report';}});
 
 function rqLbl(st){return {open:'مفتوح',pastdue:'انتهى الموعد (التسليم المتأخر مفتوح)',closed:'مُغلق من الإدارة',upcoming:'قادم'}[st]||st;}
-/* ───────── التقييمات المتعددة واستيراد العلامات من Excel ───────── */
-var MK={wb:null,file:null},xlsxP=null,asxArm={};
-function ensureXlsx(){
-  if(window.XLSX)return Promise.resolve();
-  if(!xlsxP)xlsxP=loadScript('vendor/xlsx.full.min.js').catch(function(e){xlsxP=null;throw e;});
-  return xlsxP;
-}
-function mkNorm(v){return String(v==null?'':v).trim().toUpperCase().replace(/\s+/g,'');}
-function mkNum(v){if(typeof v==='number')return isFinite(v)?v:null;var s=String(v==null?'':v).trim().replace(',','.');if(s===''||isNaN(Number(s)))return null;return Number(s);}
-function mkRound(v){return Math.round(v*100)/100;}
-function mkHeader(rows){
-  var hm=/علامة|العلامة|درجة|الدرجة|mark|score|grade|total|المجموع/i,hs=/شعبة|الشعبة|section|class/i,skip=/عظمى|النجاح|الكاملة|max|pass|full/i;
-  for(var i=0;i<Math.min(rows.length,25);i++){
-    var r=rows[i],mc=-1,sc=-1;
-    for(var j=0;j<r.length;j++){var c=String(r[j]==null?'':r[j]).trim();if(!c)continue;if(sc<0&&hs.test(c))sc=j;if(mc<0&&hm.test(c)&&!skip.test(c))mc=j;}
-    if(mc>-1)return {row:i,secCol:sc,markCol:mc};
-  }
-  return null;
-}
-function mkSetting(rows,re){
-  for(var i=0;i<rows.length;i++)for(var j=0;j<rows[i].length;j++){
-    if(re.test(String(rows[i][j]==null?'':rows[i][j]))){for(var k=j+1;k<=j+2&&k<rows[i].length;k++){var n=mkNum(rows[i][k]);if(n!=null)return n;}}
-  }
-  return null;
-}
-function mkGuess(rows,secMap){ // ملف بلا عناوين: العمود الأخير الغالب عليه الأرقام هو العلامة
-  var maxC=0;rows.forEach(function(r){maxC=Math.max(maxC,r.length);});
-  var best=-1,bc=0;
-  for(var j=0;j<maxC;j++){var cnt=0,tot=0;rows.forEach(function(r){var v=r[j];if(v===''||v==null)return;tot++;if(mkNum(v)!=null)cnt++;});if(cnt>=3&&cnt/Math.max(tot,1)>=0.6&&cnt>=bc){best=j;bc=cnt;}}
-  if(best<0)return null;
-  var first=0;for(;first<rows.length;first++){if(mkNum(rows[first][best])!=null)break;}
-  var sc=-1,sbest=0;
-  for(var k=0;k<maxC;k++){if(k===best)continue;var hit=0,tt=0;rows.forEach(function(r){var v=r[k];if(v===''||v==null)return;tt++;if(secMap[mkNorm(v)])hit++;});if(hit>=2&&hit/Math.max(tt,1)>=0.5&&hit>sbest){sc=k;sbest=hit;}}
-  return {row:first-1,secCol:sc,markCol:best,guessed:true};
-}
-function parseMarks(wb,sections,opts){
-  var secMap={};sections.forEach(function(c){secMap[mkNorm(c)]=c;});
-  var marks={},skipped=0,noSec=0,unknown={},srcMax=null,srcPass=null,used=0,guessed=0,guessCol=null;
-  wb.SheetNames.forEach(function(nm){
-    var rows=XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,raw:true,defval:''}),h=mkHeader(rows);
-    if(!h){h=mkGuess(rows,secMap);if(h){guessed++;guessCol=h.markCol+1;}}
-    if(!h)return;
-    used++;
-    var sm=mkSetting(rows,/العلامة العظمى|الدرجة العظمى|العلامة الكاملة|full mark|max mark|maximum/i),sp=mkSetting(rows,/علامة النجاح|درجة النجاح|pass mark|passing/i);
-    if(srcMax==null&&sm!=null)srcMax=sm;if(srcPass==null&&sp!=null)srcPass=sp;
-    var sheetSec=secMap[mkNorm(nm)]||(sections.length===1?sections[0]:null)||opts.defSec||null;
-    for(var i=h.row+1;i<rows.length;i++){
-      var r=rows[i],m=mkNum(r[h.markCol]);
-      if(m==null){if(String(r[h.markCol]==null?'':r[h.markCol]).trim()!=='')skipped++;continue;}
-      var sec=null;
-      if(h.secCol>-1){var sv=mkNorm(r[h.secCol]);if(sv===''){sec=sheetSec;}else if(secMap[sv]){sec=secMap[sv];}else{unknown[sv]=(unknown[sv]||0)+1;continue;}}
-      else sec=sheetSec;
-      if(!sec){skipped++;noSec++;continue;}
-      (marks[sec]=marks[sec]||[]).push(m);
-    }
-  });
-  if(!used)return {error:'لم أجد علامات في الملف. اكتب العلامات في عمود واحد (ويفضَّل أن يكون عنوانه «العلامة»)، أو حمّل النموذج الجاهز.'};
-  var maxM=opts.max!=null?opts.max:(srcMax!=null?srcMax:100),passM=opts.pass!=null?opts.pass:(srcPass!=null?srcPass:maxM*0.5);
-  if(!(maxM>0))return {error:'العلامة العظمى يجب أن تكون أكبر من صفر.'};
-  var rawMax=-1e9;Object.keys(marks).forEach(function(k){marks[k].forEach(function(v){rawMax=Math.max(rawMax,v);});});
-  var cand=null;[10,20,25,30,40,50,60].some(function(x){if(x>=rawMax){cand=x;return true;}return false;});
-  var suggest=(opts.max==null&&srcMax==null&&cand!=null)?cand:null;
-  var f=100/maxM,stats=[],missing=[],over=0;
-  sections.forEach(function(c){
-    var a=marks[c];if(!a||!a.length){missing.push(c);return;}
-    var sum=0,mx=-1e9,mn=1e9,pc=0;a.forEach(function(v){if(v>maxM)over++;sum+=v;mx=Math.max(mx,v);mn=Math.min(mn,v);if(v>=passM)pc++;});
-    stats.push({section:c,n:a.length,max:mkRound(Math.min(mx*f,100)),min:mkRound(Math.max(mn*f,0)),avg:mkRound(Math.min(sum/a.length*f,100)),pass:mkRound(pc/a.length*100)});
-  });
-  return {stats:stats,missing:missing,unknown:Object.keys(unknown),skipped:skipped,over:over,maxM:maxM,passM:passM,total:Object.keys(marks).reduce(function(a,k){return a+marks[k].length;},0),guessed:guessed,guessCol:guessCol,rawMax:rawMax,suggest:suggest,needSection:noSec>0&&!opts.defSec&&sections.length>1};
-}
-function mkInfo(html,bad){var el=$('#mkInfo');if(!el)return;el.hidden=!html;el.className=bad?'msg-err':'fm-banner';el.style.margin='8px 0';el.innerHTML=html||'';}
-function mkReadFile(file){
-  return new Promise(function(res,rej){
-    var fr=new FileReader(),csv=/\.csv$/i.test(file.name);
-    fr.onload=function(){res(csv?{type:'string',data:String(fr.result).replace(/^\uFEFF/,'')}:{type:'array',data:fr.result});};fr.onerror=function(){rej(new Error('read'));};
-    if(csv)fr.readAsText(file,'UTF-8');else fr.readAsArrayBuffer(file);
-  });
-}
-function mkApply(){
-  if(!MK.wb||!UP||!UP.task)return;
-  var mx=mkNum($('#mkMax').value),ps=mkNum($('#mkPass').value),ds=MK.defSec||'',res;
-  try{res=parseMarks(MK.wb,UP.task.sections,{max:mx,pass:ps,defSec:ds});}catch(e){mkInfo('تعذّرت قراءة الملف: '+esc(e.message||e),true);return;}
-  if(res.error){mkInfo(esc(res.error),true);return;}
-  res.stats.forEach(function(x){var tr=$('tr[data-sec="'+x.section+'"]');if(!tr)return;['n','max','min','avg','pass'].forEach(function(f){var i=$('input[data-sf="'+f+'"]',tr);if(i)i.value=x[f];});});
-  var h=res.stats.length?'قُرئت <b>'+res.total+'</b> علامة لـ <b>'+res.stats.length+'</b> شعبة (العلامة العظمى '+res.maxM+'، علامة النجاح '+res.passM+'). حُوّلت الأرقام إلى <b>100</b> وملأت الجدول أدناه، وتستطيع تعديلها.':'لم تُقرأ علامات لأي من شعبك.';
-  var warn=[];
-  if(res.suggest)warn.push('أعلى علامة في الملف <b>'+res.rawMax+'</b> والعلامة العظمى المعتمدة <b>100</b>، فتبدو الأرقام صغيرة. هل العلامات من <b>'+res.suggest+'</b>؟ <button class="btn xs primary" type="button" data-asx="setmax|'+res.suggest+'">نعم، اعتمد '+res.suggest+'</button>');
-  if(res.guessed)warn.push('لم أجد عنواناً لعمود العلامة، فاعتبرت <b>العمود رقم '+res.guessCol+'</b> هو علامات الطلاب. تأكد من الأرقام.');
-  if(res.needSection){warn.push('لا يوجد عمود «شعبة» في الملف وعندك أكثر من شعبة. اختر الشعبة التي تخصها علامات هذا الملف: <select id="mkSec" class="inp" style="display:inline-block;width:auto;min-height:36px"><option value="">— اختر —</option>'+UP.task.sections.map(function(c){return '<option value="'+esc(c)+'">'+esc(c)+'</option>';}).join('')+'</select> (كرّر لكل شعبة بملفها).');}
-  if(ds&&!res.needSection)warn.push('نُسبت العلامات التي بلا شعبة إلى الشعبة <b>'+esc(ds)+'</b>.');
-  if(res.missing.length&&!res.needSection)warn.push('لا علامات في الملف للشعب: '+esc(res.missing.join('، '))+' (عبّئها يدوياً أو بملف آخر).');
-  if(res.unknown.length)warn.push('شعب في الملف ليست من شعبك وتُجوهلت: '+esc(res.unknown.join('، '))+'.');
-  if(res.skipped&&!res.needSection)warn.push('تُجوهل '+res.skipped+' سطر بلا علامة صالحة أو بلا شعبة.');
-  if(res.over)warn.push('<b>'+res.over+'</b> علامة أكبر من العلامة العظمى ('+res.maxM+'): راجع الملف أو عدّل العلامة العظمى.');
-  mkInfo(h+(warn.length?'<ul style="margin:6px 18px 0;font-weight:500">'+warn.map(function(w){return '<li>'+w+'</li>';}).join('')+'</ul>':''),false);
-  var sel=$('#mkSec');if(sel)sel.value=ds;
-  if(res.over||res.needSection||res.suggest||!res.stats.length){var el=$('#mkInfo');el.className='msg-err';}
-}
-function mkOnFile(file){
-  MK.file=file;MK.defSec='';if(!file){MK.wb=null;mkInfo('');return;}
-  if(file.size>10*1024*1024){mkInfo('الملف أكبر من 10 ميغابايت.',true);return;}
-  mkInfo('جارٍ قراءة العلامات…',false);
-  ensureXlsx().then(function(){return mkReadFile(file);}).then(function(r){MK.wb=XLSX.read(r.data,{type:r.type});mkApply();})
-  .catch(function(e){mkInfo(e&&e.code==='load'?'تعذّر تحميل مكوّن قراءة Excel. تحقق من الاتصال وأعد المحاولة.':'تعذّرت قراءة الملف: تأكد أنه Excel أو CSV سليم.',true);});
-}
-function mkTemplate(){
-  var t=UP&&UP.task;if(!t)return;
-  ensureXlsx().then(function(){
-    var rows=[['الشعبة','اسم الطالب','العلامة','','العلامة العظمى',100],['','','','','علامة النجاح',50]];
-    t.sections.forEach(function(c){for(var i=0;i<4;i++)rows.push([c,'','']);});
-    var ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:12},{wch:28},{wch:12},{wch:3},{wch:18},{wch:10}];
-    var ws2=XLSX.utils.aoa_to_sheet([['كيف تعبّئ الملف'],['1) اكتب رمز الشعبة (مثل '+(t.sections[0]||'1EA')+') في عمود «الشعبة» لكل طالب، واسم الطالب اختياري.'],['2) اكتب علامة كل طالب في عمود «العلامة». اترك الخانة فارغة للغائب.'],['3) عدّل «العلامة العظمى» و«علامة النجاح» إن اختلفتا (الأصل 100 و50).'],['4) يمكنك أيضاً تسمية كل ورقة برمز الشعبة وإبقاء عمود «الشعبة» فارغاً.'],['5) ارفع الملف في البوابة: تُحسب الأرقام (العدد، الأعلى، الأدنى، المعدل، نسبة النجاح) وتُحوَّل إلى 100.']]);
-    ws2['!cols']=[{wch:100}];
-    var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'العلامات');XLSX.utils.book_append_sheet(wb,ws2,'تعليمات');
-    var b64=XLSX.write(wb,{bookType:'xlsx',type:'base64'});
-    saveBlob('نموذج_العلامات.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',b64,true);
-  }).catch(function(){toast('تعذّر تحميل مكوّن Excel.');});
-}
+/* ───────── التقييمات المتعددة: عدد الناجحين يدوياً وتُحسب نسبة النجاح ───────── */
+var asxArm={};
 function mkAvg(stats){var n=0,w=0;(stats||[]).forEach(function(x){n+=x.n;w+=x.avg*x.n;});return {n:n,avg:n?Math.round(w/n*10)/10:null};}
 function readStatsTable(){
   var stats=[],bad='';
   $$('#view tr[data-sec]').forEach(function(tr){
     var o={section:tr.dataset.sec},ok=true;
-    ['n','max','min','avg','pass'].forEach(function(f){var v=$('input[data-sf="'+f+'"]',tr).value.replace(',','.').trim();if(v===''||isNaN(Number(v))){ok=false;}o[f]=Number(v);});
+    ['n','max','min','avg','ok'].forEach(function(f){var v=$('input[data-sf="'+f+'"]',tr).value.replace(',','.').trim();if(v===''||isNaN(Number(v))){ok=false;}o[f]=Number(v);});
     if(!ok){bad=bad||('أكمل أرقام الشعبة '+o.section+'.');return;}
     if(Math.floor(o.n)!==o.n||o.n<1)bad=bad||('عدد طلاب الشعبة '+o.section+' يجب أن يكون عدداً صحيحاً موجباً.');
+    else if(Math.floor(o.ok)!==o.ok||o.ok<0||o.ok>o.n)bad=bad||('الشعبة '+o.section+': عدد الناجحين عدد صحيح من 0 إلى عدد طلاب الشعبة ('+o.n+').');
     else if(o.min<0||o.min>o.avg||o.avg>o.max)bad=bad||('الشعبة '+o.section+': يجب أن يكون الأدنى ≤ المعدل ≤ الأعلى.');
-    else if(o.max>100||o.pass<0||o.pass>100)bad=bad||('الشعبة '+o.section+': العلامات من 100، ونسبة النجاح بين 0 و100.');
+    else if(o.max>100)bad=bad||('الشعبة '+o.section+': العلامات من 100.');
+    o.pass=Math.round(o.ok/o.n*1000)/10;delete o.ok;
     stats.push(o);
   });
   return {stats:stats,error:bad};
@@ -2124,19 +2010,16 @@ function showUpload(key,mode,batch){
   var sub=t.submission,b=null;
   if(t.needStats&&batch)b=((sub&&sub.batches)||[]).filter(function(x){return x.id===batch;})[0];
   if(t.needStats&&mode!=='new'&&!b){toast('التقييم غير موجود.');return;}
-  UP={task:t,mode:mode,batch:batch||'',b:b};MK={wb:null,file:null};window.scrollTo(0,0);
+  UP={task:t,mode:mode,batch:batch||'',b:b};window.scrollTo(0,0);
   var prev={};if(b&&b.stats)b.stats.forEach(function(x){prev[x.section]=x;});
   var head=mode==='add'?'إضافة ملف إلى: '+b.title:mode==='edit'?'تعديل علامات: '+b.title:(t.needStats?'تقييم جديد':esc(t.label));
   var h='<div class="panel upl"><div class="panel-h"><div><h2>'+esc(t.label)+' – '+esc(t.period)+'</h2><div class="sub">'+head+' • '+(t.subject?esc(unitLbl(t))+' • ':'')+'آخر موعد: '+fmtDate(t.due)+(t.status==='overdue'?' (انتهى الموعد، سيُسجَّل متأخراً)':'')+'</div></div></div><div class="fields">';
   if(t.needStats&&mode!=='add'){
     h+='<div class="fld"><label for="upTitle">عنوان التقييم (اختياري)</label><input class="inp" id="upTitle" maxlength="80" placeholder="مثال: اختبار الوحدة الثانية" value="'+esc(b?b.title:'')+'"></div>';
-    h+='<div class="fld"><label>قراءة العلامات من ملف Excel</label><div class="filebox"><input type="file" id="mkFile" accept=".xlsx,.xls,.csv"><div style="margin-top:8px;color:var(--muted);font-size:12.5px">ملف فيه عمود «الشعبة» وعمود «العلامة» (أو ورقة لكل شعبة). يحسب النظام العدد والأعلى والأدنى والمعدل ونسبة النجاح ويحوّلها إلى 100. <button class="btn xs" type="button" data-asx="tpl">تحميل نموذج Excel جاهز</button></div>'+
-     '<div class="row" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><div><label class="fm-hint" for="mkMax">العلامة العظمى</label><input class="inp" id="mkMax" inputmode="decimal" placeholder="100" style="max-width:130px"></div><div><label class="fm-hint" for="mkPass">علامة النجاح</label><input class="inp" id="mkPass" inputmode="decimal" placeholder="50" style="max-width:130px"></div></div>'+
-     (mode==='new'?'<label class="chk" style="display:flex;gap:8px;align-items:center;margin-top:8px"><input type="checkbox" id="mkAttach" checked> إرفاق ملف Excel نفسه مع التقييم</label>':'')+'<div id="mkInfo" hidden></div></div></div>';
-    h+='<div class="fld"><label>أرقام النتائج لكل شعبة (من 100)'+(b?' — محفوظة سابقاً؛ عدّلها إن لزم':' — تُملأ تلقائياً من Excel أو تدخلها يدوياً')+'</label><div class="tbl-wrap"><table class="stbl"><thead><tr><th>الشعبة</th><th>عدد الطلاب</th><th>أعلى علامة</th><th>أدنى علامة</th><th>المعدل</th><th>نسبة النجاح %</th></tr></thead><tbody>'+
-     t.sections.map(function(c){var v=prev[c]||{};return '<tr data-sec="'+esc(c)+'"><td>'+esc(c)+'</td>'+['n','max','min','avg','pass'].map(function(f){return '<td data-l="'+{n:'عدد الطلاب',max:'أعلى علامة',min:'أدنى علامة',avg:'المعدل',pass:'نسبة النجاح %'}[f]+'"><input data-sf="'+f+'" inputmode="decimal" autocomplete="off" value="'+(v[f]!=null?esc(v[f]):'')+'"></td>';}).join('')+'</tr>';}).join('')+'</tbody></table></div></div>';
+    h+='<div class="fld"><label>أرقام النتائج لكل شعبة (العلامات من 100)'+(b?' — محفوظة سابقاً؛ عدّلها إن لزم':'')+'</label><div class="fm-hint" style="margin:2px 0 8px">نسبة النجاح = عدد الناجحين في المادة ÷ عدد طلاب الشعبة الإجمالي × 100 (تُحسب تلقائياً، أدخل عدد الناجحين فقط).</div><div class="tbl-wrap"><table class="stbl"><thead><tr><th>الشعبة</th><th>عدد طلاب الشعبة (الإجمالي)</th><th>أعلى علامة</th><th>أدنى علامة</th><th>المعدل</th><th>عدد الناجحين</th><th>نسبة النجاح</th></tr></thead><tbody>'+
+     t.sections.map(function(c){var v=prev[c]||{};if(v.n!=null&&v.pass!=null)v=Object.assign({},v,{ok:Math.round(v.pass*v.n/100)});return '<tr data-sec="'+esc(c)+'"><td>'+esc(c)+'</td>'+['n','max','min','avg','ok'].map(function(f){return '<td data-l="'+{n:'عدد طلاب الشعبة',max:'أعلى علامة',min:'أدنى علامة',avg:'المعدل',ok:'عدد الناجحين'}[f]+'"><input data-sf="'+f+'" inputmode="decimal" autocomplete="off" value="'+(v[f]!=null?esc(v[f]):'')+'"></td>';}).join('')+'<td data-l="نسبة النجاح" class="tn"><b data-pp>'+(v.n&&v.ok!=null?num2(v.ok/v.n*100)+'%':'—')+'</b></td></tr>';}).join('')+'</tbody></table></div></div>';
   }
-  var flab=mode==='add'?'الملفات الجديدة (يمكن اختيار أكثر من ملف)':mode==='edit'?'إضافة ملفات إلى هذا التقييم (اختياري)':(t.needStats?'ملفات إضافية للتقييم (اختياري إن أرفقت ملف Excel أعلاه)':(sub?'إضافة ملف أو أكثر (تُضاف إلى الملفات السابقة)':'الملف (يمكن اختيار أكثر من ملف)'));
+  var flab=mode==='add'?'الملفات الجديدة (يمكن اختيار أكثر من ملف)':mode==='edit'?'إضافة ملفات إلى هذا التقييم (اختياري)':(t.needStats?'ملف التقييم نفسه (PDF أو غيره، يمكن اختيار أكثر من ملف)':(sub?'إضافة ملف أو أكثر (تُضاف إلى الملفات السابقة)':'الملف (يمكن اختيار أكثر من ملف)'));
   h+='<div class="fld"><label for="upFile">'+flab+'</label>'+(sub&&sub.files&&sub.files.length&&!t.needStats?'<div class="task-s" style="margin-bottom:6px">الملفات الحالية ('+sub.files.length+'): '+sub.files.map(function(f){return esc(f.name);}).join('، ')+'</div>':'')+'<div class="filebox"><input type="file" id="upFile" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.jpg,.jpeg,.png"><div style="margin-top:8px;color:var(--muted);font-size:12.5px">PDF أو Word أو Excel أو PowerPoint أو صورة، حتى 10 ميغابايت لكل ملف، وحتى 12 ملفاً للمطلوب</div></div></div>';
   if(mode!=='add')h+='<div class="fld"><label for="upNotes">'+esc(t.notesLabel||'ملاحظات')+' (اختياري)</label><textarea class="inp" id="upNotes" placeholder="اكتب هنا إن وجد">'+esc(b?b.notes:(sub&&!t.needStats?sub.notes:''))+'</textarea></div>';
   h+='</div><div id="upMsg" class="msg-err" hidden style="margin:0 16px 12px"></div><div class="row-btns"><button class="btn primary" type="button" id="upSubmit">'+(mode==='edit'?'حفظ':'رفع')+'</button><button class="btn" type="button" id="upCancel">إلغاء</button></div></div>';
@@ -2144,9 +2027,8 @@ function showUpload(key,mode,batch){
 }
 function doUpload(){
   var t=UP.task,mode=UP.mode,btn=$('#upSubmit');$('#upMsg').hidden=true;
-  var files=Array.prototype.slice.call($('#upFile').files),mk=$('#mkFile'),att=$('#mkAttach');
-  if(t.needStats&&mode==='new'&&mk&&mk.files[0]&&att&&att.checked)files.unshift(mk.files[0]);
-  if(mode!=='edit'&&!files.length){upErr(t.needStats&&mode==='new'?'أرفق ملفاً واحداً على الأقل (يمكن إرفاق ملف Excel نفسه).':'اختر ملفاً واحداً على الأقل.');return;}
+  var files=Array.prototype.slice.call($('#upFile').files);
+  if(mode!=='edit'&&!files.length){upErr(t.needStats&&mode==='new'?'أرفق ملف التقييم (ملفاً واحداً على الأقل).':'اختر ملفاً واحداً على الأقل.');return;}
   var cur=(t.submission&&t.submission.files)?t.submission.files.length:0;
   if(cur+files.length>12){upErr('الحد الأقصى 12 ملفاً للمطلوب الواحد (لديك '+cur+').');return;}
   for(var i=0;i<files.length;i++){
@@ -2182,8 +2064,6 @@ function doUpload(){
 function asxClick(e){
   var el=e.target.closest('[data-asx]');if(!el)return false;
   var a=el.dataset.asx.split('|'),k=a[0],batch=a[1],key=a[2]+'|'+(a[3]||'');
-  if(k==='tpl'){mkTemplate();return true;}
-  if(k==='setmax'){var inp=$('#mkMax');if(inp){inp.value=batch;mkApply();}return true;}
   if(k==='split'){
     el.disabled=true;
     api('splitFile',{id:batch}).then(function(r){invalidate();return cfetch('myTasks').then(function(res){TASKS=res.tasks.filter(function(x){var co=(x.type==='minutes'||x.type==='report');return TASKMODE==='min'?co:!co;});toast('صار الملف تقييماً مستقلاً. أدخل علاماته الآن.');showUpload(a[2]+'|'+(a[3]||''),'edit',r.batch);});}).catch(function(er){el.disabled=false;toast(errText(er));});
@@ -2200,11 +2080,11 @@ function asxClick(e){
   }
   return true;
 }
-document.addEventListener('change',function(e){
-  var t=e.target;if(!t)return;
-  if(t.id==='mkFile'){mkOnFile(t.files[0]||null);return;}
-  if(t.id==='mkSec'){MK.defSec=t.value;mkApply();return;}
-  if((t.id==='mkMax'||t.id==='mkPass')&&MK.wb)mkApply();
+document.addEventListener('input',function(e){
+  var t=e.target;if(!t||!t.dataset||(t.dataset.sf!=='ok'&&t.dataset.sf!=='n'))return;
+  var tr=t.closest('tr[data-sec]');if(!tr)return;
+  var n=Number($('input[data-sf="n"]',tr).value.replace(',','.')),k=Number($('input[data-sf="ok"]',tr).value.replace(',','.')),o=$('[data-pp]',tr);
+  if(o)o.textContent=(n>0&&isFinite(k)&&$('input[data-sf="ok"]',tr).value.trim()!=='')?num2(k/n*100)+'%':'—';
 });
 function assessRowsHTML(t,sub,key){
   var s='',bs=(sub&&sub.batches)||[],pair=esc(t.reqId)+'|'+esc(t.unit);
@@ -2222,16 +2102,17 @@ function rfSubjOptions(d){
   return '<option value="">كل المواد</option>'+list.map(function(x){return '<option value="'+esc(x)+'"'+(resF.subj===x?' selected':'')+'>'+esc(x)+'</option>';}).join('');
 }
 
+function fileBtns(x){var fs=x.files||[];return fs.length?fs.map(function(f,i){return '<button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'" title="'+esc(f.name)+'">'+(fs.length>1?'ملف '+(i+1):'ملف التقييم')+'</button>';}).join(' '):'—';}
 function stDetailHTML(sr){
   var rows=sr.slice().sort(function(a,b){return a.subject.localeCompare(b.subject,'ar')||a.teacher.localeCompare(b.teacher,'ar')||String(a.assessment).localeCompare(String(b.assessment),'ar')||a.section.localeCompare(b.section);});
-  return '<details class="grp"><summary><span>تفصيل التقييمات</span><span class="badge">'+rows.length+'</span></summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المعلم(ة)</th><th>المادة</th><th>التقييم</th><th>الشعبة</th><th>الطلاب</th><th>المعدل</th><th>أعلى</th><th>أدنى</th><th>النجاح</th></tr></thead><tbody>'+
-   rows.map(function(x){return '<tr><td>'+esc(x.teacher)+'</td><td>'+esc(x.subject)+'</td><td>'+esc(x.assessment||'')+'</td><td class="tn">'+esc(x.section)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td></tr>';}).join('')+'</tbody></table></div></details>';
+  return '<details class="grp"><summary><span>تفصيل التقييمات</span><span class="badge">'+rows.length+'</span></summary><div class="tbl-wrap"><table class="tbl"><thead><tr><th>المعلم(ة)</th><th>المادة</th><th>التقييم</th><th>الشعبة</th><th>الطلاب</th><th>المعدل</th><th>أعلى</th><th>أدنى</th><th>النجاح</th><th>الملف</th></tr></thead><tbody>'+
+   rows.map(function(x){return '<tr><td>'+esc(x.teacher)+'</td><td>'+esc(x.subject)+'</td><td>'+esc(x.assessment||'')+'</td><td class="tn">'+esc(x.section)+'</td><td class="tn">'+x.n+'</td><td class="tn">'+num2(x.avg)+'</td><td class="tn">'+num2(x.max)+'</td><td class="tn">'+num2(x.min)+'</td><td class="tn">'+num2(x.pass)+'%</td><td>'+fileBtns(x)+'</td></tr>';}).join('')+'</tbody></table></div></details>';
 }
 /* ───────── حساب المعلم التدريبي (للإدارة) ───────── */
-var DEMO={link:'',name:'',busy:false},demoArm={},SRV_VER='',PORTAL_VER='2.2';
+var DEMO={link:'',name:'',busy:false},demoArm={},SRV_VER='',PORTAL_VER='2.4';
 function renderDemo(){
   var h=hubHead()+'<div class="panel sect"><div class="panel-h"><div><h2>حساب المعلم التدريبي</h2><div class="sub">لعرض المنظومة في الورش والتدريب دون المساس ببيانات المعلمين الحقيقية.</div></div></div><div style="padding:0 16px 16px">'+
-   '<ul class="ck" style="margin-bottom:12px"><li>معلم باسم «معلم تجريبي (للتدريب)» بمادتين: الإنجليزية والرياضيات (الصف الأول، ثلاث شعب).</li><li>يعمل كأي معلم: رفع الخطة، التقييمات، استيراد Excel، الحذف والإضافة.</li><li><b>لا يدخل في الإحصاءات</b> ولا في متابعة المنسقين ولا في عدد المعلمين.</li><li>بعد الورشة اضغط «مسح بيانات التدريب» ليعود الحساب جديداً.</li></ul>'+
+   '<ul class="ck" style="margin-bottom:12px"><li>معلم باسم «معلم تجريبي (للتدريب)» بمادتين: الإنجليزية والرياضيات (الصف الأول، ثلاث شعب).</li><li>يعمل كأي معلم: رفع الخطة، التقييمات وإدخال العلامات، الحذف والإضافة.</li><li><b>لا يدخل في الإحصاءات</b> ولا في متابعة المنسقين ولا في عدد المعلمين.</li><li>بعد الورشة اضغط «مسح بيانات التدريب» ليعود الحساب جديداً.</li></ul>'+
    '<div class="row-btns" style="flex-wrap:wrap"><button class="btn primary" type="button" data-demo="create"'+(DEMO.busy?' disabled':'')+'>'+(DEMO.link?'تجديد الرابط (يُلغي السابق)':'إنشاء الرابط')+'</button><button class="btn" type="button" data-demo="clear"'+(DEMO.busy?' disabled':'')+'>مسح بيانات التدريب</button></div>';
   if(DEMO.link)h+='<div class="fm-banner" style="margin-top:14px"><b>رابط الحساب التدريبي</b><small>افتحه في نافذة خاصة أو على جهاز آخر لتعرضه أمام المشاركين.</small><div class="fm-row2" style="margin-top:8px"><input class="inp" id="demoLink" readonly dir="ltr" value="'+esc(DEMO.link)+'" style="text-align:left"><button class="btn sm" type="button" data-demo="copy">نسخ</button><a class="btn sm primary" href="'+esc(DEMO.link)+'" target="_blank" rel="noopener" style="text-decoration:none">فتح</a></div></div>';
   $('#view').innerHTML=h+'</div></div>';
