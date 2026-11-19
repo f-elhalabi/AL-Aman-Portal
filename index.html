@@ -358,6 +358,9 @@ body.hist-mode .app{padding-bottom:40px}
 .stbl td{padding:4px}
 .stbl td:first-child{font:800 14px Cairo,sans-serif;text-align:center;white-space:nowrap}
 .stbl input{width:100%;min-width:64px;min-height:42px;text-align:center;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);padding:4px}
+.stbl input:not([type=file]){max-width:78px;min-width:52px;min-height:36px;font-size:14px}
+.stbl input[type=file]{width:170px;min-height:0;border:0;padding:0;background:transparent;font-size:11.5px}
+.stbl td.sf{text-align:start}
 .stbl input:focus{outline:none;border-color:var(--brand2)}
 .msg-err{margin-top:10px;padding:9px 12px;border-radius:12px;background:var(--surface2);color:var(--v-low);font-weight:700;font-size:13.5px}
 .cov{display:flex;align-items:center;gap:10px;min-width:160px}
@@ -1259,7 +1262,7 @@ function taskRow(t){
   var sub=t.submission,key=esc(t.reqId+'|'+t.unit),files=sub?((sub.files&&sub.files.length)?sub.files:[{id:sub.id,name:sub.fileName,when:sub.when,late:sub.late}]):[];
   var s='<div class="task'+(t.status==='upcoming'?' up':'')+'"><div><div class="task-t">'+esc(t.period)+(t.target?' – عن: '+esc(t.target):(t.subject?' – '+esc(unitLbl(t)):''))+'</div>'+
    '<div class="task-s">آخر موعد: '+fmtDate(t.due)+(t.status==='upcoming'?' • يُفتح في '+fmtDate(t.opens):'')+(t.sections.length?' • الشعب: '+esc(t.sections.join('، ')):'')+'</div>';
-  if(t.needStats)s+=assessRowsHTML(t,sub,key);else files.forEach(function(f){s+='<div class="fm-rl"><span>'+esc(f.name)+' • '+fmtDT(f.when)+(f.late?' <span class="tag-late">(متأخر)</span>':'')+'</span><span><button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'">تنزيل</button>'+(t.closed?'':' <button class="btn xs" type="button" data-delf="'+esc(f.id)+'">حذف</button>')+'</span></div>';});
+  if(t.needStats)s+=assessRowsHTML(t,sub,key);else files.forEach(function(f){s+='<div class="fm-rl"><span>'+esc(f.name)+(f.section?' • الشعبة '+esc(f.section):'')+' • '+fmtDT(f.when)+(f.late?' <span class="tag-late">(متأخر)</span>':'')+'</span><span><button class="btn xs" type="button" data-dl="'+esc(f.id)+'" data-fn="'+esc(f.name)+'">تنزيل</button>'+(t.closed?'':' <button class="btn xs" type="button" data-delf="'+esc(f.id)+'">حذف</button>')+'</span></div>';});
   if(t.closed)s+='<div class="task-s" style="color:var(--v-low)">أغلقت الإدارة هذا المطلوب، فلا يمكن التسليم أو التعديل.</div>';
   s+='</div><span class="chipv" style="--c:'+ST_COLOR[t.status]+'">'+ST_LABEL[t.status]+'</span><div class="task-btns">';
   if(t.status!=='upcoming'&&!t.closed)s+='<button class="btn primary sm" type="button" data-upl="'+key+'">'+(files.length?(t.needStats?'+ تقييم جديد':'+ إضافة ملف'):'رفع')+'</button>';
@@ -2016,10 +2019,11 @@ function showUpload(key,mode,batch){
   var h='<div class="panel upl"><div class="panel-h"><div><h2>'+esc(t.label)+' – '+esc(t.period)+'</h2><div class="sub">'+head+' • '+(t.subject?esc(unitLbl(t))+' • ':'')+'آخر موعد: '+fmtDate(t.due)+(t.status==='overdue'?' (انتهى الموعد، سيُسجَّل متأخراً)':'')+'</div></div></div><div class="fields">';
   if(t.needStats&&mode!=='add'){
     h+='<div class="fld"><label for="upTitle">عنوان التقييم (اختياري)</label><input class="inp" id="upTitle" maxlength="80" placeholder="مثال: اختبار الوحدة الثانية" value="'+esc(b?b.title:'')+'"></div>';
-    h+='<div class="fld"><label>أرقام النتائج لكل شعبة (العلامات من 100)'+(b?' — محفوظة سابقاً؛ عدّلها إن لزم':'')+'</label><div class="fm-hint" style="margin:2px 0 8px">نسبة النجاح = عدد الناجحين في المادة ÷ عدد طلاب الشعبة الإجمالي × 100 (تُحسب تلقائياً، أدخل عدد الناجحين فقط).</div><div class="tbl-wrap"><table class="stbl"><thead><tr><th>الشعبة</th><th>عدد طلاب الشعبة (الإجمالي)</th><th>أعلى علامة</th><th>أدنى علامة</th><th>المعدل</th><th>عدد الناجحين</th><th>نسبة النجاح</th></tr></thead><tbody>'+
-     t.sections.map(function(c){var v=prev[c]||{};if(v.n!=null&&v.pass!=null)v=Object.assign({},v,{ok:Math.round(v.pass*v.n/100)});return '<tr data-sec="'+esc(c)+'"><td>'+esc(c)+'</td>'+['n','max','min','avg','ok'].map(function(f){return '<td data-l="'+{n:'عدد طلاب الشعبة',max:'أعلى علامة',min:'أدنى علامة',avg:'المعدل',ok:'عدد الناجحين'}[f]+'"><input data-sf="'+f+'" inputmode="decimal" autocomplete="off" value="'+(v[f]!=null?esc(v[f]):'')+'"></td>';}).join('')+'<td data-l="نسبة النجاح" class="tn"><b data-pp>'+(v.n&&v.ok!=null?num2(v.ok/v.n*100)+'%':'—')+'</b></td></tr>';}).join('')+'</tbody></table></div></div>';
+    h+='<div class="fld"><label>أرقام النتائج لكل شعبة (العلامات من 100)'+(b?' — محفوظة سابقاً؛ عدّلها إن لزم':'')+'</label><div class="fm-hint" style="margin:2px 0 8px">نسبة النجاح = عدد الناجحين في المادة ÷ عدد طلاب الشعبة الإجمالي × 100 (تُحسب تلقائياً، أدخل عدد الناجحين فقط).</div><div class="tbl-wrap"><table class="stbl"><thead><tr><th>الشعبة</th><th>عدد طلاب الشعبة (الإجمالي)</th><th>أعلى علامة</th><th>أدنى علامة</th><th>المعدل</th><th>عدد الناجحين</th><th>نسبة النجاح</th><th>ملف PDF الشعبة (اختياري)</th></tr></thead><tbody>'+
+     t.sections.map(function(c){var v=prev[c]||{};if(v.n!=null&&v.pass!=null)v=Object.assign({},v,{ok:Math.round(v.pass*v.n/100)});return '<tr data-sec="'+esc(c)+'"><td>'+esc(c)+'</td>'+['n','max','min','avg','ok'].map(function(f){return '<td data-l="'+{n:'عدد طلاب الشعبة',max:'أعلى علامة',min:'أدنى علامة',avg:'المعدل',ok:'عدد الناجحين'}[f]+'"><input data-sf="'+f+'" inputmode="decimal" autocomplete="off" value="'+(v[f]!=null?esc(v[f]):'')+'"></td>';}).join('')+'<td data-l="نسبة النجاح" class="tn"><b data-pp>'+(v.n&&v.ok!=null?num2(v.ok/v.n*100)+'%':'—')+'</b></td><td class="sf" data-l="ملف الشعبة"><input type="file" data-sfile="'+esc(c)+'" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.jpg,.jpeg,.png"></td></tr>';}).join('')+'</tbody></table></div></div>';
   }
-  var flab=mode==='add'?'الملفات الجديدة (يمكن اختيار أكثر من ملف)':mode==='edit'?'إضافة ملفات إلى هذا التقييم (اختياري)':(t.needStats?'ملف التقييم نفسه (PDF أو غيره، يمكن اختيار أكثر من ملف)':(sub?'إضافة ملف أو أكثر (تُضاف إلى الملفات السابقة)':'الملف (يمكن اختيار أكثر من ملف)'));
+  if(t.needStats&&mode==='add'&&t.sections.length>1)h+='<div class="fld"><label>ملف لكل شعبة (اختياري)</label><div class="tbl-wrap"><table class="stbl"><tbody>'+t.sections.map(function(c){return '<tr><td>'+esc(c)+'</td><td class="sf"><input type="file" data-sfile="'+esc(c)+'" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.jpg,.jpeg,.png"></td></tr>';}).join('')+'</tbody></table></div></div>';
+  var flab=mode==='add'?'الملفات الجديدة (يمكن اختيار أكثر من ملف)':mode==='edit'?'إضافة ملفات إلى هذا التقييم (اختياري)':(t.needStats?'ملف مشترك لكل الشعب (اختياري إن أرفقت ملف كل شعبة أعلاه)':(sub?'إضافة ملف أو أكثر (تُضاف إلى الملفات السابقة)':'الملف (يمكن اختيار أكثر من ملف)'));
   h+='<div class="fld"><label for="upFile">'+flab+'</label>'+(sub&&sub.files&&sub.files.length&&!t.needStats?'<div class="task-s" style="margin-bottom:6px">الملفات الحالية ('+sub.files.length+'): '+sub.files.map(function(f){return esc(f.name);}).join('، ')+'</div>':'')+'<div class="filebox"><input type="file" id="upFile" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.jpg,.jpeg,.png"><div style="margin-top:8px;color:var(--muted);font-size:12.5px">PDF أو Word أو Excel أو PowerPoint أو صورة، حتى 10 ميغابايت لكل ملف، وحتى 12 ملفاً للمطلوب</div></div></div>';
   if(mode!=='add')h+='<div class="fld"><label for="upNotes">'+esc(t.notesLabel||'ملاحظات')+' (اختياري)</label><textarea class="inp" id="upNotes" placeholder="اكتب هنا إن وجد">'+esc(b?b.notes:(sub&&!t.needStats?sub.notes:''))+'</textarea></div>';
   h+='</div><div id="upMsg" class="msg-err" hidden style="margin:0 16px 12px"></div><div class="row-btns"><button class="btn primary" type="button" id="upSubmit">'+(mode==='edit'?'حفظ':'رفع')+'</button><button class="btn" type="button" id="upCancel">إلغاء</button></div></div>';
@@ -2027,8 +2031,10 @@ function showUpload(key,mode,batch){
 }
 function doUpload(){
   var t=UP.task,mode=UP.mode,btn=$('#upSubmit');$('#upMsg').hidden=true;
-  var files=Array.prototype.slice.call($('#upFile').files);
-  if(mode!=='edit'&&!files.length){upErr(t.needStats&&mode==='new'?'أرفق ملف التقييم (ملفاً واحداً على الأقل).':'اختر ملفاً واحداً على الأقل.');return;}
+  var items=Array.prototype.slice.call($('#upFile').files).map(function(f){return {f:f,sec:''};});
+  $$('#view input[data-sfile]').forEach(function(i){if(i.files&&i.files[0])items.push({f:i.files[0],sec:i.dataset.sfile});});
+  var files=items.map(function(x){return x.f;});
+  if(mode!=='edit'&&!files.length){upErr(t.needStats&&mode==='new'?'أرفق ملف التقييم (مشتركاً أو لكل شعبة).':'اختر ملفاً واحداً على الأقل.');return;}
   var cur=(t.submission&&t.submission.files)?t.submission.files.length:0;
   if(cur+files.length>12){upErr('الحد الأقصى 12 ملفاً للمطلوب الواحد (لديك '+cur+').');return;}
   for(var i=0;i<files.length;i++){
@@ -2040,20 +2046,21 @@ function doUpload(){
   if(t.needStats&&mode!=='add'){var r=readStatsTable();if(r.error){upErr(r.error);return;}stats=r.stats;title=($('#upTitle').value||'').trim();}
   btn.disabled=true;var done=0,late=false,batch=UP.batch;
   function seq(list,first){
-    return list.reduce(function(pr,fi,i){return pr.then(function(){
+    return list.reduce(function(pr,it,i){var fi=it.f;return pr.then(function(){
       btn.textContent='جارٍ رفع '+(i+1)+' من '+list.length+'… قد يستغرق دقيقة';
       return readB64(fi).then(function(b64){
         var o={reqId:t.reqId,unit:t.unit,file:{name:fi.name,data:b64},stats:[],notes:''};
         if(batch)o.batch=batch;
+        if(it.sec)o.section=it.sec;
         if(first&&i===0){o.stats=stats;o.title=title;o.notes=notes;}
         return api('upload',o);
       }).then(function(r){done++;if(r.late)late=true;if(t.needStats&&r.batch&&r.batch!=='L')batch=r.batch;else if(t.needStats&&r.batch==='L')batch='L';});
     });},Promise.resolve());
   }
   var chain;
-  if(mode==='edit'){chain=api('updateStats',{reqId:t.reqId,unit:t.unit,batch:batch,stats:stats,title:title,notes:notes}).then(function(){return seq(files,false);});}
-  else if(mode==='add'){chain=seq(files,false);}
-  else{chain=seq(files,true);}
+  if(mode==='edit'){chain=api('updateStats',{reqId:t.reqId,unit:t.unit,batch:batch,stats:stats,title:title,notes:notes}).then(function(){return seq(items,false);});}
+  else if(mode==='add'){chain=seq(items,false);}
+  else{chain=seq(items,true);}
   chain.then(function(){
     toast(mode==='edit'?'تم حفظ التعديل.':(done>1?'تم رفع '+done+' ملفات':'تم الرفع')+(late?' (سُجّل متأخراً).':' بنجاح.'));invalidate();showTasks(TASKMODE);
   }).catch(function(e){
