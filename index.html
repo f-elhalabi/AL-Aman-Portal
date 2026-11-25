@@ -749,7 +749,7 @@ setInterval(function(){if(CODE&&!document.hidden)api('ping').catch(function(){})
 var ERR={unauthorized:'الرمز غير صالح أو أُلغي.',forbidden:'غير مصرّح لك بهذا الإجراء.',locked:'هذه المشاهدة مُصدَّرة ولا يمكن تعديلها.',not_found:'العنصر غير موجود.',busy:'الخادم مشغول، أعد المحاولة بعد لحظات.',network:'تعذّر الاتصال بالخادم. تحقق من الإنترنت.',too_large:'حجم البيانات كبير.',server:'حدث خطأ في الخادم. أعد المحاولة.'};
 var INV={teacher:'المعلم غير معروف.',date:'التاريخ غير صالح.',assignment:'الشعبة لا تطابق المعلم والمادة.',teacher_required:'اختر المعلم(ة).',subject_required:'اختر المادة.',section_required:'اختر الشعبة.',date_required:'أدخل تاريخ المشاهدة.',no_scores:'قيّم بنداً واحداً على الأقل.',action:'طلب غير معروف.',
   file_type:'نوع الملف غير مسموح أو الملف تالف.',file_missing:'اختر الملف أولاً.',file_size:'حجم الملف أكبر من 10 ميغابايت.',not_open:'هذا المطلوب لم يُفتح بعد.',
-  stats_section:'شعبة غير صحيحة في الأرقام.',stats_missing:'أدخل أرقام كل الشعب.',stats_number:'الأرقام غير صالحة.',stats_n:'عدد الطلاب يجب أن يكون عدداً صحيحاً (1 إلى 500).',
+  stats_section:'شعبة غير صحيحة في الأرقام.',stats_missing:'أدخل أرقام شعبة واحدة على الأقل.',stats_number:'الأرقام غير صالحة.',stats_n:'عدد الطلاب يجب أن يكون عدداً صحيحاً (1 إلى 500).',
   stats_order:'يجب أن يكون: الأدنى ≤ المعدل ≤ الأعلى.',stats_pass:'نسبة النجاح بين 0 و100.',
   use_form:'يُعبَّأ هذا المطلوب بنموذج لا بملف.',type:'هذا الإجراء لا ينطبق على هذا المطلوب.',closed:'أغلقت الإدارة هذا المطلوب، فلا يمكن التسليم أو التعديل.',date_order:'آخر موعد قبل تاريخ الفتح.',date:'تاريخ غير صحيح.',pstart:'بداية الفترة يجب أن تسبق آخر موعد.',ids:'حدّد مطلوباً واحداً على الأقل.',too_many_files:'بلغت الحد الأقصى: 12 ملفاً لهذا المطلوب.',attendance:'حدّد حالة الحضور لكل المعلمين.',agenda:'أضف نقطة بحث واحدة على الأقل.',rating:'اختر التقدير العام.',strengths:'أضف نقطة قوة واحدة على الأقل.',dev:'أضف مجال تطوير واحداً على الأقل.',recs:'أضف توصية واحدة على الأقل.',support:'اكتب الدعم المطلوب من الإدارة.',requirement:'المطلوب غير صحيح.',status:'حالة غير صحيحة.'};
 function errText(e){if(e.code==='invalid')return INV[e.detail]||'بيانات غير صالحة.';return ERR[e.code]||ERR.server;}
@@ -1994,7 +1994,8 @@ function mkAvg(stats){var n=0,w=0;(stats||[]).forEach(function(x){n+=x.n;w+=x.av
 function readStatsTable(){
   var stats=[],bad='';
   $$('#view tr[data-sec]').forEach(function(tr){
-    var o={section:tr.dataset.sec},ok=true;
+    var o={section:tr.dataset.sec},ok=true,empty=['n','max','min','avg','ok'].every(function(f){return $('input[data-sf="'+f+'"]',tr).value.trim()==='';});
+    if(empty){var sf=$('input[data-sfile]',tr);if(sf&&sf.files&&sf.files[0])bad=bad||('الشعبة '+o.section+': أدخل أرقامها أو أزل ملفها، فالتقييم لا يخصّها.');return;}
     ['n','max','min','avg','ok'].forEach(function(f){var v=$('input[data-sf="'+f+'"]',tr).value.replace(',','.').trim();if(v===''||isNaN(Number(v))){ok=false;}o[f]=Number(v);});
     if(!ok){bad=bad||('أكمل أرقام الشعبة '+o.section+'.');return;}
     if(Math.floor(o.n)!==o.n||o.n<1)bad=bad||('عدد طلاب الشعبة '+o.section+' يجب أن يكون عدداً صحيحاً موجباً.');
@@ -2004,6 +2005,7 @@ function readStatsTable(){
     o.pass=Math.round(o.ok/o.n*1000)/10;delete o.ok;
     stats.push(o);
   });
+  if(!bad&&!stats.length)bad='أدخل أرقام شعبة واحدة على الأقل. اترك الشعب التي لا يخصّها هذا التقييم فارغة.';
   return {stats:stats,error:bad};
 }
 function showUpload(key,mode,batch){
@@ -2019,7 +2021,7 @@ function showUpload(key,mode,batch){
   var h='<div class="panel upl"><div class="panel-h"><div><h2>'+esc(t.label)+' – '+esc(t.period)+'</h2><div class="sub">'+head+' • '+(t.subject?esc(unitLbl(t))+' • ':'')+'آخر موعد: '+fmtDate(t.due)+(t.status==='overdue'?' (انتهى الموعد، سيُسجَّل متأخراً)':'')+'</div></div></div><div class="fields">';
   if(t.needStats&&mode!=='add'){
     h+='<div class="fld"><label for="upTitle">عنوان التقييم (اختياري)</label><input class="inp" id="upTitle" maxlength="80" placeholder="مثال: اختبار الوحدة الثانية" value="'+esc(b?b.title:'')+'"></div>';
-    h+='<div class="fld"><label>أرقام النتائج لكل شعبة (العلامات من 100)'+(b?' — محفوظة سابقاً؛ عدّلها إن لزم':'')+'</label><div class="fm-hint" style="margin:2px 0 8px">نسبة النجاح = عدد الناجحين في المادة ÷ عدد طلاب الشعبة الإجمالي × 100 (تُحسب تلقائياً، أدخل عدد الناجحين فقط).</div><div class="tbl-wrap"><table class="stbl"><thead><tr><th>الشعبة</th><th>عدد طلاب الشعبة (الإجمالي)</th><th>أعلى علامة</th><th>أدنى علامة</th><th>المعدل</th><th>عدد الناجحين</th><th>نسبة النجاح</th><th>ملف PDF الشعبة (اختياري)</th></tr></thead><tbody>'+
+    h+='<div class="fld"><label>أرقام النتائج لكل شعبة (العلامات من 100)'+(b?' — محفوظة سابقاً؛ عدّلها إن لزم':'')+'</label><div class="fm-hint" style="margin:2px 0 8px">نسبة النجاح = عدد الناجحين في المادة ÷ عدد طلاب الشعبة الإجمالي × 100 (تُحسب تلقائياً، أدخل عدد الناجحين فقط). إن كان التقييم لبعض الشعب فقط فاترك الباقية فارغة، ويمكنك لاحقاً فتح «العلامات» وإضافة بقية الشعب متى أجريت التقييم لها.</div><div class="tbl-wrap"><table class="stbl"><thead><tr><th>الشعبة</th><th>عدد طلاب الشعبة (الإجمالي)</th><th>أعلى علامة</th><th>أدنى علامة</th><th>المعدل</th><th>عدد الناجحين</th><th>نسبة النجاح</th><th>ملف PDF الشعبة (اختياري)</th></tr></thead><tbody>'+
      t.sections.map(function(c){var v=prev[c]||{};if(v.n!=null&&v.pass!=null)v=Object.assign({},v,{ok:Math.round(v.pass*v.n/100)});return '<tr data-sec="'+esc(c)+'"><td>'+esc(c)+'</td>'+['n','max','min','avg','ok'].map(function(f){return '<td data-l="'+{n:'عدد طلاب الشعبة',max:'أعلى علامة',min:'أدنى علامة',avg:'المعدل',ok:'عدد الناجحين'}[f]+'"><input data-sf="'+f+'" inputmode="decimal" autocomplete="off" value="'+(v[f]!=null?esc(v[f]):'')+'"></td>';}).join('')+'<td data-l="نسبة النجاح" class="tn"><b data-pp>'+(v.n&&v.ok!=null?num2(v.ok/v.n*100)+'%':'—')+'</b></td><td class="sf" data-l="ملف الشعبة"><input type="file" data-sfile="'+esc(c)+'" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.jpg,.jpeg,.png"></td></tr>';}).join('')+'</tbody></table></div></div>';
   }
   if(t.needStats&&mode==='add'&&t.sections.length>1)h+='<div class="fld"><label>ملف لكل شعبة (اختياري)</label><div class="tbl-wrap"><table class="stbl"><tbody>'+t.sections.map(function(c){return '<tr><td>'+esc(c)+'</td><td class="sf"><input type="file" data-sfile="'+esc(c)+'" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.jpg,.jpeg,.png"></td></tr>';}).join('')+'</tbody></table></div></div>';
